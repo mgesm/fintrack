@@ -2884,6 +2884,7 @@ function renderTagsInput(){
 var isSaving=false;
 async function saveTx(){
   if(isSaving)return;isSaving=true;
+  haptic(12);
   var amount=parseFloat(document.getElementById('txAmount').value);
   var note=document.getElementById('txNote').value.trim()||null;
   var date=document.getElementById('txDate').value;
@@ -2918,16 +2919,16 @@ async function saveTx(){
     else{var r=await sb.from('transactions').insert(tx).select();if(r.error){setSync('err');status.textContent='error: '+r.error.message;status.className='modal-status status-err';isSaving=false;return;}transactions.unshift(r.data[0]||tx);}
     addAudit('➕','transacción',(txType==='transfer'?'transferencia':catById(payload.category).name)+' '+fmt(amount));
   }
-  saveLocalCache();if(!isOffline)setSync('ok');status.textContent=isOffline?'guardado offline':'✓ guardado';status.className='modal-status status-ok';haptic([12,40,12]);refreshTab();setTimeout(function(){closeModal();isSaving=false;},600);
+  saveLocalCache();if(!isOffline)setSync('ok');status.textContent=isOffline?'guardado offline':'✓ guardado';status.className='modal-status status-ok';refreshTab();setTimeout(function(){closeModal();isSaving=false;},600);
 }
 async function deleteTx(id){
   var tx=transactions.find(function(t){return t.id===id;});
   if(!tx)return;
+  haptic(18);
   setSync('syncing');
   if(isOffline){transactions=transactions.filter(function(t){return t.id!==id;});queueOp({type:'delete',table:'transactions',id:id});saveLocalCache();}
   else{var r=await sb.from('transactions').delete().eq('id',id);if(!r.error){transactions=transactions.filter(function(t){return t.id!==id;});saveLocalCache();setSync('ok');}else{setSync('err');return;}}
   addAudit('🗑','transacción',catById(tx.category).name+' '+fmt(tx.amount));
-  haptic(18);
   refreshTab();
   showUndoToast('Transacción eliminada',function(){restoreTx(tx);});
 }
