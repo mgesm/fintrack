@@ -1622,6 +1622,16 @@ function hideLoading(){
   setTimeout(function(){ov.classList.add('hidden');},wait);
 }
 function haptic(pattern){if(navigator.vibrate)try{navigator.vibrate(pattern||10);}catch(e){}}
+function testHaptic(){
+  var box=document.getElementById('hapticTestResult');if(!box)return;
+  var supported='vibrate' in navigator;
+  var secure=window.isSecureContext;
+  var res;
+  if(!supported)res='navigator.vibrate NO existe en este navegador';
+  else{try{res='vibrate(200) devolvió: '+navigator.vibrate(200);}catch(e){res='vibrate() lanzó error: '+e.message;}}
+  box.textContent='Soportado: '+supported+' · Contexto seguro (https): '+secure+' · '+res+' · UA: '+navigator.userAgent;
+  box.className='status-msg status-ok';
+}
 var _numbersAnimated=false;
 function shouldAnimateNumbers(){if(_numbersAnimated)return false;_numbersAnimated=true;return true;}
 function countUp(el,endVal,formatFn,ms){
@@ -2778,6 +2788,7 @@ function renderSettingsTab(el){
 
   el.innerHTML='<div class="settings-wrap" style="display:flex;flex-direction:column;gap:20px">'
     +'<div class="settings-section"><div class="settings-title">Cuenta</div><div class="settings-info">'+email+'</div><button class="settings-btn danger" onclick="signOut()">Cerrar sesión<span class="btn-arrow">›</span></button></div>'
+    +'<div class="settings-section"><div class="settings-title">Diagnóstico de vibración (temporal)</div><button class="settings-btn" onclick="testHaptic()">Probar vibración</button><div class="status-msg" id="hapticTestResult" style="white-space:normal;word-break:break-word"></div></div>'
     +'<div class="settings-section"><div class="settings-title">Historial de inicios de sesión</div><button class="settings-btn" onclick="loadLoginHistory()">Ver últimos accesos</button><div id="loginHistoryList" style="margin-top:8px"></div></div>'
     +'<div class="settings-section"><div class="settings-title">Apariencia</div><div class="settings-info" style="margin-bottom:8px">Tema claro u oscuro de la app</div><div class="theme-switch-row">'
     +themeOpts.map(function(o){return '<button class="theme-switch-btn'+(curTheme===o.v?' active':'')+'" onclick="setTheme(\''+o.v+'\')">'+o.label+'</button>';}).join('')
