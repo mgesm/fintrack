@@ -14,6 +14,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;}
 :root{
   --accent:#34C759;--accent-dark:#248A3D;
   --bg:#EEF0F3;--bg2:rgba(255,255,255,0.62);--bg3:rgba(120,120,140,0.08);--bg4:rgba(120,120,140,0.14);
@@ -434,7 +436,7 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto;min-height
 .bnav-pill{
   position:absolute;
   top:6px;bottom:6px;
-  border-radius:24px;
+  border-radius:999px;
   background:rgba(255,255,255,0.16);
   border:0.5px solid rgba(255,255,255,0.38);
   box-shadow:
