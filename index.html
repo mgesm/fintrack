@@ -1621,17 +1621,6 @@ function hideLoading(){
   var wait=Math.max(0,LOAD_MIN_MS-(Date.now()-loadStartTs));
   setTimeout(function(){ov.classList.add('hidden');},wait);
 }
-function haptic(pattern){if(navigator.vibrate)try{navigator.vibrate(pattern||10);}catch(e){}}
-function testHaptic(){
-  var box=document.getElementById('hapticTestResult');if(!box)return;
-  var supported='vibrate' in navigator;
-  var secure=window.isSecureContext;
-  var res;
-  if(!supported)res='navigator.vibrate NO existe en este navegador';
-  else{try{res='vibrate(200) devolvió: '+navigator.vibrate(200);}catch(e){res='vibrate() lanzó error: '+e.message;}}
-  box.textContent='Soportado: '+supported+' · Contexto seguro (https): '+secure+' · '+res+' · UA: '+navigator.userAgent;
-  box.className='status-msg status-ok';
-}
 var _numbersAnimated=false;
 function shouldAnimateNumbers(){if(_numbersAnimated)return false;_numbersAnimated=true;return true;}
 function countUp(el,endVal,formatFn,ms){
@@ -1974,7 +1963,6 @@ function toggleFlip(innerId){
   var inner=document.getElementById(innerId);if(!inner)return;
   inner.classList.toggle('flipped');
   setFlipHeight(innerId);
-  haptic(8);
 }
 function onFrontClick(ev){if(ev.target.closest('.donut-container'))return;toggleFlip('homeFlipInner');}
 function onBackClick(ev){if(ev.target.closest('.hm-cell'))return;toggleFlip('homeFlipInner');}
@@ -2037,7 +2025,6 @@ document.getElementById('nextMonth').onclick=function(){if(homeAnnualMode){viewY
 
 function switchTab(i){
   var prev=activeTab;
-  if(i!==prev)haptic(9);
   activeTab=i;
   saveUiState();
   searchQuery='';filterType='all';filterCat='';sortOrder='date-desc';filterDateFrom='';filterDateTo='';
@@ -2150,10 +2137,6 @@ document.addEventListener('touchmove',function(e){
     txSwipe.item.style.transition='none';
     txSwipe.item.style.transform='translateX('+dx+'px)';
     txSwipe.bg.style.opacity=Math.min(1,Math.abs(dx)/80);
-    var thr=txSwipe.item.offsetWidth*0.38;
-    var past=dx<-thr;
-    if(past&&!txSwipe.thresholdCrossed){haptic(10);}
-    txSwipe.thresholdCrossed=past;
     e.preventDefault();
   }
 },{passive:false});
@@ -2314,7 +2297,6 @@ function catDragStart(e,id){
   var cards=Array.prototype.slice.call(list.querySelectorAll('.cat-flip-card'));
   catDrag={id:id,card:card,list:list,cards:cards,startY:e.clientY,handle:handle,pointerId:e.pointerId};
   card.classList.add('cat-dragging');
-  haptic(14);
   try{document.body.style.userSelect='none';}catch(err){}
   try{handle.setPointerCapture(e.pointerId);}catch(err){}
   handle.addEventListener('pointermove',catDragMove);
@@ -2337,7 +2319,6 @@ function catDragMove(e){
       if(idx<curIdx)catDrag.list.insertBefore(catDrag.card,c);
       else catDrag.list.insertBefore(catDrag.card,c.nextSibling);
       catDrag.cards=Array.prototype.slice.call(catDrag.list.querySelectorAll('.cat-flip-card'));
-      haptic(7);
       catDrag.startY=e.clientY;
       catDrag.card.style.transform='';
       break;
@@ -2788,7 +2769,6 @@ function renderSettingsTab(el){
 
   el.innerHTML='<div class="settings-wrap" style="display:flex;flex-direction:column;gap:20px">'
     +'<div class="settings-section"><div class="settings-title">Cuenta</div><div class="settings-info">'+email+'</div><button class="settings-btn danger" onclick="signOut()">Cerrar sesión<span class="btn-arrow">›</span></button></div>'
-    +'<div class="settings-section"><div class="settings-title">Diagnóstico de vibración (temporal)</div><button class="settings-btn" onclick="testHaptic()">Probar vibración</button><div class="status-msg" id="hapticTestResult" style="white-space:normal;word-break:break-word"></div></div>'
     +'<div class="settings-section"><div class="settings-title">Historial de inicios de sesión</div><button class="settings-btn" onclick="loadLoginHistory()">Ver últimos accesos</button><div id="loginHistoryList" style="margin-top:8px"></div></div>'
     +'<div class="settings-section"><div class="settings-title">Apariencia</div><div class="settings-info" style="margin-bottom:8px">Tema claro u oscuro de la app</div><div class="theme-switch-row">'
     +themeOpts.map(function(o){return '<button class="theme-switch-btn'+(curTheme===o.v?' active':'')+'" onclick="setTheme(\''+o.v+'\')">'+o.label+'</button>';}).join('')
@@ -2818,7 +2798,6 @@ async function clearTxs(){if(!confirm('¿Borrar TODAS las transacciones?'))retur
 
 // TX MODAL
 function openModal(){
-  haptic(10);
   editingTxId=null;txTags=[];isRecurring=false;
   document.getElementById('modalTitle').textContent='Nueva transacción';
   var _dn=new Date();document.getElementById('txDate').value=_dn.getFullYear()+'-'+pad(_dn.getMonth()+1)+'-'+pad(_dn.getDate());
@@ -2895,7 +2874,6 @@ function renderTagsInput(){
 var isSaving=false;
 async function saveTx(){
   if(isSaving)return;isSaving=true;
-  haptic(12);
   var amount=parseFloat(document.getElementById('txAmount').value);
   var note=document.getElementById('txNote').value.trim()||null;
   var date=document.getElementById('txDate').value;
@@ -2935,7 +2913,6 @@ async function saveTx(){
 async function deleteTx(id){
   var tx=transactions.find(function(t){return t.id===id;});
   if(!tx)return;
-  haptic(18);
   setSync('syncing');
   if(isOffline){transactions=transactions.filter(function(t){return t.id!==id;});queueOp({type:'delete',table:'transactions',id:id});saveLocalCache();}
   else{var r=await sb.from('transactions').delete().eq('id',id);if(!r.error){transactions=transactions.filter(function(t){return t.id!==id;});saveLocalCache();setSync('ok');}else{setSync('err');return;}}
@@ -2955,7 +2932,7 @@ function showUndoToast(msg,onUndo){
   var t=document.getElementById('undoToast');
   if(!t){t=document.createElement('div');t.id='undoToast';t.className='undo-toast';document.body.appendChild(t);}
   t.innerHTML='<span>'+msg+'</span><button class="undo-toast-btn" id="undoToastBtn">Deshacer</button>';
-  document.getElementById('undoToastBtn').onclick=function(){haptic(12);clearTimeout(undoToastTimer);t.classList.remove('show');onUndo();};
+  document.getElementById('undoToastBtn').onclick=function(){clearTimeout(undoToastTimer);t.classList.remove('show');onUndo();};
   clearTimeout(undoToastTimer);
   requestAnimationFrame(function(){t.classList.add('show');});
   undoToastTimer=setTimeout(function(){t.classList.remove('show');},5000);
@@ -2976,7 +2953,6 @@ async function saveBudget(catId){
 async function addCat(){var inp=document.getElementById('newCatInput');var name=inp.value.trim().toLowerCase();if(!name)return;if(categories.some(function(c){return c.name===name;})){alert('Ya existe una categoría con ese nombre');return;}var cat={id:'c'+Date.now(),name:name,color:PALETTE[categories.length%PALETTE.length],subcats:[],position:categories.length,user_id:currentUser.id};setSync('syncing');var r=await sb.from('categories').insert(cat).select();if(!r.error){categories.push(r.data[0]||cat);saveLocalCache();setSync('ok');addAudit('➕','categoría',name);inp.value='';refreshTab();}else setSync('err');}
 async function deleteCat(id){
   if(!confirm('¿Eliminar esta categoría?'))return;
-  haptic(18);
   var cat=categories.find(function(c){return c.id===id;});
   var name=cat?cat.name:catById(id).name;
   var catBudgets=budgets.filter(function(b){return b.category_id===id;});
