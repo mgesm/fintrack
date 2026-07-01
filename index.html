@@ -2112,10 +2112,10 @@ document.addEventListener('click',function(e){
   if(action==='edit-tx')editTx(id);
   else if(action==='del-tx')deleteTx(id);
   else if(action==='del-cat')deleteCat(id);
-  else if(action==='show-subform'){var f=document.getElementById('subform_'+id);f.style.display=f.style.display==='none'?'block':'none';if(f.style.display==='block')document.getElementById('subinput_'+id).focus();}
-  else if(action==='show-colorform'){var f=document.getElementById('colorform_'+id);f.style.display=f.style.display==='none'?'block':'none';}
+  else if(action==='show-subform'){var f=document.getElementById('subform_'+id);f.style.display=f.style.display==='none'?'block':'none';if(f.style.display==='block')document.getElementById('subinput_'+id).focus();setFlipHeight(catFlipId(id));}
+  else if(action==='show-colorform'){var f=document.getElementById('colorform_'+id);f.style.display=f.style.display==='none'?'block':'none';setFlipHeight(catFlipId(id));}
   else if(action==='set-cat-color')saveCatColor(id,sub);
-  else if(action==='show-budgetform'){var f=document.getElementById('budgetform_'+id);f.style.display=f.style.display==='none'?'block':'none';if(f.style.display==='block')document.getElementById('budgetinput_'+id).focus();}
+  else if(action==='show-budgetform'){var f=document.getElementById('budgetform_'+id);f.style.display=f.style.display==='none'?'block':'none';if(f.style.display==='block')document.getElementById('budgetinput_'+id).focus();setFlipHeight(catFlipId(id));}
   else if(action==='add-subcat')addSubcat(id);
   else if(action==='save-budget')saveBudget(id);
   else if(action==='del-subcat')deleteSubcat(id,decodeURIComponent(sub));
@@ -2305,6 +2305,7 @@ function buildTxItem(t){
 }
 
 // CATEGORIES TAB
+function catFlipId(id){return 'catFlipInner_'+(IS_DESKTOP?'dt':'')+id;}
 var catDrag=null;
 function catDragStart(e,id){
   e.preventDefault();e.stopPropagation();
@@ -2312,11 +2313,14 @@ function catDragStart(e,id){
   var card=handle.closest('.cat-flip-card');if(!card)return;
   var list=card.parentNode;
   var cards=Array.prototype.slice.call(list.querySelectorAll('.cat-flip-card'));
-  catDrag={id:id,card:card,list:list,cards:cards,startY:e.clientY};
+  catDrag={id:id,card:card,list:list,cards:cards,startY:e.clientY,handle:handle,pointerId:e.pointerId};
   card.classList.add('cat-dragging');
   try{document.body.style.userSelect='none';}catch(err){}
-  document.addEventListener('pointermove',catDragMove);
-  document.addEventListener('pointerup',catDragEnd);
+  try{handle.setPointerCapture(e.pointerId);}catch(err){}
+  handle.addEventListener('pointermove',catDragMove);
+  handle.addEventListener('pointerup',catDragEnd);
+  handle.addEventListener('pointercancel',catDragEnd);
+  handle.addEventListener('lostpointercapture',catDragEnd);
 }
 function catDragMove(e){
   if(!catDrag)return;
@@ -2341,17 +2345,27 @@ function catDragMove(e){
 }
 async function catDragEnd(){
   if(!catDrag)return;
-  document.removeEventListener('pointermove',catDragMove);
-  document.removeEventListener('pointerup',catDragEnd);
+  var handle=catDrag.handle;
+  handle.removeEventListener('pointermove',catDragMove);
+  handle.removeEventListener('pointerup',catDragEnd);
+  handle.removeEventListener('pointercancel',catDragEnd);
+  handle.removeEventListener('lostpointercapture',catDragEnd);
+  try{handle.releasePointerCapture(catDrag.pointerId);}catch(err){}
   catDrag.card.style.transform='';
   catDrag.card.classList.remove('cat-dragging');
   try{document.body.style.userSelect='';}catch(err){}
   var order=Array.prototype.slice.call(catDrag.list.querySelectorAll('.cat-flip-card')).map(function(c){return c.getAttribute('data-cat-id');});
   catDrag=null;
+  var changed=order.some(function(id,i){var cat=categories.find(function(c){return c.id===id;});return cat&&(cat.position||0)!==i;});
   order.forEach(function(id,i){var cat=categories.find(function(c){return c.id===id;});if(cat)cat.position=i;});
   categories.sort(function(a,b){return (a.position||0)-(b.position||0);});
+  if(!changed)return;
   saveLocalCache();setSync('syncing');
-  try{await Promise.all(order.map(function(id,i){return sb.from('categories').update({position:i}).eq('id',id);}));setSync('ok');}catch(e){setSync('err');}
+  try{
+    await Promise.all(order.map(function(id,i){return sb.from('categories').update({position:i}).eq('id',id);}));
+    setSync('ok');
+  }catch(e){setSync('err');}
+  refreshTab();
 }
 function renderCatTab(el,prefix){
   prefix=prefix||'';
