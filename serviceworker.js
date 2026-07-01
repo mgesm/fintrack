@@ -1,4 +1,4 @@
-var CACHE_NAME='fintrack-cache-v30';
+var CACHE_NAME='fintrack-cache-v31';
 var PRECACHE=['./','./index.html','./manifest.json','./icon-192.png','./icon-512.png'];
 
 self.addEventListener('install',function(e){
