@@ -1382,7 +1382,10 @@ function budgetForCatRange(catId,from,to){
   while(y<y2||(y===y2&&m<=m2)){total+=budgetForCat(catId,y,m);m++;if(m>11){m=0;y++;}}
   return total;
 }
-function totalBudget(){var b=budgets.find(function(b){return b.is_total;});return b?b.amount:0;}
+function totalBudget(year,month){
+  var my=(year!==undefined&&month!==undefined)?monthKey(year,month):monthKey(viewYear,viewMonth);
+  return budgets.filter(function(b){return !b.is_total&&b.month_year===my;}).reduce(function(s,b){return s+b.amount;},0);
+}
 function setSync(s){var d=document.getElementById('syncDot');if(d)d.className='sync-dot '+s;}
 function setAccent(color){
   var el=document.documentElement;
@@ -2754,7 +2757,7 @@ function renderSettingsTab(el){
     +themeOpts.map(function(o){return '<button class="theme-switch-btn'+(curTheme===o.v?' active':'')+'" onclick="setTheme(\''+o.v+'\')">'+o.label+'</button>';}).join('')
     +'</div></div>'
     +'<div class="settings-section"><div class="settings-title">Tema de color</div><div class="settings-info">Color de acento de la app</div><div class="color-palette">'+accentSwatches+'</div></div>'
-    +'<div class="settings-section"><div class="settings-title">Presupuesto total mensual</div><div class="settings-info" style="margin-bottom:8px">Límite global de gasto para el mes</div><div class="budget-input-row"><span style="font-size:13px;color:var(--text2);flex:1">Presupuesto total</span><input type="number" class="budget-input" id="totalBudgetInput" placeholder="0" min="0" step="10" value="'+(totalBudget()||'')+'"><button class="budget-save-btn" onclick="saveTotalBudget()">Guardar</button></div></div>'
+    +'<div class="settings-section"><div class="settings-title">Presupuesto total mensual</div><div class="settings-info">Suma automática de los presupuestos de todas las categorías de '+capitalize(MONTHS[viewMonth])+': <strong>'+fmt(totalBudget())+'</strong></div></div>'
     +'<div class="settings-section"><div class="settings-title">Copia de seguridad automática</div><div class="settings-info">'+(lastBackup?'Última copia: '+new Date(lastBackup).toLocaleDateString('es-ES'):'Sin copia reciente')+'<br>Se descarga automáticamente cada 7 días.</div><button class="settings-btn" onclick="downloadBackupNow()">↓ Descargar copia ahora</button></div>'
     +'<div class="settings-section"><div class="settings-title">Exportar datos</div><button class="settings-btn" onclick="openExportModal()">↓ Exportar (PDF · Excel · CSV)<span class="btn-arrow">›</span></button><button class="settings-btn" onclick="exportJSON()">↓ Exportar JSON (copia)</button></div>'
     +'<div class="settings-section"><div class="settings-title">Importar copia</div><textarea id="importArea" style="width:100%;background:var(--bg3);border:1px solid var(--card-border);color:var(--text2);border-radius:var(--radius-sm);padding:8px 10px;font-size:12px;font-family:var(--mono);resize:vertical;outline:none;min-height:80px" placeholder=\'{"transactions":[...],"categories":[...]}\'></textarea><button class="settings-btn" onclick="importJSON()">↑ Importar JSON</button><div class="status-msg" id="importStatus"></div></div>'
@@ -2763,15 +2766,6 @@ function renderSettingsTab(el){
     +'<div class="settings-section"><div class="settings-title">Zona de peligro</div><button class="settings-btn danger" onclick="clearTxs()">⚠ Borrar todas las transacciones</button></div>'
     +'<div style="text-align:center;padding:16px 0;font-size:11px;font-family:var(--mono);color:var(--text3)">fintrack · '+email+'</div>'
     +'</div>';
-}
-async function saveTotalBudget(){
-  var val=parseFloat(document.getElementById('totalBudgetInput').value)||0;
-  var uid=currentUser.id;
-  var existing=budgets.find(function(b){return b.is_total;});
-  setSync('syncing');
-  if(existing){var ru=await sb.from('budgets').update({amount:val}).eq('id',existing.id);if(ru.error){setSync('err');return;}existing.amount=val;}
-  else{var nb={id:'btotal'+Date.now(),category_id:'total',amount:val,is_total:true,user_id:uid};var r=await sb.from('budgets').insert(nb).select();if(r.error){setSync('err');return;}budgets.push(r.data?r.data[0]:nb);}
-  saveLocalCache();setSync('ok');addAudit('💰','presupuesto total',fmt(val));refreshTab();
 }
 async function signOut(){var cKey='ft_cache_'+(currentUser?currentUser.id:'');offlineQueue=[];localStorage.removeItem(queueKey());if(cKey!=='ft_cache_')localStorage.removeItem(cKey);await sb.auth.signOut();transactions=[];categories=[];accounts=[];patrimony=[];budgets=[];auditLog=[];showAuth();}
 async function loadLoginHistory(){
