@@ -1590,49 +1590,38 @@ async function bioUnlock(){
     unlockApp();
   }catch(e){/* fall back to PIN */}
 }
-var UI_RESUME_MS=30*60*1000; // resume where you left off if reopened within 30 min
-var restoreTab=null;
 function saveUiState(){
-  try{localStorage.setItem('ft_uistate',JSON.stringify({tab:activeTab,vy:viewYear,vm:viewMonth,ts:Date.now()}));}catch(e){}
+  try{localStorage.setItem('ft_uistate',JSON.stringify({vy:viewYear,vm:viewMonth,ts:Date.now()}));}catch(e){}
 }
 function restoreUiState(){
-  // Default to Inicio; only restore the last tab if reopened within UI_RESUME_MS
-  // (a true restart/force-close/crash falls outside that window and always lands on Inicio).
-  activeTab=0;restoreTab=null;
+  // Every time this code runs, the app is loading from zero (a real reload happened —
+  // whether from inactivity, a force-close, a crash, or a normal fresh open). There is
+  // no reliable way to distinguish those cases from JS, so always land on Inicio.
+  activeTab=0;
   try{
     var raw=localStorage.getItem('ft_uistate');if(!raw)return;
-    var s=JSON.parse(raw);if(!s||(Date.now()-s.ts)>UI_RESUME_MS)return;
+    var s=JSON.parse(raw);
     if(typeof s.vy==='number')viewYear=s.vy;
     if(typeof s.vm==='number')viewMonth=s.vm;
-    if(typeof s.tab==='number'&&s.tab>=0&&s.tab<=4){activeTab=s.tab;restoreTab=s.tab;}
   }catch(e){}
 }
-var FAST_RESUME_MS=30*60*1000; // 30 min
 document.addEventListener('visibilitychange',function(){
-  if(document.visibilityState==='hidden'){saveUiState();lastHiddenAt=Date.now();try{localStorage.setItem('ft_last_hidden',String(lastHiddenAt));}catch(e){};}
+  if(document.visibilityState==='hidden'){saveUiState();lastHiddenAt=Date.now();}
   else if(document.visibilityState==='visible'){
     if(currentUser&&pinIsSet()&&lastHiddenAt&&(Date.now()-lastHiddenAt)>PIN_RELOCK_MS)lockApp();
   }
 });
-window.addEventListener('pagehide',function(){saveUiState();try{localStorage.setItem('ft_last_hidden',String(Date.now()));}catch(e){};});
+window.addEventListener('pagehide',saveUiState);
 var LOAD_MIN_MS=1700,loadStartTs=0;
 function hideLoading(){
   var ov=document.getElementById('loadingOverlay');if(!ov)return;
   var wait=Math.max(0,LOAD_MIN_MS-(Date.now()-loadStartTs));
   setTimeout(function(){ov.classList.add('hidden');},wait);
 }
-function canFastResume(){
-  if(!currentUser)return false;
-  var cc=localStorage.getItem('ft_cache_'+currentUser.id);
-  if(!cc)return false;
-  var lh=parseInt(localStorage.getItem('ft_last_hidden')||'0',10);
-  return lh>0&&(Date.now()-lh)<FAST_RESUME_MS;
-}
 function showApp(){
   document.getElementById('authScreen').style.display='none';
-  var fast=canFastResume();
-  if(!fast){loadStartTs=Date.now();document.getElementById('loadingOverlay').classList.remove('hidden');}
-  else{document.getElementById('loadingOverlay').classList.add('hidden');}
+  loadStartTs=Date.now();
+  document.getElementById('loadingOverlay').classList.remove('hidden');
   // PIN/biometric lock disabled — clear any previously stored credentials
   try{localStorage.removeItem('ft_pin');localStorage.removeItem('ft_bio');}catch(e){}
   restoreUiState();
@@ -1652,7 +1641,7 @@ function showApp(){
     document.getElementById('fabBtn').classList.remove('fab-hidden');
     setTimeout(function(){movePill(0);},100);
   }
-  loadData(fast);
+  loadData();
 }
 function showAuth(){
   document.getElementById('loadingOverlay').classList.add('hidden');
@@ -1675,7 +1664,7 @@ function showAuth(){
 }
 
 var loadDataInFlight=false;
-async function loadData(fastResume){
+async function loadData(){
   if(!currentUser)return;
   if(loadDataInFlight)return;
   loadDataInFlight=true;
@@ -1684,35 +1673,6 @@ async function loadData(fastResume){
     var cc=localStorage.getItem('ft_cache_'+currentUser.id);
     if(cc){var cd=JSON.parse(cc);transactions=cd.transactions||[];categories=cd.categories||[];accounts=cd.accounts||[];patrimony=cd.patrimony||[];budgets=cd.budgets||[];auditLog=cd.auditLog||[];}
   }catch(e){}
-  // Fast-resume: render from cache immediately, then sync in background
-  if(fastResume&&transactions.length+categories.length>0){
-    loadDataInFlight=false;
-    if(window.innerWidth>=768){if(typeof dtRender==='function')dtRender();}else{render();if(restoreTab!==null){var rt=restoreTab;restoreTab=null;if(rt!==0)switchTab(rt);}}
-    scheduleAutoBackup();
-    // Background sync — update data silently without any loading overlay
-    loadDataInFlight=true;
-    try{
-      var uid2=currentUser.id;
-      var res2=await Promise.all([
-        sb.from('categories').select('*').eq('user_id',uid2).order('position'),
-        sb.from('transactions').select('*').eq('user_id',uid2).order('date',{ascending:false}),
-        sb.from('accounts').select('*').eq('user_id',uid2).order('position'),
-        sb.from('patrimony').select('*').eq('user_id',uid2).order('year').order('month'),
-        sb.from('budgets').select('*').eq('user_id',uid2)
-      ]);
-      if(!res2[0].error)categories=res2[0].data||[];
-      if(!res2[1].error)transactions=res2[1].data||[];
-      if(!res2[2].error)accounts=res2[2].data||[];
-      if(!res2[3].error)patrimony=res2[3].data||[];
-      if(!res2[4].error)budgets=res2[4].data||[];
-      await processRecurring();
-      saveLocalCache();setSync('ok');
-      if(offlineQueue.length)await processOfflineQueue();
-      refreshTab();
-    }catch(e){setSync('err');}
-    loadDataInFlight=false;
-    return;
-  }
   try{
     var uid=currentUser.id;
     var res=await Promise.all([
@@ -1737,7 +1697,7 @@ async function loadData(fastResume){
   }catch(e){setSync('err');}
   loadDataInFlight=false;
   hideLoading();
-  if(window.innerWidth>=768){if(typeof dtRender==='function')dtRender();}else{render();if(restoreTab!==null){var rt=restoreTab;restoreTab=null;if(rt!==0)switchTab(rt);}}
+  if(window.innerWidth>=768){if(typeof dtRender==='function')dtRender();}else{render();}
   scheduleAutoBackup();
 }
 var txVersion=0;
