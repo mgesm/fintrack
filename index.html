@@ -1621,8 +1621,24 @@ function hideLoading(){
   var wait=Math.max(0,LOAD_MIN_MS-(Date.now()-loadStartTs));
   setTimeout(function(){ov.classList.add('hidden');},wait);
 }
+var _numbersAnimated=false;
+function shouldAnimateNumbers(){if(_numbersAnimated)return false;_numbersAnimated=true;return true;}
+function countUp(el,endVal,formatFn,ms){
+  if(!el)return;
+  ms=ms||900;
+  var startTs=null;
+  function step(ts){
+    if(!startTs)startTs=ts;
+    var p=Math.min((ts-startTs)/ms,1);
+    var eased=1-Math.pow(1-p,3);
+    el.textContent=formatFn(endVal*eased);
+    if(p<1)requestAnimationFrame(step);else el.textContent=formatFn(endVal);
+  }
+  requestAnimationFrame(step);
+}
 function showApp(){
   document.getElementById('authScreen').style.display='none';
+  _numbersAnimated=false;
   loadStartTs=Date.now();
   document.getElementById('loadingOverlay').classList.remove('hidden');
   // PIN/biometric lock disabled — clear any previously stored credentials
@@ -1825,9 +1841,10 @@ function render(){
   var tExp=exps.reduce(function(s,t){return s+t.amount;},0);
   var tInc=incs.reduce(function(s,t){return s+t.amount;},0);
   var bal=tInc-tExp;
-  document.getElementById('totalInc').textContent=fmtShort(tInc);
-  document.getElementById('totalExp').textContent=fmtShort(tExp);
-  var bel=document.getElementById('totalBal');bel.textContent=fmtShort(Math.abs(bal));bel.style.color=bal>=0?'var(--green)':'var(--red)';
+  var incEl=document.getElementById('totalInc'),expEl=document.getElementById('totalExp'),bel=document.getElementById('totalBal');
+  bel.style.color=bal>=0?'var(--green)':'var(--red)';
+  if(shouldAnimateNumbers()){countUp(incEl,tInc,fmtShort);countUp(expEl,tExp,fmtShort);countUp(bel,Math.abs(bal),fmtShort);}
+  else{incEl.textContent=fmtShort(tInc);expEl.textContent=fmtShort(tExp);bel.textContent=fmtShort(Math.abs(bal));}
   var tb=totalBudget();
   var tbEl=document.getElementById('totalBudgetBar');
   if(tb>0&&!homeAnnualMode){
@@ -3602,9 +3619,9 @@ function dtRender(){
   var topBarHtml=showTopBar?'<div class="dt-top-bar">'
     // Summary cards row
     +'<div class="dt-summary-row">'
-    +'<div class="dt-scard"><span class="dt-scard-label">Ingresos</span><span class="dt-scard-value" style="color:var(--green)">'+fmt(tInc)+'</span></div>'
-    +'<div class="dt-scard"><span class="dt-scard-label">Gastos</span><span class="dt-scard-value" style="color:var(--red)">'+fmt(tExp)+'</span></div>'
-    +'<div class="dt-scard"><span class="dt-scard-label">Balance</span><span class="dt-scard-value" style="color:'+(bal>=0?'var(--green)':'var(--red)')+'">'+fmt(Math.abs(bal))+'</span></div>'
+    +'<div class="dt-scard"><span class="dt-scard-label">Ingresos</span><span class="dt-scard-value" id="dtInc" style="color:var(--green)">'+fmt(tInc)+'</span></div>'
+    +'<div class="dt-scard"><span class="dt-scard-label">Gastos</span><span class="dt-scard-value" id="dtExp" style="color:var(--red)">'+fmt(tExp)+'</span></div>'
+    +'<div class="dt-scard"><span class="dt-scard-label">Balance</span><span class="dt-scard-value" id="dtBal" style="color:'+(bal>=0?'var(--green)':'var(--red)')+'">'+fmt(Math.abs(bal))+'</span></div>'
     +'</div>'
     // Donut (flips to heatmap) centered + legend below
     +'<div class="dt-flip-wrap"><div class="flip-inner" id="dtFlipInner">'
@@ -3629,6 +3646,11 @@ function dtRender(){
   // Tab content
   // Set top bar first
   tc.innerHTML=topBarHtml+'<div id="dtTabInner"></div>';
+  if(showTopBar&&shouldAnimateNumbers()){
+    countUp(document.getElementById('dtInc'),tInc,fmt);
+    countUp(document.getElementById('dtExp'),tExp,fmt);
+    countUp(document.getElementById('dtBal'),Math.abs(bal),fmt);
+  }
   // Render tab content into the DOM-attached element
   var tabInner=document.getElementById('dtTabInner');
   if(tabInner){
