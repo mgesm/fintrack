@@ -1,8 +1,15 @@
-var CACHE_NAME='fintrack-cache-v35';
+var CACHE_NAME='fintrack-cache-v38';
 var PRECACHE=['./','./index.html','./manifest.json','./icon-192.png','./icon-512.png'];
 
 self.addEventListener('install',function(e){
-  e.waitUntil(caches.open(CACHE_NAME).then(function(cache){return cache.addAll(PRECACHE);}));
+  e.waitUntil(caches.open(CACHE_NAME).then(function(cache){
+    // index.html es crítico: si falla, que falle la instalación. El resto es best-effort.
+    return cache.add('./index.html').then(function(){
+      return Promise.all(PRECACHE.filter(function(u){return u!=='./index.html';}).map(function(u){
+        return cache.add(u).catch(function(){});
+      }));
+    });
+  }));
   self.skipWaiting();
 });
 
