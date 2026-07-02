@@ -2925,6 +2925,21 @@ function renderTagsInput(){
     else if(e.key==='Backspace'&&!this.value&&txTags.length){txTags.pop();renderTagsInput();}
   });
 }
+async function syncRecurSeries(seriesId,editedId,fields){
+  if(!seriesId)return;
+  var siblings=transactions.filter(function(t){return t.recur_series_id===seriesId&&t.id!==editedId;});
+  siblings.forEach(function(t){Object.assign(t,fields);});
+  if(siblings.length)saveLocalCache();
+  if(isOffline){
+    siblings.forEach(function(t){queueOp({type:'update',table:'transactions',id:t.id,data:fields});});
+    return;
+  }
+  try{
+    await sb.from('transactions').update(fields).eq('recur_series_id',seriesId).neq('id',editedId);
+  }catch(ex){
+    siblings.forEach(function(t){queueOp({type:'update',table:'transactions',id:t.id,data:fields});});
+  }
+}
 var isSaving=false;
 async function saveTx(){
   if(isSaving)return;isSaving=true;
@@ -2970,6 +2985,11 @@ async function saveTx(){
       }
     }
     addAudit('✎','transacción',(txType==='transfer'?'transferencia':catById(payload.category).name)+' '+fmt(amount));
+    var seriesIdForSync=payload.recur_series_id||(oldTx&&oldTx.recur_series_id);
+    if(seriesIdForSync){
+      var seriesFields={recurring:payload.recurring,recur_interval:payload.recurring?payload.recur_interval:null,recur_end_date:payload.recurring?payload.recur_end_date:null};
+      try{await syncRecurSeries(seriesIdForSync,editingTxId,seriesFields);}catch(ex){}
+    }
   } else {
     var newTxId='tx'+Date.now()+Math.random().toString(36).slice(2,6);
     var seriesId=(payload.recurring)?('rs'+Date.now()+Math.random().toString(36).slice(2,6)):null;
