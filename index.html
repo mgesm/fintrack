@@ -2811,7 +2811,11 @@ function renderAnnualTab(el){
     var sumExp=monthsWithData.reduce(function(s,i){return s+expData[i];},0);
     var sumInc=monthsWithData.reduce(function(s,i){return s+incData[i];},0);
     var avgExp=sumExp/monthsWithData.length,avgInc=sumInc/monthsWithData.length;
-    var savRate=sumInc>0?(sumInc-sumExp)/sumInc*100:null;
+    var realNow=new Date(),realY=realNow.getFullYear(),realM=realNow.getMonth();
+    var pastMonthsWithData=monthsWithData.filter(function(i){return !(chartYear===realY&&i===realM);});
+    var sumIncPast=pastMonthsWithData.reduce(function(s,i){return s+incData[i];},0);
+    var sumExpPast=pastMonthsWithData.reduce(function(s,i){return s+expData[i];},0);
+    var savRate=(pastMonthsWithData.length&&sumIncPast>0)?(sumIncPast-sumExpPast)/sumIncPast*100:null;
     var monthsLabel='sobre '+monthsWithData.length+' mes'+(monthsWithData.length===1?'':'es')+' con datos';
     statsHtml='<div class="stat-title">Estadísticas del año</div>'
       +'<div class="stat-grid">'
