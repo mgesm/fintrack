@@ -2803,29 +2803,34 @@ function renderAnnualTab(el){
   var monthsWithData=[];
   for(var mi=0;mi<12;mi++){if(incData[mi]>0||expData[mi]>0)monthsWithData.push(mi);}
   var statsHtml='';
+  var realNow=new Date(),realY=realNow.getFullYear(),realM=realNow.getMonth();
+  var pastMonthsWithData=monthsWithData.filter(function(i){return !(chartYear===realY&&i===realM);});
   if(monthsWithData.length){
     var maxExpIdx=monthsWithData.reduce(function(a,b){return expData[b]>expData[a]?b:a;});
-    var minExpIdx=monthsWithData.reduce(function(a,b){return expData[b]<expData[a]?b:a;});
     var maxIncIdx=monthsWithData.reduce(function(a,b){return incData[b]>incData[a]?b:a;});
-    var maxSavIdx=monthsWithData.reduce(function(a,b){return savData[b]>savData[a]?b:a;});
-    var sumExp=monthsWithData.reduce(function(s,i){return s+expData[i];},0);
     var sumInc=monthsWithData.reduce(function(s,i){return s+incData[i];},0);
-    var avgExp=sumExp/monthsWithData.length,avgInc=sumInc/monthsWithData.length;
-    var realNow=new Date(),realY=realNow.getFullYear(),realM=realNow.getMonth();
-    var pastMonthsWithData=monthsWithData.filter(function(i){return !(chartYear===realY&&i===realM);});
-    var sumIncPast=pastMonthsWithData.reduce(function(s,i){return s+incData[i];},0);
-    var sumExpPast=pastMonthsWithData.reduce(function(s,i){return s+expData[i];},0);
-    var savRate=(pastMonthsWithData.length&&sumIncPast>0)?(sumIncPast-sumExpPast)/sumIncPast*100:null;
+    var avgInc=sumInc/monthsWithData.length;
     var monthsLabel='sobre '+monthsWithData.length+' mes'+(monthsWithData.length===1?'':'es')+' con datos';
+    var pastStatsHtml='';
+    if(pastMonthsWithData.length){
+      var minExpIdx=pastMonthsWithData.reduce(function(a,b){return expData[b]<expData[a]?b:a;});
+      var maxSavIdx=pastMonthsWithData.reduce(function(a,b){return savData[b]>savData[a]?b:a;});
+      var sumExpPast=pastMonthsWithData.reduce(function(s,i){return s+expData[i];},0);
+      var sumIncPast=pastMonthsWithData.reduce(function(s,i){return s+incData[i];},0);
+      var avgExpPast=sumExpPast/pastMonthsWithData.length;
+      var savRate=sumIncPast>0?(sumIncPast-sumExpPast)/sumIncPast*100:null;
+      var pastMonthsLabel='sobre '+pastMonthsWithData.length+' mes'+(pastMonthsWithData.length===1?'':'es')+' cerrado'+(pastMonthsWithData.length===1?'':'s');
+      pastStatsHtml='<div class="stat-card"><div class="stat-label">Mes menos gastado</div><div class="stat-val" style="color:var(--green)">'+fmt(expData[minExpIdx])+'</div><div class="stat-sub">'+capitalize(MONTHS[minExpIdx])+'</div></div>'
+        +'<div class="stat-card"><div class="stat-label">Mes con más ahorro</div><div class="stat-val" style="color:'+(savData[maxSavIdx]>=0?'var(--green)':'var(--red)')+'">'+(savData[maxSavIdx]>=0?'+':'−')+fmt(Math.abs(savData[maxSavIdx]))+'</div><div class="stat-sub">'+capitalize(MONTHS[maxSavIdx])+'</div></div>'
+        +'<div class="stat-card"><div class="stat-label">Gasto medio mensual</div><div class="stat-val">'+fmt(avgExpPast)+'</div><div class="stat-sub">'+pastMonthsLabel+'</div></div>';
+    }
     statsHtml='<div class="stat-title">Estadísticas del año</div>'
       +'<div class="stat-grid">'
       +'<div class="stat-card"><div class="stat-label">Mes más gastado</div><div class="stat-val" style="color:var(--red)">'+fmt(expData[maxExpIdx])+'</div><div class="stat-sub">'+capitalize(MONTHS[maxExpIdx])+'</div></div>'
-      +'<div class="stat-card"><div class="stat-label">Mes menos gastado</div><div class="stat-val" style="color:var(--green)">'+fmt(expData[minExpIdx])+'</div><div class="stat-sub">'+capitalize(MONTHS[minExpIdx])+'</div></div>'
+      +pastStatsHtml
       +'<div class="stat-card"><div class="stat-label">Mes con más ingresos</div><div class="stat-val" style="color:var(--green)">'+fmt(incData[maxIncIdx])+'</div><div class="stat-sub">'+capitalize(MONTHS[maxIncIdx])+'</div></div>'
-      +'<div class="stat-card"><div class="stat-label">Mes con más ahorro</div><div class="stat-val" style="color:'+(savData[maxSavIdx]>=0?'var(--green)':'var(--red)')+'">'+(savData[maxSavIdx]>=0?'+':'−')+fmt(Math.abs(savData[maxSavIdx]))+'</div><div class="stat-sub">'+capitalize(MONTHS[maxSavIdx])+'</div></div>'
-      +'<div class="stat-card"><div class="stat-label">Gasto medio mensual</div><div class="stat-val">'+fmt(avgExp)+'</div><div class="stat-sub">'+monthsLabel+'</div></div>'
       +'<div class="stat-card"><div class="stat-label">Ingreso medio mensual</div><div class="stat-val">'+fmt(avgInc)+'</div><div class="stat-sub">'+monthsLabel+'</div></div>'
-      +(savRate!==null?'<div class="stat-card wide"><div><div class="stat-label">Tasa de ahorro media</div><div class="stat-sub">(ingresos − gastos) / ingresos</div></div><div class="stat-val" style="color:'+(savRate>=0?'var(--green)':'var(--red)')+'">'+savRate.toFixed(1).replace('.',',')+'%</div></div>':'')
+      +(savRate!=null?'<div class="stat-card wide"><div><div class="stat-label">Tasa de ahorro media</div><div class="stat-sub">(ingresos − gastos) / ingresos</div></div><div class="stat-val" style="color:'+(savRate>=0?'var(--green)':'var(--red)')+'">'+savRate.toFixed(1).replace('.',',')+'%</div></div>':'')
       +'</div>';
   }
   el.innerHTML='<div style="padding:12px 0 0"><div class="chart-year-nav"><button class="nav-btn" onclick="chartYear--;switchTab(3)">&#8249;</button><div class="chart-year-label">'+chartYear+'</div><button class="nav-btn" onclick="chartYear++;switchTab(3)">&#8250;</button></div></div>'
