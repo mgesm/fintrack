@@ -1452,8 +1452,8 @@ function budgetForCatRange(catId,from,to){
   return total;
 }
 function totalBudget(year,month){
-  var my=(year!==undefined&&month!==undefined)?monthKey(year,month):monthKey(viewYear,viewMonth);
-  return budgets.filter(function(b){return !b.is_total&&b.month_year===my;}).reduce(function(s,b){return s+b.amount;},0);
+  var yr=(year!==undefined)?year:viewYear,mo=(month!==undefined)?month:viewMonth;
+  return categories.reduce(function(s,c){return s+budgetForCat(c.id,yr,mo);},0);
 }
 function setSync(s){var d=document.getElementById('syncDot');if(d)d.className='sync-dot '+s;}
 function setAccent(color){
