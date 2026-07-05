@@ -2866,21 +2866,23 @@ function renderAnnualTab(el){
     var sumInc=monthsWithData.reduce(function(s,i){return s+incData[i];},0);
     var avgInc=sumInc/monthsWithData.length;
     var monthsLabel='sobre '+monthsWithData.length+' mes'+(monthsWithData.length===1?'':'es')+' con datos';
-    var pastStatsHtml='';
+    var minExpHtml='',maxSavHtml='',avgExpHtml='',avgDailyTotalHtml='',savRateHtml='';
     if(pastMonthsWithData.length){
       var minExpIdx=pastMonthsWithData.reduce(function(a,b){return expData[b]<expData[a]?b:a;});
       var maxSavIdx=pastMonthsWithData.reduce(function(a,b){return savData[b]>savData[a]?b:a;});
       var sumExpPast=pastMonthsWithData.reduce(function(s,i){return s+expData[i];},0);
       var sumIncPast=pastMonthsWithData.reduce(function(s,i){return s+incData[i];},0);
       var avgExpPast=sumExpPast/pastMonthsWithData.length;
-      var savRate=sumIncPast>0?(sumIncPast-sumExpPast)/sumIncPast*100:null;
+      var savAmount=sumIncPast-sumExpPast;
+      var savRate=sumIncPast>0?savAmount/sumIncPast*100:null;
       var pastMonthsLabel='sobre '+pastMonthsWithData.length+' mes'+(pastMonthsWithData.length===1?'':'es')+' cerrado'+(pastMonthsWithData.length===1?'':'s');
       var daysInPastMonths=pastMonthsWithData.reduce(function(s,i){return s+new Date(chartYear,i+1,0).getDate();},0);
       var avgDailyTotal=daysInPastMonths>0?sumExpPast/daysInPastMonths:null;
-      pastStatsHtml='<div class="stat-card"><div class="stat-label">Mes menos gastado</div><div class="stat-val" style="color:var(--green)">'+fmt(expData[minExpIdx])+'</div><div class="stat-sub">'+capitalize(MONTHS[minExpIdx])+'</div></div>'
-        +'<div class="stat-card"><div class="stat-label">Mes con más ahorro</div><div class="stat-val" style="color:'+(savData[maxSavIdx]>=0?'var(--green)':'var(--red)')+'">'+(savData[maxSavIdx]>=0?'+':'−')+fmt(Math.abs(savData[maxSavIdx]))+'</div><div class="stat-sub">'+capitalize(MONTHS[maxSavIdx])+'</div></div>'
-        +'<div class="stat-card"><div class="stat-label">Gasto medio mensual</div><div class="stat-val">'+fmt(avgExpPast)+'</div><div class="stat-sub">'+pastMonthsLabel+'</div></div>'
-        +(avgDailyTotal!=null?'<div class="stat-card"><div class="stat-label">Gasto diario medio</div><div class="stat-val">'+fmt(avgDailyTotal)+'</div><div class="stat-sub">'+pastMonthsLabel+'</div></div>':'');
+      minExpHtml='<div class="stat-card"><div class="stat-label">Mes menos gastado</div><div class="stat-val" style="color:var(--red)">'+fmt(expData[minExpIdx])+'</div><div class="stat-sub">'+capitalize(MONTHS[minExpIdx])+'</div></div>';
+      maxSavHtml='<div class="stat-card"><div class="stat-label">Mes con más ahorro</div><div class="stat-val" style="color:'+(savData[maxSavIdx]>=0?'var(--green)':'var(--red)')+'">'+(savData[maxSavIdx]>=0?'+':'−')+fmt(Math.abs(savData[maxSavIdx]))+'</div><div class="stat-sub">'+capitalize(MONTHS[maxSavIdx])+'</div></div>';
+      avgExpHtml='<div class="stat-card"><div class="stat-label">Gasto medio mensual</div><div class="stat-val">'+fmt(avgExpPast)+'</div><div class="stat-sub">'+pastMonthsLabel+'</div></div>';
+      avgDailyTotalHtml=(avgDailyTotal!=null?'<div class="stat-card"><div class="stat-label">Gasto diario medio</div><div class="stat-val">'+fmt(avgDailyTotal)+'</div><div class="stat-sub">'+pastMonthsLabel+'</div></div>':'');
+      savRateHtml=(savRate!=null?'<div class="stat-card wide"><div><div class="stat-label">Tasa de ahorro media</div><div class="stat-sub">(ingresos − gastos) / ingresos</div></div><div class="stat-val" style="color:'+(savRate>=0?'var(--green)':'var(--red)')+'">'+savRate.toFixed(1).replace('.',',')+'% ('+(savAmount>=0?'+':'−')+fmt(Math.abs(savAmount))+')</div></div>':'');
     }
     var curMonthDailyHtml='';
     if(chartYear===realY){
@@ -2891,12 +2893,15 @@ function renderAnnualTab(el){
     }
     statsHtml='<div class="stat-title">Estadísticas del año</div>'
       +'<div class="stat-grid">'
-      +'<div class="stat-card"><div class="stat-label">Mes más gastado</div><div class="stat-val" style="color:var(--red)">'+fmt(expData[maxExpIdx])+'</div><div class="stat-sub">'+capitalize(MONTHS[maxExpIdx])+'</div></div>'
-      +pastStatsHtml
-      +'<div class="stat-card"><div class="stat-label">Mes con más ingresos</div><div class="stat-val" style="color:var(--green)">'+fmt(incData[maxIncIdx])+'</div><div class="stat-sub">'+capitalize(MONTHS[maxIncIdx])+'</div></div>'
-      +'<div class="stat-card"><div class="stat-label">Ingreso medio mensual</div><div class="stat-val">'+fmt(avgInc)+'</div><div class="stat-sub">'+monthsLabel+'</div></div>'
       +curMonthDailyHtml
-      +(savRate!=null?'<div class="stat-card wide"><div><div class="stat-label">Tasa de ahorro media</div><div class="stat-sub">(ingresos − gastos) / ingresos</div></div><div class="stat-val" style="color:'+(savRate>=0?'var(--green)':'var(--red)')+'">'+savRate.toFixed(1).replace('.',',')+'%</div></div>':'')
+      +avgDailyTotalHtml
+      +avgExpHtml
+      +'<div class="stat-card"><div class="stat-label">Ingreso medio mensual</div><div class="stat-val">'+fmt(avgInc)+'</div><div class="stat-sub">'+monthsLabel+'</div></div>'
+      +'<div class="stat-card"><div class="stat-label">Mes más gastado</div><div class="stat-val" style="color:var(--red)">'+fmt(expData[maxExpIdx])+'</div><div class="stat-sub">'+capitalize(MONTHS[maxExpIdx])+'</div></div>'
+      +minExpHtml
+      +maxSavHtml
+      +'<div class="stat-card"><div class="stat-label">Mes con más ingresos</div><div class="stat-val" style="color:var(--green)">'+fmt(incData[maxIncIdx])+'</div><div class="stat-sub">'+capitalize(MONTHS[maxIncIdx])+'</div></div>'
+      +savRateHtml
       +'</div>';
   }
   el.innerHTML='<div style="padding:12px 0 0"><div class="chart-year-nav"><button class="nav-btn" onclick="chartYear--;switchTab(3)">&#8249;</button><div class="chart-year-label">'+chartYear+'</div><button class="nav-btn" onclick="chartYear++;switchTab(3)">&#8250;</button></div></div>'
