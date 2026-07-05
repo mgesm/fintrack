@@ -1392,7 +1392,7 @@ function catIconSvg(c,size){
 }
 function monthKey(y,m){return y+'-'+pad(m+1);}
 function isAutoSubBudgetCat(catId){var c=categories.find(function(c){return c.id===catId;});return !!(c&&c.name&&c.name.trim().toLowerCase()==='suscripciones');}
-function autoRecurBudgetForCat(catId,year,month){
+function autoRecurBudgetBreakdown(catId,year,month){
   var seriesMap={};
   transactions.forEach(function(t){
     if(!t.recurring||t.type!=='expense'||t.category!==catId)return;
@@ -1400,7 +1400,7 @@ function autoRecurBudgetForCat(catId,year,month){
     var key=t.recur_series_id||('legacy|'+t.type+'|'+t.category+'|'+(t.account_id||'')+'|'+t.amount+'|'+interval);
     (seriesMap[key]=seriesMap[key]||[]).push(t);
   });
-  var total=0;
+  var total=0,items=[];
   Object.keys(seriesMap).forEach(function(key){
     var group=seriesMap[key];
     var root=group[0];
@@ -1413,15 +1413,22 @@ function autoRecurBudgetForCat(catId,year,month){
     var monthEnd=new Date(year,month+1,0,12,0,0);
     if(rootDate>monthEnd)return;
     if(endDate&&endDate<monthStart)return;
-    var occ=rootDate,guard=0;
+    var occ=rootDate,guard=0,count=0;
     while(occ<=monthEnd&&guard<600){
-      if(occ>=monthStart&&occ<=monthEnd&&(!endDate||occ<=endDate))total+=root.amount;
+      if(occ>=monthStart&&occ<=monthEnd&&(!endDate||occ<=endDate))count++;
       occ=addInterval(occ,interval,anchorDay);
       guard++;
     }
+    if(count>0){
+      var amt=root.amount*count;
+      total+=amt;
+      items.push({label:root.note||(root.subcategory?capitalize(root.subcategory):'Gasto recurrente'),amount:Math.round(amt*100)/100,count:count});
+    }
   });
-  return Math.round(total*100)/100;
+  items.sort(function(a,b){return b.amount-a.amount;});
+  return {total:Math.round(total*100)/100,items:items};
 }
+function autoRecurBudgetForCat(catId,year,month){return autoRecurBudgetBreakdown(catId,year,month).total;}
 function budgetForCat(catId,year,month){
   var yr=(year!==undefined)?year:viewYear,mo=(month!==undefined)?month:viewMonth;
   var my=monthKey(yr,mo);
@@ -1434,6 +1441,12 @@ function hasManualBudget(catId,year,month){
   var yr=(year!==undefined)?year:viewYear,mo=(month!==undefined)?month:viewMonth;
   var my=monthKey(yr,mo);
   return budgets.some(function(b){return b.category_id===catId&&!b.is_total&&b.month_year===my;});
+}
+function budgetNoteForCat(catId,year,month){
+  var yr=(year!==undefined)?year:viewYear,mo=(month!==undefined)?month:viewMonth;
+  var my=monthKey(yr,mo);
+  var b=budgets.find(function(b){return b.category_id===catId&&!b.is_total&&b.month_year===my;});
+  return (b&&b.note)||'';
 }
 async function resetBudgetToAuto(catId){
   var my=monthKey(viewYear,viewMonth);
@@ -2472,6 +2485,8 @@ function renderCatTab(el,prefix){
   var html='<div class="section-title">Presupuesto y gastos '+(homeAnnualMode?'del año '+viewYear:'del mes')+'</div>';
   categories.forEach(function(c){
     var amt=bycat[c.id]||0,budget=homeAnnualMode?budgetForCatRange(c.id,viewYear+'-01',viewYear+'-12'):budgetForCat(c.id);
+    var budgetNote=budgetNoteForCat(c.id);
+    var autoBreakdown=(isAutoSubBudgetCat(c.id)&&!hasManualBudget(c.id)&&!homeAnnualMode)?autoRecurBudgetBreakdown(c.id,viewYear,viewMonth):null;
     var maxBar=budget>0?Math.max(budget,amt):totalExp||1;
     var pctBar=budget>0?Math.min(Math.round(amt/maxBar*100),100):Math.min(Math.round(amt/maxBar*100),100);
     var budgetPctBar=budget>0?Math.min(Math.round(budget/maxBar*100),100):0;
@@ -2520,11 +2535,14 @@ function renderCatTab(el,prefix){
       +'<button class="add-btn" data-action="add-subcat" data-id="'+c.id+'">Añadir</button></div></div>'
       +'<div id="budgetform_'+prefix+c.id+'" style="display:none;margin-top:6px">'
       +(isAutoSubBudgetCat(c.id)?'<div style="font-size:11px;color:var(--text3);margin-bottom:6px">'+(hasManualBudget(c.id)?'Fijado manualmente. ':'🔄 Calculado automáticamente según tus gastos recurrentes de este mes. ')+(hasManualBudget(c.id)?'<span style="color:var(--amber);cursor:pointer;text-decoration:underline" data-action="reset-budget-auto" data-id="'+c.id+'">Volver a automático</span>':'Puedes fijarlo a mano y así dejará de recalcularse.')+'</div>':'')
+      +(autoBreakdown&&autoBreakdown.items.length?'<div style="font-size:11px;color:var(--text3);margin-bottom:8px;display:flex;flex-direction:column;gap:2px">'+autoBreakdown.items.map(function(it){return '<div style="display:flex;justify-content:space-between;gap:8px"><span>'+capEsc(it.label)+(it.count>1?' ×'+it.count:'')+'</span><span style="font-family:var(--mono)">'+fmt(it.amount)+'</span></div>';}).join('')+'</div>':'')
       +'<div class="budget-input-row">'
       +'<span style="font-size:12px;color:var(--text2);flex:1">Presupuesto de '+capitalize(MONTHS[viewMonth])+'</span>'
       +'<input type="number" class="budget-input" id="budgetinput_'+prefix+c.id+'" placeholder="0" min="0" step="1" value="'+(budget||'')+'">'
       +'<button class="budget-save-btn" data-action="save-budget" data-id="'+c.id+'">Guardar</button>'
-      +'</div></div>'
+      +'</div>'
+      +'<div style="margin-top:6px"><input type="text" class="add-input" id="budgetnote_'+prefix+c.id+'" placeholder="Nota (opcional): ¿qué has tenido en cuenta?" maxlength="200" value="'+htmlEscape(budgetNote)+'" style="width:100%"></div>'
+      +'</div>'
       +'</div>'
       +'<div class="flip-face flip-back chart-card" onclick="toggleFlip(\'catFlipInner_'+prefix+c.id+'\')">'
       +'<div class="chart-card-title">Gasto mensual · '+capEsc(c.name)+' ('+viewYear+')</div>'
@@ -3160,11 +3178,13 @@ function showUndoToast(msg,onUndo){
 async function saveBudget(catId){
   var pfx=IS_DESKTOP?'dt':'';
   var val=parseFloat(document.getElementById('budgetinput_'+pfx+catId).value)||0;
+  var noteEl=document.getElementById('budgetnote_'+pfx+catId);
+  var note=noteEl?(noteEl.value.trim().slice(0,200)||null):null;
   var my=monthKey(viewYear,viewMonth);
   var existing=budgets.find(function(b){return b.category_id===catId&&!b.is_total&&b.month_year===my;});
   setSync('syncing');
-  if(existing){var ru=await sb.from('budgets').update({amount:val}).eq('id',existing.id);if(ru.error){setSync('err');return;}existing.amount=val;}
-  else{var nb={id:'b'+Date.now(),category_id:catId,amount:val,is_total:false,month_year:my,user_id:currentUser.id};var r=await sb.from('budgets').insert(nb).select();if(r.error){setSync('err');return;}budgets.push(r.data?r.data[0]:nb);}
+  if(existing){var ru=await sb.from('budgets').update({amount:val,note:note}).eq('id',existing.id);if(ru.error){setSync('err');return;}existing.amount=val;existing.note=note;}
+  else{var nb={id:'b'+Date.now(),category_id:catId,amount:val,is_total:false,month_year:my,note:note,user_id:currentUser.id};var r=await sb.from('budgets').insert(nb).select();if(r.error){setSync('err');return;}budgets.push(r.data?r.data[0]:nb);}
   addAudit('💰','presupuesto',catById(catId).name+': '+fmt(val));
   document.getElementById('budgetform_'+pfx+catId).style.display='none';
   saveLocalCache();setSync('ok');refreshTab();
@@ -3493,6 +3513,7 @@ function validateImportData(d){
       if(!b||!isStr(b.id,100)||!b.id)throw new Error('presupuesto #'+i+': id inválido');
       if(!isNum(b.amount))throw new Error('presupuesto #'+i+': importe inválido');
       if(b.month_year!=null&&!isStr(b.month_year,10))throw new Error('presupuesto #'+i+': mes inválido');
+      if(b.note!=null&&!isStr(b.note,200))throw new Error('presupuesto #'+i+': nota inválida');
     });
     checkDupIds(d.budgets,'presupuesto');
   }
@@ -3520,7 +3541,7 @@ async function importJSON(){
     var chunk=50;for(var i=0;i<txs.length;i+=chunk){var r2=await sb.from('transactions').upsert(txs.slice(i,i+chunk));if(r2.error)throw new Error('transacciones: '+r2.error.message+' (importación parcial: '+i+' de '+txs.length+' transacciones importadas antes del fallo)');}
     if(d.accounts&&d.accounts.length){await sleep(300);var accs=d.accounts.map(function(a){return {id:a.id,name:a.name,color:a.color,position:a.position||0,user_id:uid};});var r3=await sb.from('accounts').insert(accs);if(r3.error)throw new Error('cuentas: '+r3.error.message);}
     if(d.patrimony&&d.patrimony.length){await sleep(300);var pat=d.patrimony.map(function(p){return {id:p.id,account_id:p.account_id,year:p.year,month:p.month,amount:p.amount,theoretical_amount:p.theoretical_amount!==undefined?p.theoretical_amount:null,reset_date:p.reset_date||null,user_id:uid};});var r4=await sb.from('patrimony').insert(pat);if(r4.error)throw new Error('patrimonio: '+r4.error.message);}
-    if(d.budgets&&d.budgets.length){await sleep(300);var bud=d.budgets.map(function(b){return {id:b.id,category_id:b.category_id,amount:b.amount,is_total:b.is_total||false,month_year:b.month_year||null,user_id:uid};});await sb.from('budgets').insert(bud);}
+    if(d.budgets&&d.budgets.length){await sleep(300);var bud=d.budgets.map(function(b){return {id:b.id,category_id:b.category_id,amount:b.amount,is_total:b.is_total||false,month_year:b.month_year||null,note:b.note||null,user_id:uid};});await sb.from('budgets').insert(bud);}
     s.textContent='✓ '+d.transactions.length+' transacciones importadas';s.className='status-msg status-ok';
     addAudit('📥','importación',d.transactions.length+' transacciones');
     await sleep(500);await loadData();
