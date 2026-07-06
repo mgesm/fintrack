@@ -1392,6 +1392,8 @@ function catIconSvg(c,size){
 }
 function monthKey(y,m){return y+'-'+pad(m+1);}
 function isAutoSubBudgetCat(catId){var c=categories.find(function(c){return c.id===catId;});return !!(c&&c.name&&c.name.trim().toLowerCase()==='suscripciones');}
+var INCOME_CAT_NAMES=['sueldo','ingresos'];
+function isIncomeCat(catId){var c=categories.find(function(c){return c.id===catId;});return !!(c&&c.name&&INCOME_CAT_NAMES.indexOf(c.name.trim().toLowerCase())!==-1);}
 function autoRecurBudgetBreakdown(catId,year,month){
   var seriesMap={};
   transactions.forEach(function(t){
@@ -2478,16 +2480,23 @@ async function catDragEnd(){
 }
 function renderCatTab(el,prefix){
   prefix=prefix||'';
-  var exps=getDashboardTx().filter(function(t){return t.type==='expense';});
-  var bycat={},bysubcat={};
+  var dashTxs=getDashboardTx();
+  var exps=dashTxs.filter(function(t){return t.type==='expense';});
+  var incs=dashTxs.filter(function(t){return t.type==='income';});
+  var bycat={},bysubcat={},bycatInc={},bysubcatInc={};
   exps.forEach(function(t){bycat[t.category]=(bycat[t.category]||0)+t.amount;if(t.subcategory){var k=t.category+'||'+t.subcategory;bysubcat[k]=(bysubcat[k]||0)+t.amount;}});
+  incs.forEach(function(t){bycatInc[t.category]=(bycatInc[t.category]||0)+t.amount;if(t.subcategory){var k=t.category+'||'+t.subcategory;bysubcatInc[k]=(bysubcatInc[k]||0)+t.amount;}});
   var totalExp=Object.values(bycat).reduce(function(a,b){return a+b;},0)||1;
+  var totalInc=Object.values(bycatInc).reduce(function(a,b){return a+b;},0)||1;
   var html='<div class="section-title">Presupuesto y gastos '+(homeAnnualMode?'del año '+viewYear:'del mes')+'</div>';
   categories.forEach(function(c){
-    var amt=bycat[c.id]||0,budget=homeAnnualMode?budgetForCatRange(c.id,viewYear+'-01',viewYear+'-12'):budgetForCat(c.id);
-    var budgetNote=budgetNoteForCat(c.id);
-    var autoBreakdown=(isAutoSubBudgetCat(c.id)&&!hasManualBudget(c.id)&&!homeAnnualMode)?autoRecurBudgetBreakdown(c.id,viewYear,viewMonth):null;
-    var maxBar=budget>0?Math.max(budget,amt):totalExp||1;
+    var isInc=isIncomeCat(c.id);
+    var amt=isInc?(bycatInc[c.id]||0):(bycat[c.id]||0);
+    var pctDenom=isInc?totalInc:totalExp;
+    var budget=isInc?0:(homeAnnualMode?budgetForCatRange(c.id,viewYear+'-01',viewYear+'-12'):budgetForCat(c.id));
+    var budgetNote=isInc?'':budgetNoteForCat(c.id);
+    var autoBreakdown=(!isInc&&isAutoSubBudgetCat(c.id)&&!hasManualBudget(c.id)&&!homeAnnualMode)?autoRecurBudgetBreakdown(c.id,viewYear,viewMonth):null;
+    var maxBar=budget>0?Math.max(budget,amt):pctDenom||1;
     var pctBar=budget>0?Math.min(Math.round(amt/maxBar*100),100):Math.min(Math.round(amt/maxBar*100),100);
     var budgetPctBar=budget>0?Math.min(Math.round(budget/maxBar*100),100):0;
     var budgetAlert='';
@@ -2500,7 +2509,7 @@ function renderCatTab(el,prefix){
     }
     var subcatHtml='';
     (c.subcats||[]).forEach(function(s){
-      var sk=c.id+'||'+s,sa=bysubcat[sk]||0;
+      var sk=c.id+'||'+s,sa=(isInc?bysubcatInc:bysubcat)[sk]||0;
       subcatHtml+='<div class="subcat-row">'
         +'<div style="width:5px;height:5px;border-radius:50%;background:'+c.color+';opacity:0.6;flex-shrink:0"></div>'
         +'<span style="flex:1;font-size:12px;color:var(--text2)">'+capEsc(s)+'</span>'
@@ -2515,7 +2524,7 @@ function renderCatTab(el,prefix){
       +'<span class="cat-drag-handle" onpointerdown="catDragStart(event,\''+c.id+'\')">⠿</span>'
       +'<div class="cat-color" style="background:'+c.color+'22;cursor:pointer;width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0" data-action="show-colorform" data-id="'+c.id+'">'+catIconSvg(c,18)+'</div>'
       +'<span style="flex:1;font-size:15px;font-weight:500;color:var(--text)">'+capEsc(c.name)+'</span>'
-      +'<span style="font-family:var(--mono);font-size:11px;color:var(--text3)">'+(amt>0?Math.round(amt/totalExp*100)+'%':'')+'</span>'
+      +'<span style="font-family:var(--mono);font-size:11px;color:var(--text3)">'+(amt>0?Math.round(amt/pctDenom*100)+'%':'')+'</span>'
       +'<span style="font-family:var(--mono);font-size:13px;color:var(--text2);margin-left:6px">'+(amt>0?fmt(amt):'—')+'</span>'
       +'<button class="del-btn-sm" data-action="del-cat" data-id="'+c.id+'">×</button>'
       +'</div>'
@@ -2545,7 +2554,7 @@ function renderCatTab(el,prefix){
       +'</div>'
       +'</div>'
       +'<div class="flip-face flip-back chart-card" onclick="toggleFlip(\'catFlipInner_'+prefix+c.id+'\')">'
-      +'<div class="chart-card-title">Gasto mensual · '+capEsc(c.name)+' ('+viewYear+')</div>'
+      +'<div class="chart-card-title">'+(isInc?'Ingreso mensual':'Gasto mensual')+' · '+capEsc(c.name)+' ('+viewYear+')</div>'
       +'<canvas id="catChart_'+prefix+c.id+'"></canvas>'
       +'</div>'
       +'</div></div>';
@@ -2553,17 +2562,19 @@ function renderCatTab(el,prefix){
   html+='<div class="section-title" style="margin-top:8px">Nueva categoría</div>'
     +'<div class="add-cat-form"><div class="form-row"><input type="text" class="add-input" id="newCatInput" placeholder="Nombre..."><button class="add-btn" onclick="addCat()">Añadir</button></div></div>';
   el.innerHTML=html;
-  var monthlyByCat={};
+  var monthlyByCat={},monthlyByCatInc={};
   transactions.forEach(function(t){
-    if(t.type!=='expense')return;
+    if(t.type!=='expense'&&t.type!=='income')return;
     var d=new Date(t.date+'T12:00:00');
     if(d.getFullYear()!==viewYear)return;
     var key=t.category+'|'+d.getMonth();
-    monthlyByCat[key]=(monthlyByCat[key]||0)+t.amount;
+    if(t.type==='expense')monthlyByCat[key]=(monthlyByCat[key]||0)+t.amount;
+    else monthlyByCatInc[key]=(monthlyByCatInc[key]||0)+t.amount;
   });
   categories.forEach(function(c){
     var canvas=document.getElementById('catChart_'+prefix+c.id);if(!canvas)return;
-    var data=[];for(var m=0;m<12;m++)data.push(monthlyByCat[c.id+'|'+m]||0);
+    var src=isIncomeCat(c.id)?monthlyByCatInc:monthlyByCat;
+    var data=[];for(var m=0;m<12;m++)data.push(src[c.id+'|'+m]||0);
     drawLineChart(canvas,[{label:capitalize(c.name),color:c.color,bold:true,data:data}],null);
     setFlipHeight('catFlipInner_'+prefix+c.id);
   });
