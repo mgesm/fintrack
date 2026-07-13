@@ -2542,16 +2542,16 @@ function renderCatTab(el,prefix){
       +(budget>0?'<div class="cat-budget-marker" style="left:'+budgetPctBar+'%"></div>':'')
       +'</div>'
       +budgetAlert
-      +'<div id="colorform_'+prefix+c.id+'" style="display:none;margin-top:8px"><div class="cat-color-palette">'+catColorSwatches+'</div></div>'
+      +'<div id="colorform_'+prefix+c.id+'" style="display:none;margin-top:8px" onclick="event.stopPropagation()"><div class="cat-color-palette">'+catColorSwatches+'</div></div>'
       +(subcatHtml?'<div class="subcat-list">'+subcatHtml+'</div>':'')
       +'<div style="display:flex;gap:6px;margin-top:6px;align-items:center">'
       +'<button class="add-sub-btn" data-action="show-subform" data-id="'+c.id+'">+ Subcategoría</button>'
       +(isInc?'':'<button class="add-sub-btn" data-action="show-budgetform" data-id="'+c.id+'" style="color:var(--amber);border-color:rgba(212,146,15,0.3)">💰 Presupuesto</button>')
       +'</div>'
-      +'<div id="subform_'+prefix+c.id+'" style="display:none;margin-top:6px">'
+      +'<div id="subform_'+prefix+c.id+'" style="display:none;margin-top:6px" onclick="event.stopPropagation()">'
       +'<div class="form-row"><input type="text" class="add-input" id="subinput_'+prefix+c.id+'" placeholder="Nombre...">'
       +'<button class="add-btn" data-action="add-subcat" data-id="'+c.id+'">Añadir</button></div></div>'
-      +'<div id="budgetform_'+prefix+c.id+'" style="display:none;margin-top:6px">'
+      +'<div id="budgetform_'+prefix+c.id+'" style="display:none;margin-top:6px" onclick="event.stopPropagation()">'
       +(isAutoSubBudgetCat(c.id)?'<div style="font-size:11px;color:var(--text3);margin-bottom:6px">'+(hasManualBudget(c.id)?'Fijado manualmente. ':'🔄 Calculado automáticamente según tus gastos recurrentes de este mes. ')+(hasManualBudget(c.id)?'<span style="color:var(--amber);cursor:pointer;text-decoration:underline" data-action="reset-budget-auto" data-id="'+c.id+'">Volver a automático</span>':'Puedes fijarlo a mano y así dejará de recalcularse.')+'</div>':'')
       +(autoBreakdown&&autoBreakdown.items.length?'<div style="font-size:11px;color:var(--text3);margin-bottom:8px;display:flex;flex-direction:column;gap:2px">'+autoBreakdown.items.map(function(it){return '<div style="display:flex;justify-content:space-between;gap:8px"><span>'+capEsc(it.label)+(it.count>1?' ×'+it.count:'')+'</span><span style="font-family:var(--mono)">'+fmt(it.amount)+'</span></div>';}).join('')+'</div>':'')
       +'<div class="budget-input-row">'
