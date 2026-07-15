@@ -2872,7 +2872,9 @@ function drawBarChart(canvas,inc,exp,sav){
   attachChartTip(canvas);
 }
 function drawLineChart(canvas,series,labels){
-  var sig=(series||[]).map(function(s){return (s||[]).join(',');}).join(';');
+  // Cada serie es un objeto ({ label, color, data }), no un array. La firma
+  // debe construirse a partir de sus datos para evitar un .join inexistente.
+  var sig=(series||[]).map(function(s){return (s&&s.data?s.data:[]).join(',');}).join(';');
   var cid=canvas.id||'line';
   if(_lineSig[cid]===sig)return;
   _lineSig[cid]=sig;
