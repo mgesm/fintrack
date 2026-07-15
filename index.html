@@ -1192,6 +1192,132 @@ html[data-theme="dark"] .mesh-orb{opacity:.45;}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important;}
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   FINTRACK / VISION 2
+   A full visual system, built around a navigation layer of Liquid Glass and
+   solid, calm content layers. It deliberately replaces the previous card UI.
+   ══════════════════════════════════════════════════════════════════════════ */
+:root{
+  --v2-panel:rgba(255,255,255,.72);
+  --v2-panel-strong:rgba(255,255,255,.88);
+  --v2-control:rgba(255,255,255,.48);
+  --v2-line:rgba(255,255,255,.72);
+  --v2-shadow:0 18px 44px rgba(40,45,68,.10),0 2px 8px rgba(40,45,68,.05);
+  --v2-float:0 28px 70px rgba(22,28,48,.18),0 4px 16px rgba(22,28,48,.08);
+  --v2-spring:cubic-bezier(.2,.82,.22,1);
+  --v2-pop:cubic-bezier(.16,.92,.22,1.18);
+}
+@media(prefers-color-scheme:dark){:root{
+  --v2-panel:rgba(31,31,39,.72);
+  --v2-panel-strong:rgba(42,42,51,.86);
+  --v2-control:rgba(255,255,255,.10);
+  --v2-line:rgba(255,255,255,.19);
+  --v2-shadow:0 20px 48px rgba(0,0,0,.34),0 2px 10px rgba(0,0,0,.24);
+  --v2-float:0 30px 76px rgba(0,0,0,.52),0 5px 18px rgba(0,0,0,.35);
+}}
+html[data-theme="light"]{--v2-panel:rgba(255,255,255,.72);--v2-panel-strong:rgba(255,255,255,.88);--v2-control:rgba(255,255,255,.48);--v2-line:rgba(255,255,255,.72);--v2-shadow:0 18px 44px rgba(40,45,68,.10),0 2px 8px rgba(40,45,68,.05);--v2-float:0 28px 70px rgba(22,28,48,.18),0 4px 16px rgba(22,28,48,.08);}
+html[data-theme="dark"]{--v2-panel:rgba(31,31,39,.72);--v2-panel-strong:rgba(42,42,51,.86);--v2-control:rgba(255,255,255,.10);--v2-line:rgba(255,255,255,.19);--v2-shadow:0 20px 48px rgba(0,0,0,.34),0 2px 10px rgba(0,0,0,.24);--v2-float:0 30px 76px rgba(0,0,0,.52),0 5px 18px rgba(0,0,0,.35);}
+
+body{
+  background:
+    radial-gradient(760px 540px at -12% -14%,rgba(83,210,139,.32),transparent 64%),
+    radial-gradient(700px 520px at 112% 18%,rgba(92,169,255,.24),transparent 66%),
+    radial-gradient(560px 480px at 52% 112%,rgba(255,184,96,.16),transparent 68%),var(--bg)!important;
+}
+.mesh-bg{opacity:.62;}
+.mesh-orb.m1{background:radial-gradient(circle,rgba(74,225,140,.54),transparent 68%);}
+.mesh-orb.m2{background:radial-gradient(circle,rgba(78,156,255,.42),transparent 68%);}
+.mesh-orb.m3{background:radial-gradient(circle,rgba(255,172,77,.32),transparent 68%);}
+
+/* Auth becomes an intentional first surface instead of a dark utility screen. */
+.auth-screen{background:radial-gradient(900px 600px at 12% 0%,#193c2a 0%,#0a1712 46%,#050608 100%)!important;}
+.auth-glass-card{
+  background:linear-gradient(145deg,rgba(255,255,255,.18),rgba(255,255,255,.07))!important;
+  border:1px solid rgba(255,255,255,.28)!important;
+  border-radius:32px!important;
+  box-shadow:0 1px 0 rgba(255,255,255,.26) inset,0 28px 70px rgba(0,0,0,.34)!important;
+  -webkit-backdrop-filter:blur(34px) saturate(150%)!important;backdrop-filter:blur(34px) saturate(150%)!important;
+}
+.auth-logo-icon{width:72px;height:72px;border-radius:25px;background:linear-gradient(145deg,rgba(105,240,154,.38),rgba(18,116,60,.24))!important;border-color:rgba(174,255,202,.40)!important;box-shadow:0 1px 0 rgba(255,255,255,.32) inset,0 18px 42px rgba(31,221,98,.22)!important;}
+.auth-btn{border-radius:18px!important;min-height:52px;letter-spacing:-.15px;}
+.auth-field-group{border-radius:20px!important;overflow:hidden;}
+
+/* Mobile top area gains breathing room and a compact, jewel-like date control. */
+.header{padding:calc(13px + var(--safe-top)) 20px 15px!important;background:transparent!important;border:none!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;}
+.logo{font-size:26px!important;letter-spacing:-1.5px!important;}
+.header-right{gap:8px!important;}
+.sync-dot{width:7px;height:7px;box-shadow:0 0 0 3px color-mix(in srgb,currentColor 10%,transparent);}
+.month-nav{padding:3px;background:var(--v2-control);border:1px solid var(--v2-line);border-radius:18px;box-shadow:0 1px 0 rgba(255,255,255,.46) inset,0 8px 18px rgba(24,30,46,.05);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);}
+.month-label{min-width:96px;font-size:13px;font-weight:700;}
+.nav-btn,.home-annual-toggle,.dt-nav-btn{width:30px!important;height:30px!important;border-radius:11px!important;background:transparent!important;border-color:transparent!important;box-shadow:none!important;}
+.home-annual-toggle{background:var(--v2-control)!important;border:1px solid var(--v2-line)!important;border-radius:12px!important;}
+
+/* The overview is recast as a clear editorial dashboard. */
+.summary{gap:9px;padding:5px 16px 12px!important;}
+.scard{min-height:112px;border-radius:26px!important;padding:16px 14px!important;overflow:hidden;isolation:isolate;box-shadow:var(--v2-shadow)!important;}
+.scard::before{left:10%!important;right:10%!important;background:linear-gradient(90deg,transparent,rgba(255,255,255,.95),transparent)!important;}
+.scard::after{position:absolute;right:-5px;bottom:-24px;font-family:var(--font);font-size:82px;line-height:1;font-weight:200;opacity:.20;z-index:-1;pointer-events:none;}
+.scard.t-inc::after{content:'↗';color:var(--green);}.scard.t-exp::after{content:'↘';color:var(--red);}.scard.t-bal::after{content:'≈';color:var(--blue);}
+.scard-label{font-size:10px!important;letter-spacing:.075em!important;margin-bottom:10px!important;}
+.scard-label::before{content:'';display:inline-block;width:6px;height:6px;margin:0 5px 1px 0;border-radius:50%;background:currentColor;vertical-align:middle;opacity:.65;}
+.scard-value{font-size:19px!important;letter-spacing:-.7px!important;}
+.budget-total-bar{margin:0 16px 12px!important;padding:14px 16px!important;border-radius:22px!important;box-shadow:var(--v2-shadow)!important;}
+.btb-bar-bg{height:7px!important;border-radius:99px;}.btb-bar-fill{height:7px!important;box-shadow:0 1px 1px rgba(255,255,255,.45) inset;}
+.flip-card{margin:0 16px!important;}.chart-area{min-height:300px;padding:28px 18px 22px!important;border-radius:30px!important;box-shadow:var(--v2-shadow)!important;overflow:hidden;}
+.chart-area::after{content:'';position:absolute;width:240px;height:240px;border-radius:50%;right:-115px;top:-110px;background:radial-gradient(circle,rgba(80,210,134,.20),transparent 67%);pointer-events:none;}
+.donut-container{width:204px;height:204px;}.dc-amount{font-size:24px!important;letter-spacing:-.9px!important;}.legend{gap:8px 14px!important;padding:14px 6px 0!important;}
+.leg-item{font-size:12px!important;padding:4px 7px;border-radius:10px;background:rgba(255,255,255,.22);}
+
+/* Lists, budgets and account cards are now generous grouped surfaces. */
+.tab-content{gap:10px!important;padding:8px 16px 152px!important;}
+.section-title,.tx-group-label{font-size:11px!important;letter-spacing:.085em!important;padding:18px 6px 8px!important;}
+.tx-swipe-wrap{border-radius:23px!important;margin-bottom:9px!important;}
+.tx-item{min-height:70px;padding:12px 14px!important;border-radius:23px!important;gap:12px!important;box-shadow:var(--v2-shadow)!important;}
+.tx-icon-wrap{width:46px!important;height:46px!important;border-radius:16px!important;background:linear-gradient(145deg,rgba(255,255,255,.66),rgba(255,255,255,.12)),color-mix(in srgb,var(--tx-color,#8E8E93) 18%,transparent)!important;border:1px solid rgba(255,255,255,.58);box-shadow:0 1px 0 rgba(255,255,255,.62) inset,0 6px 14px rgba(20,26,38,.07);}
+.tx-icon-wrap svg{color:var(--tx-color,#8E8E93);filter:drop-shadow(0 1px 1px rgba(0,0,0,.10));}.tx-transfer-icon{color:var(--blue);}
+.tx-cat{font-size:15px!important;font-weight:700!important;}.tx-note{font-size:12px!important;margin-top:3px!important;}.tx-amount{font-size:16px!important;letter-spacing:-.55px!important;}
+.search-input{height:48px;border-radius:17px!important;padding:12px 16px 12px 45px!important;background:linear-gradient(135deg,rgba(255,255,255,.70),rgba(255,255,255,.34))!important;}
+.search-bar{position:relative;margin-bottom:12px!important;}.search-bar::before{content:'⌕';position:absolute;left:17px;top:7px;font-family:Arial,sans-serif;font-size:27px;font-weight:300;color:var(--text3);z-index:2;line-height:1;pointer-events:none;}
+.filter-row{gap:8px!important;margin-bottom:12px!important;}.filter-chip,.sort-select,.date-range-input{padding:8px 13px!important;border-radius:14px!important;font-weight:650!important;}
+.cat-row,.add-cat-form,.pat-account{border-radius:25px!important;box-shadow:var(--v2-shadow)!important;}.cat-row{padding:15px 16px!important;margin-bottom:10px!important;}.cat-dot,.pat-acc-color{width:14px!important;height:14px!important;border-radius:5px!important;box-shadow:0 1px 2px rgba(0,0,0,.18);}.cat-color{cursor:pointer;width:42px;height:42px;border-radius:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:linear-gradient(145deg,rgba(255,255,255,.64),rgba(255,255,255,.12)),color-mix(in srgb,var(--cat-color,#8E8E93) 20%,transparent)!important;border:1px solid rgba(255,255,255,.58);box-shadow:0 1px 0 rgba(255,255,255,.62) inset,0 6px 14px rgba(20,26,38,.07);}.cat-bar-bg{height:6px!important;margin-top:11px!important;}.cat-bar-fill{height:6px!important;box-shadow:0 1px 1px rgba(255,255,255,.4) inset;}
+.add-cat-form{padding:16px!important;}.add-input,.budget-input,.pat-acc-input{border:1px solid var(--v2-line)!important;border-radius:15px!important;background:var(--v2-control)!important;}.add-btn,.pat-save-btn{border-radius:16px!important;}
+.pat-total-card{border-radius:30px!important;padding:24px 20px!important;box-shadow:var(--v2-shadow)!important;}.pat-total-value{font-size:42px!important;letter-spacing:-1.7px!important;}.pat-account-row{padding:16px 17px 12px!important;}.pat-acc-actions{padding:0 17px 16px!important;}.pat-acc-btn{border-radius:14px!important;min-height:38px;}
+.chart-card,.compare-card,.settings-section{border-radius:28px!important;box-shadow:var(--v2-shadow)!important;}.settings-section{overflow:hidden!important;}.settings-title{padding:17px 17px 10px!important;font-size:15px!important;}
+.chart-year-nav{margin:2px 0 14px!important;padding:5px!important;border-radius:19px!important;background:var(--v2-control);border:1px solid var(--v2-line);box-shadow:0 1px 0 rgba(255,255,255,.52) inset;}.chart-year-label{font-size:20px!important;letter-spacing:-.65px!important;}.compare-grid{gap:12px!important;margin-bottom:14px!important;}.compare-card{min-height:124px!important;padding:17px!important;overflow:hidden;position:relative;}.compare-card::after{content:'';position:absolute;width:115px;height:115px;right:-46px;bottom:-52px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.66),transparent 65%);opacity:.55;}.compare-label,.stat-label{font-size:10px!important;letter-spacing:.08em!important;}.compare-val{font-size:22px!important;letter-spacing:-.9px!important;margin-top:9px!important;}.compare-diff{font-size:11px!important;line-height:1.4!important;margin-top:7px!important;}.chart-card{padding:20px 18px!important;}.chart-card-title{font-size:11px!important;letter-spacing:.075em!important;margin-bottom:18px!important;}.chart-legend-item{padding:5px 8px;border-radius:10px;background:rgba(255,255,255,.24);}.stat-title{font-size:11px!important;letter-spacing:.085em!important;margin:16px 4px 10px!important;}.stat-grid{gap:11px!important;}.stat-card{min-height:122px!important;padding:16px!important;border-radius:22px!important;box-shadow:var(--v2-shadow)!important;}.stat-val{font-size:21px!important;letter-spacing:-.8px!important;margin-top:8px!important;}.stat-sub{font-size:11px!important;line-height:1.35!important;margin-top:5px!important;}.stat-card.wide{min-height:92px!important;border-radius:22px!important;}
+.settings-info{padding:0 17px 13px!important;}.settings-btn{min-height:54px!important;padding:14px 17px!important;font-weight:550!important;border-top-color:color-mix(in srgb,var(--separator) 70%,transparent)!important;transition:background .28s ease,transform .35s var(--v2-spring),color .28s ease!important;}.settings-btn .btn-arrow{font-size:17px!important;}.theme-switch-row{border-radius:17px!important;background:var(--v2-control);padding:11px!important;}
+
+/* The mobile dock is a true control layer, not a strip attached to the screen. */
+.bottom-nav{width:calc(100% - 28px)!important;max-width:430px!important;min-height:76px;padding:7px!important;border-radius:27px!important;bottom:calc(12px + var(--safe-bottom))!important;background:linear-gradient(145deg,rgba(255,255,255,.54),rgba(255,255,255,.20))!important;border:1px solid rgba(255,255,255,.68)!important;box-shadow:0 1px 0 rgba(255,255,255,.70) inset,0 -1px 0 rgba(0,0,0,.06) inset,var(--v2-float)!important;-webkit-backdrop-filter:blur(34px) saturate(165%)!important;backdrop-filter:blur(34px) saturate(165%)!important;}
+.bottom-nav::before{opacity:.55;}.bottom-nav::after{background:radial-gradient(105% 120% at 24% -12%,rgba(255,255,255,.52),transparent 48%),linear-gradient(105deg,transparent 20%,rgba(78,167,255,.12) 50%,transparent 78%)!important;}
+.bnav-pill{top:7px!important;bottom:7px!important;border-radius:20px!important;background:linear-gradient(145deg,rgba(255,255,255,.64),rgba(255,255,255,.18))!important;border:1px solid rgba(255,255,255,.70)!important;box-shadow:0 1px 0 rgba(255,255,255,.78) inset,0 8px 16px rgba(34,42,61,.10)!important;}
+.bnav-btn{gap:3px!important;padding:7px 4px!important;border-radius:20px!important;}.bnav-icon-wrap{width:29px!important;height:29px!important;border-radius:11px!important;}.bnav-icon-wrap svg{width:20px!important;height:20px!important;}.bnav-label{font-size:9.5px!important;font-weight:650!important;}.bnav-btn.active .bnav-icon-wrap{background:rgba(52,199,89,.13)!important;box-shadow:none!important;}.bnav-btn.active svg{color:var(--accent)!important;}
+.fab{width:62px!important;height:62px!important;bottom:calc(102px + var(--safe-bottom))!important;border-radius:22px!important;font-size:31px!important;}
+
+/* Sheets get a large, tactile presentation with a focused editing hierarchy. */
+.modal-bg{background:rgba(8,12,18,.30)!important;-webkit-backdrop-filter:blur(18px) saturate(115%)!important;backdrop-filter:blur(18px) saturate(115%)!important;}
+.modal{background:linear-gradient(145deg,var(--v2-panel-strong),var(--v2-panel))!important;border:1px solid var(--v2-line)!important;border-radius:32px 32px 0 0!important;padding:9px 20px calc(30px + var(--safe-bottom))!important;box-shadow:0 1px 0 rgba(255,255,255,.54) inset,0 -22px 70px rgba(0,0,0,.16)!important;-webkit-backdrop-filter:blur(38px) saturate(160%)!important;backdrop-filter:blur(38px) saturate(160%)!important;}
+.modal-handle{width:40px!important;height:5px!important;margin:12px auto 22px!important;background:color-mix(in srgb,var(--text) 18%,transparent)!important;}.modal-title{font-size:22px!important;letter-spacing:-.65px!important;margin-bottom:19px!important;}.type-toggle{border-radius:18px!important;padding:4px!important;background:rgba(120,125,140,.14)!important;}.type-btn{padding:10px!important;border-radius:14px!important;}.type-btn.active-exp,.type-btn.active-inc,.type-btn.active-tra{background:var(--v2-panel-strong)!important;box-shadow:0 1px 0 rgba(255,255,255,.60) inset,0 5px 12px rgba(30,35,50,.08)!important;}.field-label{margin:17px 2px 7px!important;font-size:12px!important;letter-spacing:.015em!important;}.field-input{min-height:49px!important;border-radius:16px!important;background:var(--v2-control)!important;border:1px solid var(--v2-line)!important;}.recurring-toggle{border-radius:16px!important;background:var(--v2-control)!important;border:1px solid var(--v2-line);}.btn-cancel,.btn-save{min-height:50px!important;border-radius:17px!important;}
+
+/* Desktop turns into an app window: floating sidebar, content canvas, larger rhythm. */
+@media(min-width:768px){
+  body{padding:16px!important;max-width:none!important;}
+  #dtLayout{height:calc(100dvh - 32px)!important;gap:16px!important;}
+  .dt-sidebar{width:270px!important;height:calc(100dvh - 32px)!important;padding:25px 15px 16px!important;border:1px solid var(--v2-line)!important;border-radius:32px!important;background:linear-gradient(155deg,rgba(255,255,255,.52),rgba(255,255,255,.18))!important;box-shadow:0 1px 0 rgba(255,255,255,.62) inset,var(--v2-float)!important;-webkit-backdrop-filter:blur(34px) saturate(160%)!important;backdrop-filter:blur(34px) saturate(160%)!important;}
+  .dt-logo{font-size:27px!important;padding:0 11px!important;letter-spacing:-1.6px!important;margin-bottom:16px!important;}
+  .dt-month-nav{padding:5px 7px!important;margin:0 5px 20px!important;border:1px solid var(--v2-line);border-radius:17px;background:var(--v2-control);}
+  .dt-nav{gap:7px!important;}.dt-nav-item{min-height:48px!important;padding:12px 13px!important;border-radius:17px!important;font-size:14px!important;font-weight:650!important;}.dt-nav-item svg{width:20px!important;height:20px!important;}.dt-nav-item.active{background:linear-gradient(135deg,rgba(255,255,255,.72),rgba(52,199,89,.17))!important;border:1px solid rgba(255,255,255,.66)!important;box-shadow:0 1px 0 rgba(255,255,255,.72) inset,0 9px 18px rgba(27,135,70,.10)!important;}.dt-add-btn{min-height:51px!important;border-radius:18px!important;margin:14px 4px 0!important;}.dt-user{padding:13px 10px 2px!important;border-top:1px solid var(--v2-line)!important;}
+  .dt-main{border:1px solid var(--v2-line);border-radius:32px;background:linear-gradient(145deg,rgba(255,255,255,.42),rgba(255,255,255,.16))!important;box-shadow:0 1px 0 rgba(255,255,255,.56) inset,var(--v2-shadow);padding:36px 42px 46px!important;-webkit-backdrop-filter:blur(18px) saturate(135%);backdrop-filter:blur(18px) saturate(135%);}
+  .dt-page-title{font-size:35px!important;letter-spacing:-1.25px!important;margin:0 0 18px 2px!important;}.dt-summary-row{gap:14px!important;margin-bottom:18px!important;}.dt-scard{min-height:112px!important;border-radius:25px!important;padding:18px!important;}.dt-donut-section{border-radius:30px!important;padding:26px 22px 20px!important;}.dt-budget-top{border-radius:22px!important;padding:15px 17px!important;}.tab-content{max-width:1080px!important;}
+  .modal{border-radius:30px!important;padding:28px!important;}
+}
+@media(min-width:768px) and (max-width:1023px){body{padding:10px!important;}#dtLayout{height:calc(100dvh - 20px)!important;gap:10px!important;}.dt-sidebar{width:70px!important;height:calc(100dvh - 20px)!important;padding:18px 9px!important;border-radius:25px!important;}.dt-main{border-radius:25px!important;padding:28px 24px!important;}.dt-nav-item{border-radius:14px!important;}}
+
+/* One motion language across views: quick intent, soft settle, no ornamental looping. */
+.tx-item,.cat-row,.pat-account,.settings-section,.chart-card,.compare-card,.scard,.dt-scard,.dt-donut-section,.dt-budget-top{transition:transform .46s var(--v2-spring),box-shadow .46s var(--v2-spring),background .35s ease!important;}
+.modal{transition:transform .54s var(--v2-spring)!important;}.modal-bg{transition:opacity .32s ease!important;}.flip-inner{transition:transform .72s var(--v2-spring),height .38s var(--v2-spring)!important;}
+@media(hover:hover){.tx-item:hover,.cat-row:hover,.pat-account:hover,.settings-section:hover,.chart-card:hover,.compare-card:hover,.scard:hover{transform:translateY(-3px);box-shadow:var(--v2-float)!important;}.dt-nav-item:hover{transform:translateX(3px)!important;}.bnav-btn:hover .bnav-icon-wrap{transform:translateY(-2px) scale(1.06)!important;}}
+@media(prefers-contrast:more){.bottom-nav,.dt-sidebar,.dt-main,.modal,.auth-glass-card{background:var(--bg-grouped)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border-color:var(--separator)!important;}.scard::after{display:none;}}
+
 </style>
 <script>(function(){var saved=localStorage.getItem('ft_theme');if(saved==='light'||saved==='dark')document.documentElement.setAttribute('data-theme',saved);})();</script>
 
@@ -1335,53 +1461,48 @@ if('serviceWorker' in navigator){
 <div class="bottom-nav" id="bottomNav" style="display:none"><div class="bnav-pill" id="bnavPill"></div>
   <button class="bnav-btn active" id="bn0" onclick="switchTab(0)">
     <div class="bnav-icon-wrap">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M3 9.5L12 3L21 9.5V20C21 20.55 20.55 21 20 21H15V15H9V21H4C3.45 21 3 20.55 3 20V9.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-        <path d="M9 21V15H15V21" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="m3.5 10 8.5-6.5 8.5 6.5v8.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2V10Z" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M9.25 20.5v-5.75h5.5v5.75" stroke="currentColor" stroke-width="1.8"/>
       </svg>
     </div>
     <span class="bnav-label">Inicio</span>
   </button>
   <button class="bnav-btn" id="bn1" onclick="switchTab(1)">
     <div class="bnav-icon-wrap">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-        <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M20.4 13.2 13.2 20.4a2.1 2.1 0 0 1-3 0l-6.6-6.6a2.1 2.1 0 0 1 0-3L10.8 3.6a2.1 2.1 0 0 1 1.5-.6h6.1a2 2 0 0 1 2 2v6.1c0 .8-.3 1.5-.9 2.1Z" stroke="currentColor" stroke-width="1.8"/>
+        <circle cx="15.9" cy="8.1" r="1.35" fill="currentColor" stroke="none"/>
       </svg>
     </div>
     <span class="bnav-label">Categ.</span>
   </button>
   <button class="bnav-btn" id="bn2" onclick="switchTab(2)">
     <div class="bnav-icon-wrap">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="2" y="5" width="20" height="14" rx="3" stroke="currentColor" stroke-width="1.8"/>
-        <path d="M2 10H22" stroke="currentColor" stroke-width="1.8"/>
-        <path d="M6 15H10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-        <circle cx="17" cy="15" r="1.5" fill="currentColor"/>
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="2.75" y="5" width="18.5" height="14" rx="3.4" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M2.75 10h18.5" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M6.5 15h4.4" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M16.6 14.1h.8" stroke="currentColor" stroke-width="2.3"/>
       </svg>
     </div>
     <span class="bnav-label">Cuentas</span>
   </button>
   <button class="bnav-btn" id="bn3" onclick="switchTab(3)">
     <div class="bnav-icon-wrap">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <polyline points="3,17 8,11 12,14 17,8 21,10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-        <polyline points="17,8 21,8 21,12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-        <line x1="3" y1="21" x2="21" y2="21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.3"/>
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M4 19V5" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M4 19h16" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M7.5 16v-3.5M12 16V8.5M16.5 16v-5" stroke="currentColor" stroke-width="2.3"/>
       </svg>
     </div>
     <span class="bnav-label">Anual</span>
   </button>
   <button class="bnav-btn" id="bn4" onclick="switchTab(4)">
     <div class="bnav-icon-wrap">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="6" cy="6" r="2" stroke="currentColor" stroke-width="1.8"/>
-        <circle cx="12" cy="12" r="2" stroke="currentColor" stroke-width="1.8"/>
-        <circle cx="18" cy="18" r="2" stroke="currentColor" stroke-width="1.8"/>
-        <path d="M2 6H4M8 6H22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-        <path d="M2 12H10M14 12H22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-        <path d="M2 18H16M20 18H22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="3.15" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M19.4 13.5a1.6 1.6 0 0 0 .32 1.77l.06.06-2.1 2.1-.06-.06a1.6 1.6 0 0 0-1.77-.32 1.6 1.6 0 0 0-.97 1.46v.09h-3v-.09a1.6 1.6 0 0 0-.97-1.46 1.6 1.6 0 0 0-1.77.32l-.06.06-2.1-2.1.06-.06a1.6 1.6 0 0 0 .32-1.77 1.6 1.6 0 0 0-1.46-.97h-.09v-3h.09a1.6 1.6 0 0 0 1.46-.97 1.6 1.6 0 0 0-.32-1.77l-.06-.06 2.1-2.1.06.06a1.6 1.6 0 0 0 1.77.32 1.6 1.6 0 0 0 .97-1.46v-.09h3v.09a1.6 1.6 0 0 0 .97 1.46 1.6 1.6 0 0 0 1.77-.32l.06-.06 2.1 2.1-.06.06a1.6 1.6 0 0 0-.32 1.77 1.6 1.6 0 0 0 1.46.97h.09v3h-.09a1.6 1.6 0 0 0-1.46.97Z" stroke="currentColor" stroke-width="1.45"/>
       </svg>
     </div>
     <span class="bnav-label">Ajustes</span>
@@ -1458,23 +1579,23 @@ if('serviceWorker' in navigator){
     <button class="home-annual-toggle" id="dtHomeAnnualBtn" onclick="toggleHomeAnnual()" title="Vista anual" style="margin:0 auto 12px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="16" y1="3" x2="16" y2="7"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Vista anual</button>
     <nav class="dt-nav" id="dtNav">
       <button class="dt-nav-item active" data-tab="0" onclick="switchTab(0)">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M3 9.5L12 3L21 9.5V20C21 20.55 20.55 21 20 21H15V15H9V21H4C3.45 21 3 20.55 3 20V9.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m3.5 10 8.5-6.5 8.5 6.5v8.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2V10Z" stroke="currentColor" stroke-width="1.8"/><path d="M9.25 20.5v-5.75h5.5v5.75" stroke="currentColor" stroke-width="1.8"/></svg>
         <span>Inicio</span>
       </button>
       <button class="dt-nav-item" data-tab="1" onclick="switchTab(1)">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20.4 13.2 13.2 20.4a2.1 2.1 0 0 1-3 0l-6.6-6.6a2.1 2.1 0 0 1 0-3L10.8 3.6a2.1 2.1 0 0 1 1.5-.6h6.1a2 2 0 0 1 2 2v6.1c0 .8-.3 1.5-.9 2.1Z" stroke="currentColor" stroke-width="1.8"/><circle cx="15.9" cy="8.1" r="1.35" fill="currentColor" stroke="none"/></svg>
         <span>Categorías</span>
       </button>
       <button class="dt-nav-item" data-tab="2" onclick="switchTab(2)">
-        <svg viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M2 10H22" stroke="currentColor" stroke-width="1.8"/><path d="M6 15H10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="17" cy="15" r="1.5" fill="currentColor"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2.75" y="5" width="18.5" height="14" rx="3.4" stroke="currentColor" stroke-width="1.8"/><path d="M2.75 10h18.5" stroke="currentColor" stroke-width="1.8"/><path d="M6.5 15h4.4" stroke="currentColor" stroke-width="1.8"/><path d="M16.6 14.1h.8" stroke="currentColor" stroke-width="2.3"/></svg>
         <span>Cuentas</span>
       </button>
       <button class="dt-nav-item" data-tab="3" onclick="switchTab(3)">
-        <svg viewBox="0 0 24 24" fill="none"><polyline points="3,17 8,11 12,14 17,8 21,10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><polyline points="17,8 21,8 21,12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 19V5" stroke="currentColor" stroke-width="1.8"/><path d="M4 19h16" stroke="currentColor" stroke-width="1.8"/><path d="M7.5 16v-3.5M12 16V8.5M16.5 16v-5" stroke="currentColor" stroke-width="2.3"/></svg>
         <span>Anual</span>
       </button>
       <button class="dt-nav-item" data-tab="4" onclick="switchTab(4)">
-        <svg viewBox="0 0 24 24" fill="none"><circle cx="6" cy="6" r="2" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="2" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="18" r="2" stroke="currentColor" stroke-width="1.8"/><path d="M2 6H4M8 6H22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M2 12H10M14 12H22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M2 18H16M20 18H22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3.15" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 13.5a1.6 1.6 0 0 0 .32 1.77l.06.06-2.1 2.1-.06-.06a1.6 1.6 0 0 0-1.77-.32 1.6 1.6 0 0 0-.97 1.46v.09h-3v-.09a1.6 1.6 0 0 0-.97-1.46 1.6 1.6 0 0 0-1.77.32l-.06.06-2.1-2.1.06-.06a1.6 1.6 0 0 0 .32-1.77 1.6 1.6 0 0 0-1.46-.97h-.09v-3h.09a1.6 1.6 0 0 0 1.46-.97 1.6 1.6 0 0 0-.32-1.77l-.06-.06 2.1-2.1.06.06a1.6 1.6 0 0 0 1.77.32 1.6 1.6 0 0 0 .97-1.46v-.09h3v.09a1.6 1.6 0 0 0 .97 1.46 1.6 1.6 0 0 0 1.77-.32l.06-.06 2.1 2.1-.06.06a1.6 1.6 0 0 0-.32 1.77 1.6 1.6 0 0 0 1.46.97h.09v3h-.09a1.6 1.6 0 0 0-1.46.97Z" stroke="currentColor" stroke-width="1.45"/></svg>
         <span>Ajustes</span>
       </button>
     </nav>
@@ -2585,7 +2706,7 @@ function buildTxItem(t){
     var delBtn=IS_DESKTOP?'<div class="tx-actions"><button class="tx-btn del" data-action="del-tx" data-id="'+t.id+'" title="eliminar">×</button></div>':'';
     return '<div class="tx-swipe-wrap"'+(IS_DESKTOP?'':' data-swipe-id="'+t.id+'"')+'><div class="tx-delete-bg"><span class="tx-delete-x">×</span></div>'
       +'<div class="tx-item" onclick="if(!event.target.closest(\'.tx-btn\'))editTx(\''+t.id+'\')">'
-      +'<div style="width:34px;height:34px;border-radius:12px;background:rgba(0,122,255,0.16);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--blue);font-size:15px;">⇄</div>'
+      +'<div class="tx-icon-wrap tx-transfer-icon" style="--tx-color:var(--blue)"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7h12l-3-3M18 17H6l3 3"/><path d="M18 7l-3 3M6 17l3-3"/></svg></div>'
       +'<div class="tx-info"><div class="tx-top"><span class="tx-cat">'+htmlEscape(accNameById(t.account_id))+' → '+htmlEscape(accNameById(t.to_account_id))+'</span></div>'
       +(t.note?'<div class="tx-note">'+hlText(t.note,searchQuery)+'</div>':'')+'</div>'
       +'<div class="tx-right"><span class="tx-amount" style="color:var(--blue)">'+fmt(t.amount)+'</span>'+rec
@@ -2597,7 +2718,7 @@ function buildTxItem(t){
   var delBtn=IS_DESKTOP?'<div class="tx-actions"><button class="tx-btn del" data-action="del-tx" data-id="'+t.id+'" title="eliminar">×</button></div>':'';
   return '<div class="tx-swipe-wrap"'+(IS_DESKTOP?'':' data-swipe-id="'+t.id+'"')+'><div class="tx-delete-bg"><span class="tx-delete-x">×</span></div>'
     +'<div class="tx-item" onclick="if(!event.target.closest(\'.tx-btn\'))editTx(\''+t.id+'\')">'
-    +'<div style="width:34px;height:34px;border-radius:12px;background:'+c.color+'22;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
+    +'<div class="tx-icon-wrap" style="--tx-color:'+c.color+'">'
     +catIconSvg(c,17)
     +'</div>'
     +'<div class="tx-info"><div class="tx-top"><span class="tx-cat">'+hlText(capitalize(c.name),searchQuery)+'</span>'+sub+'</div>'
@@ -2720,7 +2841,7 @@ function renderCatTab(el,prefix){
       +'<div class="cat-row flip-face flip-front" onclick="if(!event.target.closest(\'[data-action],.cat-drag-handle\'))toggleFlip(\'catFlipInner_'+prefix+c.id+'\')">'
       +'<div class="cat-row-top">'
       +'<span class="cat-drag-handle" onpointerdown="catDragStart(event,\''+c.id+'\')">⠿</span>'
-      +'<div class="cat-color" style="background:'+c.color+'22;cursor:pointer;width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0" data-action="show-colorform" data-id="'+c.id+'">'+catIconSvg(c,18)+'</div>'
+      +'<div class="cat-color" style="--cat-color:'+c.color+'" data-action="show-colorform" data-id="'+c.id+'">'+catIconSvg(c,18)+'</div>'
       +'<span style="flex:1;font-size:15px;font-weight:500;color:var(--text)">'+capEsc(c.name)+'</span>'
       +'<span style="font-family:var(--mono);font-size:11px;color:var(--text3)">'+(amt>0?Math.round(amt/pctDenom*100)+'%':'')+'</span>'
       +'<span style="font-family:var(--mono);font-size:13px;color:var(--text2);margin-left:6px">'+(amt>0?fmt(amt):'—')+'</span>'
@@ -2766,7 +2887,7 @@ function renderCatTab(el,prefix){
     archivedCats.forEach(function(ac){
       html+='<div class="flip-card cat-arch-card" data-cat-id="'+ac.id+'" style="opacity:0.55"><div class="flip-inner" id="catFlipInner_'+prefix+ac.id+'">'
         +'<div class="cat-row flip-face flip-front"><div class="cat-row-top">'
-        +'<div class="cat-color" style="background:'+ac.color+'22;width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center">'+catIconSvg(ac,16)+'</div>'
+        +'<div class="cat-color" style="--cat-color:'+ac.color+'">'+catIconSvg(ac,16)+'</div>'
         +'<span style="flex:1;font-size:14px;color:var(--text2)">'+capEsc(ac.name)+'</span>'
         +'<button class="arch-btn-sm" data-action="archive-cat" data-id="'+ac.id+'" title="Restaurar" style="color:var(--accent)">↺</button>'
         +'<button class="del-btn-sm" data-action="del-cat" data-id="'+ac.id+'">×</button>'
