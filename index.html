@@ -2843,9 +2843,10 @@ function drawBarRect(ctx,x,y,w,h,color){
 }
 function drawBarChart(canvas,inc,exp,sav){
   var sig=(inc||[]).join(',')+';'+(exp||[]).join(',')+';'+(sav||[]).join(',');
-  var cid=canvas.id||'bar';
-  if(_barSig[cid]===sig)return;
-  _barSig[cid]=sig;
+  // Al volver a Anual se crea un canvas nuevo con el mismo id: debe dibujarse
+  // aunque sus datos coincidan con los del canvas que ya fue eliminado.
+  if(canvas._barSig===sig)return;
+  canvas._barSig=sig;
   var s=chartSetup(canvas,200);if(!s)return;
   var ctx=s.ctx,W=s.w,H=s.h,padL=38,padR=10,padT=12,padB=22;
   var plotH=H-padT-padB,plotW=W-padL-padR;
@@ -2875,9 +2876,9 @@ function drawLineChart(canvas,series,labels){
   // Cada serie es un objeto ({ label, color, data }), no un array. La firma
   // debe construirse a partir de sus datos para evitar un .join inexistente.
   var sig=(series||[]).map(function(s){return (s&&s.data?s.data:[]).join(',');}).join(';');
-  var cid=canvas.id||'line';
-  if(_lineSig[cid]===sig)return;
-  _lineSig[cid]=sig;
+  // La firma se guarda en este canvas, no por su id reutilizable entre vistas.
+  if(canvas._lineSig===sig)return;
+  canvas._lineSig=sig;
   var s=chartSetup(canvas,200);if(!s)return;
   var ctx=s.ctx,W=s.w,H=s.h,padL=40,padR=10,padT=12,padB=22;
   var plotH=H-padT-padB,plotW=W-padL-padR;
