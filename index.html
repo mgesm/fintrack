@@ -513,6 +513,7 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto;min-height
 .tx-subcat{font-size:12px;color:var(--text3);font-weight:400;}
 .tx-tag{font-size:11px;background:var(--bg3);border-radius:5px;padding:1px 6px;color:var(--text3);font-weight:500;}
 .tx-note{font-size:13px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+.tx-search-hit{background:rgba(255,214,10,0.52);color:inherit;border-radius:3px;padding:0 1px;}
 .tx-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
 .tx-amount{font-family:var(--mono);font-size:15px;font-weight:700;letter-spacing:-0.3px;}
 .tx-recurring-badge{font-size:10px;font-weight:500;color:var(--amber);}
@@ -1366,6 +1367,15 @@ var DEFAULT_CATS=[
 ];
 function pad(n){return String(n).padStart(2,'0');}
 function htmlEscape(s){return s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/`/g,'&#96;');}
+// Escapa el contenido antes de resaltar la búsqueda para que las notas y los
+// nombres de categoría sigan siendo texto seguro al insertarse en el HTML.
+function hlText(value,query){
+  var text=htmlEscape(value);
+  var q=String(query||'').trim();
+  if(!q)return text;
+  var escaped=q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  return text.replace(new RegExp('('+escaped+')','gi'),'<mark class="tx-search-hit">$1</mark>');
+}
 function capitalize(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
 function capEsc(s){return htmlEscape(capitalize(s));}
 function fmt(n){n=Number(n);if(!isFinite(n))n=0;return n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';}
