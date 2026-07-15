@@ -348,6 +348,8 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto;min-height
 .donut-container{cursor:default;}
 /* CATEGORY ⇄ MONTHLY CHART FLIP */
 .cat-flip-card{margin:0 0 8px 0;}
+.cat-arch-card{margin:0 0 8px 0;}
+
 .cat-flip-card .cat-row.flip-front{margin-bottom:0;}
 .cat-flip-card .flip-back{padding:14px 14px;box-sizing:border-box;position:absolute!important;top:0;left:0;}
 .cat-drag-handle{cursor:grab;padding:2px 6px 2px 0;color:var(--text3);touch-action:none;flex-shrink:0;font-size:16px;line-height:1;user-select:none;}
@@ -2467,7 +2469,7 @@ function catDragMove(e){
       var idx=catDrag.cards.indexOf(c),curIdx=catDrag.cards.indexOf(catDrag.card);
       if(idx<curIdx)catDrag.list.insertBefore(catDrag.card,c);
       else catDrag.list.insertBefore(catDrag.card,c.nextSibling);
-      catDrag.cards=Array.prototype.slice.call(catDrag.list.querySelectorAll('.cat-flip-card'));
+      catDrag.cards=Array.prototype.slice.call(catDrag.list.querySelectorAll('#catDragList .cat-flip-card'));
       catDrag.startY=e.clientY;
       catDrag.card.style.transform='';
       break;
@@ -2487,7 +2489,7 @@ async function catDragEnd(){
   catDrag.card.classList.remove('cat-dragging');
   try{document.body.style.userSelect='';}catch(err){}
   if(wasDetached||!document.body.contains(catDrag.list)){catDrag=null;return;}
-  var order=Array.prototype.slice.call(catDrag.list.querySelectorAll('.cat-flip-card')).map(function(c){return c.getAttribute('data-cat-id');});
+  var order=Array.prototype.slice.call(catDrag.list.querySelectorAll('#catDragList .cat-flip-card')).map(function(c){return c.getAttribute('data-cat-id');});
   catDrag=null;
   var changed=order.some(function(id,i){var cat=categories.find(function(c){return c.id===id;});return cat&&(cat.position||0)!==i;});
   order.forEach(function(id,i){var cat=categories.find(function(c){return c.id===id;});if(cat)cat.position=i;});
@@ -2513,7 +2515,7 @@ function renderCatTab(el,prefix){
   var totalInc=Object.values(bycatInc).reduce(function(a,b){return a+b;},0)||1;
   var activeCats=categories.filter(function(c){return !c.archived;});
   var archivedCats=categories.filter(function(c){return c.archived;});
-  var html='<div class="section-title">Presupuesto y gastos '+(homeAnnualMode?'del año '+viewYear:'del mes')+'</div>';
+  var html='<div class="section-title">Presupuesto y gastos '+(homeAnnualMode?'del año '+viewYear:'del mes')+'</div><div id="catDragList">';
   activeCats.forEach(function(c){
     var isInc=isIncomeCat(c.id);
     var amt=isInc?(bycatInc[c.id]||0):(bycat[c.id]||0);
@@ -2588,11 +2590,11 @@ function renderCatTab(el,prefix){
       +'</div></div>';
   });
   html+='<div class="section-title" style="margin-top:8px">Nueva categoría</div>'
-    +'<div class="add-cat-form"><div class="form-row"><input type="text" class="add-input" id="newCatInput" placeholder="Nombre..."><button class="add-btn" onclick="addCat()">Añadir</button></div></div>';
+    +'</div>'+'<div class="add-cat-form"><div class="form-row"><input type="text" class="add-input" id="newCatInput" placeholder="Nombre..."><button class="add-btn" onclick="addCat()">Añadir</button></div></div>';
   if(archivedCats.length){
     html+='<div class="section-title" style="margin-top:16px;opacity:0.5">Archivadas</div>';
     archivedCats.forEach(function(ac){
-      html+='<div class="flip-card cat-flip-card" data-cat-id="'+ac.id+'" style="opacity:0.55"><div class="flip-inner">'
+      html+='<div class="flip-card cat-arch-card" data-cat-id="'+ac.id+'" style="opacity:0.55"><div class="flip-inner" id="catFlipInner_'+prefix+ac.id+'">'
         +'<div class="cat-row flip-face flip-front"><div class="cat-row-top">'
         +'<div class="cat-color" style="background:'+ac.color+'22;width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center">'+catIconSvg(ac,16)+'</div>'
         +'<span style="flex:1;font-size:14px;color:var(--text2)">'+capEsc(ac.name)+'</span>'
