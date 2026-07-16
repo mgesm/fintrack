@@ -1572,6 +1572,17 @@ async function processOfflineQueue(){
 }
 function queueKey(){return 'ft_queue_'+(currentUser?currentUser.id:'anon');}
 function queueOp(op){offlineQueue.push(op);localStorage.setItem(queueKey(),JSON.stringify(offlineQueue));}
+var ftRealtimeChannel=null,ftRealtimeTimer=null;
+function subscribeRealtime(){
+  if(!currentUser||!sb.channel)return;
+  if(ftRealtimeChannel){try{sb.removeChannel(ftRealtimeChannel);}catch(e){}}
+  var uid=currentUser.id;
+  ftRealtimeChannel=sb.channel('fintrack-'+uid).on('postgres_changes',{event:'*',schema:'public',table:'transactions',filter:'user_id=eq.'+uid},scheduleRemoteRefresh).on('postgres_changes',{event:'*',schema:'public',table:'categories',filter:'user_id=eq.'+uid},scheduleRemoteRefresh).on('postgres_changes',{event:'*',schema:'public',table:'accounts',filter:'user_id=eq.'+uid},scheduleRemoteRefresh).on('postgres_changes',{event:'*',schema:'public',table:'budgets',filter:'user_id=eq.'+uid},scheduleRemoteRefresh).subscribe();
+}
+function scheduleRemoteRefresh(){
+  if(isOffline||offlineQueue.length||loadDataInFlight)return;
+  clearTimeout(ftRealtimeTimer);ftRealtimeTimer=setTimeout(function(){if(currentUser&&!isOffline&&!offlineQueue.length&&!loadDataInFlight)loadData();},500);
+}
 
 function switchAuthTab(m){
   authMode=m;
@@ -1837,6 +1848,7 @@ function showApp(){
     setTimeout(function(){movePill(0);},100);
   }
   if(!loadingAlready)loadData();
+  subscribeRealtime();
 }
 function showAuth(){
   document.getElementById('loadingOverlay').classList.add('hidden');
@@ -2892,6 +2904,8 @@ async function deleteAdjustment(id){if(isLockedAdjust(id)){alert('Este saldo ini
 function chartCssVar(name,fallback){var v=getComputedStyle(document.documentElement).getPropertyValue(name).trim();return v||fallback;}
 function chartSetup(canvas,cssH){
   if(!canvas)return null;
+  canvas.setAttribute('role','img');
+  if(!canvas.getAttribute('aria-label'))canvas.setAttribute('aria-label','Gráfico financiero interactivo. Toca o usa el ratón para consultar cada mes.');
   var dpr=window.devicePixelRatio||1;
   canvas.style.width='100%';canvas.style.height=cssH+'px';
   var cssW=canvas.clientWidth||canvas.parentNode.clientWidth||320;
@@ -4318,6 +4332,14 @@ async function dtQuickAdd(){
 // ── BOOT ──
 
 document.getElementById('fabBtn').onclick=openModal;
+function enableKeyboardControls(){
+  document.querySelectorAll('.type-btn,.recurring-toggle,.cat-color-swatch,.dt-nav-item').forEach(function(el){
+    if(el.tabIndex<0)el.tabIndex=0;
+    if(!el.getAttribute('role'))el.setAttribute('role','button');
+    if(!el._ftKeyboard){el._ftKeyboard=true;el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();el.click();}});}
+  });
+}
+enableKeyboardControls();
 document.getElementById('modalBg').addEventListener('click',function(e){if(e.target===document.getElementById('modalBg'))closeModal();});
 document.addEventListener('keydown',function(e){
   if(e.key!=='Escape')return;
