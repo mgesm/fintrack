@@ -1763,11 +1763,27 @@ document.addEventListener('visibilitychange',function(){
   }
 });
 window.addEventListener('pagehide',saveUiState);
-var LOAD_MIN_MS=1700,loadStartTs=0;
+var LOAD_MIN_MS=1700,LOAD_REMOTE_TIMEOUT_MS=10000,loadStartTs=0;
 function hideLoading(){
   var ov=document.getElementById('loadingOverlay');if(!ov)return;
   var wait=Math.max(0,LOAD_MIN_MS-(Date.now()-loadStartTs));
   setTimeout(function(){ov.classList.add('hidden');},wait);
+}
+// Nunca dejar la interfaz bloqueada si una petición de red queda pendiente.
+// Los datos ya guardados localmente siguen siendo utilizables mientras vuelve la conexión.
+function withLoadTimeout(promise,ms,label){
+  return new Promise(function(resolve,reject){
+    var done=false;
+    var timer=setTimeout(function(){
+      if(done)return;done=true;
+      reject(new Error(label||'Tiempo de espera agotado al sincronizar'));
+    },ms||LOAD_REMOTE_TIMEOUT_MS);
+    Promise.resolve(promise).then(function(value){
+      if(done)return;done=true;clearTimeout(timer);resolve(value);
+    },function(error){
+      if(done)return;done=true;clearTimeout(timer);reject(error);
+    });
+  });
 }
 var _numbersAnimated=false;
 function shouldAnimateNumbers(){if(_numbersAnimated)return false;_numbersAnimated=true;return true;}
@@ -1788,8 +1804,11 @@ function countUp(el,endVal,formatFn,ms){
 function showApp(){
   document.getElementById('authScreen').style.display='none';
   _numbersAnimated=false;
-  loadStartTs=Date.now();
-  document.getElementById('loadingOverlay').classList.remove('hidden');
+  var loadingAlready=loadDataInFlight;
+  if(!loadingAlready){
+    loadStartTs=Date.now();
+    document.getElementById('loadingOverlay').classList.remove('hidden');
+  }
   // PIN/biometric lock disabled — clear any previously stored credentials
   try{localStorage.removeItem('ft_pin');localStorage.removeItem('ft_bio');}catch(e){}
   restoreUiState();
@@ -1811,7 +1830,7 @@ function showApp(){
     for(var _bi=0;_bi<5;_bi++){var _bn=document.getElementById('bn'+_bi);if(_bn)_bn.classList.toggle('active',_bi===activeTab);}
     setTimeout(function(){movePill(0);},100);
   }
-  loadData();
+  if(!loadingAlready)loadData();
 }
 function showAuth(){
   document.getElementById('loadingOverlay').classList.add('hidden');
@@ -1845,14 +1864,14 @@ async function loadData(){
   }catch(e){}
   try{
     var uid=currentUser.id;
-    var res=await Promise.all([
+    var res=await withLoadTimeout(Promise.all([
       sb.from('categories').select('*').eq('user_id',uid).order('position'),
       sb.from('transactions').select('*').eq('user_id',uid).order('date',{ascending:false}),
       sb.from('accounts').select('*').eq('user_id',uid).order('position'),
       sb.from('patrimony').select('*').eq('user_id',uid).order('year').order('month'),
       sb.from('budgets').select('*').eq('user_id',uid),
       sb.from('recurrence_exclusions').select('*').eq('user_id',uid)
-    ]);
+    ]),LOAD_REMOTE_TIMEOUT_MS,'La sincronización inicial ha tardado demasiado');
     if(!res[0].error)categories=res[0].data||[];
     if(!res[1].error)transactions=res[1].data||[];
     if(!res[2].error)accounts=res[2].data||[];
@@ -1865,14 +1884,16 @@ async function loadData(){
     // Vaciar la cola offline ANTES de generar recurrencias: si se canceló una
     // serie sin red, el update de "recurring:false" debe aplicarse primero
     // para que processRecurring no regenere la serie ya cancelada.
-    if(offlineQueue.length)await processOfflineQueue();
-    await processRecurring();
+    if(offlineQueue.length)await withLoadTimeout(processOfflineQueue(),LOAD_REMOTE_TIMEOUT_MS,'La cola offline ha tardado demasiado');
+    await withLoadTimeout(processRecurring(),LOAD_REMOTE_TIMEOUT_MS,'Las recurrencias han tardado demasiado');
     saveLocalCache();setSync('ok');
   }catch(e){setSync('err');}
-  loadDataInFlight=false;
-  hideLoading();
-  if(IS_DESKTOP){if(typeof dtRender==='function')dtRender();}else{render();}
-  scheduleAutoBackup();
+  finally{
+    loadDataInFlight=false;
+    hideLoading();
+    try{if(IS_DESKTOP){if(typeof dtRender==='function')dtRender();}else{render();}}catch(renderError){setSync('err');}
+    try{scheduleAutoBackup();}catch(backupError){}
+  }
 }
 var txVersion=0;
 function saveLocalCache(){
