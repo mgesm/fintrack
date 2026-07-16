@@ -2051,7 +2051,7 @@ function donutEdgeGlow(ctx,cx,cy,g){
 // Native canvas doughnut — tinted liquid glass crystals, no external chart library
 function drawDonut(canvas,entries,total,size,opts){
   size=size||190;opts=opts||{};
-  var dpr=window.devicePixelRatio||1;
+  var dpr=Math.min(window.devicePixelRatio||1,2);
   canvas.style.width=size+'px';canvas.style.height=size+'px';
   canvas.width=Math.round(size*dpr);canvas.height=Math.round(size*dpr);
   var ctx=canvas.getContext('2d');
@@ -2998,7 +2998,7 @@ function attachChartTip(canvas){
     tip.style.left=tx+'px';tip.style.top=ty+'px';
   }
   canvas.onpointermove=show;canvas.onpointerdown=show;canvas.onpointerleave=hideChartTip;
-  canvas.onpointerup=hideChartTip;canvas.onpointercancel=hideChartTip;
+  canvas.onpointerup=function(ev){if(ev.pointerType==='mouse')hideChartTip();};canvas.onpointercancel=hideChartTip;
 }
 
 // ANNUAL TAB
@@ -3302,8 +3302,11 @@ async function saveTx(){
     }
     var seriesIdForSync=payload.recur_series_id||(oldTx&&oldTx.recur_series_id);
     if(seriesIdForSync){
-      var seriesFields={recurring:payload.recurring,recur_interval:payload.recurring?payload.recur_interval:null,recur_end_date:payload.recurring?payload.recur_end_date:null};
-      try{await syncRecurSeries(seriesIdForSync,editingTxId,seriesFields);}catch(ex){}
+      var applyFuture=confirm('¿Aplicar estos cambios también a las ocurrencias futuras de esta recurrencia?\n\nAceptar: esta y futuras. Cancelar: solo esta.');
+      if(applyFuture){
+        var seriesFields={type:payload.type,amount:payload.amount,category:payload.category,subcategory:payload.subcategory,note:payload.note,tags:payload.tags,account_id:payload.account_id,to_account_id:payload.to_account_id,recurring:payload.recurring,recur_interval:payload.recurring?payload.recur_interval:null,recur_end_date:payload.recurring?payload.recur_end_date:null};
+        try{await syncRecurSeries(seriesIdForSync,editingTxId,seriesFields);}catch(ex){}
+      }
     }
   } else {
     var newTxId='tx'+Date.now()+Math.random().toString(36).slice(2,6);
@@ -4306,6 +4309,12 @@ async function dtQuickAdd(){
 
 document.getElementById('fabBtn').onclick=openModal;
 document.getElementById('modalBg').addEventListener('click',function(e){if(e.target===document.getElementById('modalBg'))closeModal();});
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Escape')return;
+  if(document.getElementById('recurrenceDeleteBg').classList.contains('visible')){closeRecurringDeleteDialog();return;}
+  if(document.getElementById('exportModalBg').classList.contains('visible')){closeExportModal();return;}
+  if(document.getElementById('modalBg').classList.contains('visible'))closeModal();
+});
 (function(){
   var modal=document.querySelector('.modal');
   var drag=null;
