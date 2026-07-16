@@ -1451,7 +1451,13 @@ function isRecurrenceExcluded(seriesKey,date){
 function monthKey(y,m){return y+'-'+pad(m+1);}
 function isAutoSubBudgetCat(catId){var c=categories.find(function(c){return c.id===catId;});return !!(c&&c.name&&c.name.trim().toLowerCase()==='suscripciones');}
 var INCOME_CAT_NAMES=['sueldo','ingresos'];
-function isIncomeCat(catId){var c=categories.find(function(c){return c.id===catId;});return !!(c&&c.name&&INCOME_CAT_NAMES.indexOf(c.name.trim().toLowerCase())!==-1);}
+function isIncomeCat(catId){
+  var c=categories.find(function(c){return c.id===catId;});
+  if(c&&c.name&&INCOME_CAT_NAMES.indexOf(c.name.trim().toLowerCase())!==-1)return true;
+  var hasIncome=transactions.some(function(t){return t.category===catId&&t.type==='income';});
+  var hasExpense=transactions.some(function(t){return t.category===catId&&t.type==='expense';});
+  return hasIncome&&!hasExpense;
+}
 function autoRecurBudgetBreakdown(catId,year,month){
   var seriesMap={};
   transactions.forEach(function(t){
@@ -1757,6 +1763,7 @@ document.addEventListener('visibilitychange',function(){
   if(document.visibilityState==='hidden'){saveUiState();lastHiddenAt=Date.now();}
   else if(document.visibilityState==='visible'){
     if(currentUser&&pinIsSet()&&lastHiddenAt&&(Date.now()-lastHiddenAt)>PIN_RELOCK_MS)lockApp();
+    else if(currentUser&&!isOffline&&!offlineQueue.length&&!loadDataInFlight)loadData();
   }
 });
 window.addEventListener('pagehide',saveUiState);
@@ -3162,6 +3169,7 @@ function openModal(){
   document.getElementById('recurInterval').value='monthly';document.getElementById('recurEndDate').value='';
   setType('expense');populateCats();populateSubcats();populateAccounts();populateTransferAccounts();renderTagsInput();
   document.getElementById('modalBg').classList.add('visible');
+  document.getElementById('modalBg').setAttribute('aria-hidden','false');
   document.getElementById('fabBtn').classList.add('open');
   setTimeout(function(){document.getElementById('txAmount').focus();},300);
 }
@@ -3185,8 +3193,9 @@ function editTx(id){
   document.getElementById('recurEndDate').value=tx.recur_end_date||'';
   document.getElementById('modalStatus').textContent='';renderTagsInput();
   document.getElementById('modalBg').classList.add('visible');
+  document.getElementById('modalBg').setAttribute('aria-hidden','false');
 }
-function closeModal(){document.getElementById('modalBg').classList.remove('visible');document.getElementById('fabBtn').classList.remove('open');editingTxId=null;}
+function closeModal(){document.getElementById('modalBg').classList.remove('visible');document.getElementById('modalBg').setAttribute('aria-hidden','true');document.getElementById('fabBtn').classList.remove('open');document.getElementById('fabBtn').focus();editingTxId=null;}
 function setType(t){
   txType=t;
   document.getElementById('typeExp').className='type-btn'+(t==='expense'?' active-exp':'');
