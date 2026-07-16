@@ -1,5 +1,6 @@
-var CACHE_NAME='fintrack-cache-v53';
-var PRECACHE=['./','./index.html','./manifest.json','./icon-192.png','./icon-512.png'];
+var CACHE_NAME='fintrack-cache-v56';
+var CACHE_PREFIX='fintrack-cache-';
+var PRECACHE=['./','./index.html','./manifest.json','./supabase-js.min.js','./icon-192.png','./icon-512.png'];
 
 self.addEventListener('install',function(e){
   e.waitUntil(caches.open(CACHE_NAME).then(function(cache){
@@ -10,12 +11,11 @@ self.addEventListener('install',function(e){
       }));
     });
   }));
-  self.skipWaiting();
 });
 
 self.addEventListener('activate',function(e){
   e.waitUntil(caches.keys().then(function(keys){
-    return Promise.all(keys.filter(function(k){return k!==CACHE_NAME;}).map(function(k){return caches.delete(k);}));
+    return Promise.all(keys.filter(function(k){return k.indexOf(CACHE_PREFIX)===0&&k!==CACHE_NAME;}).map(function(k){return caches.delete(k);}));
   }));
   self.clients.claim();
 });
@@ -24,6 +24,13 @@ self.addEventListener('fetch',function(e){
   if(e.request.method!=='GET')return;
   var url=new URL(e.request.url);
   if(url.origin!==location.origin){
+    return;
+  }
+  if(e.request.mode==='navigate'){
+    e.respondWith(fetch(e.request).then(function(networkRes){
+      if(networkRes&&networkRes.status===200)caches.open(CACHE_NAME).then(function(cache){cache.put(e.request,networkRes.clone());});
+      return networkRes;
+    }).catch(function(){return caches.match(e.request).then(function(cached){return cached||caches.match('./index.html');});}));
     return;
   }
   e.respondWith(
