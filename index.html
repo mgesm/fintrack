@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)">
@@ -1045,6 +1045,14 @@ html[data-theme="dark"] .dt-user{border-top-color:rgba(255,255,255,0.08);}
 <meta name="apple-mobile-web-app-title" content="fintrack">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
+<script>
+// FinTrack mantiene una escala fija: bloquea pellizco y atajos de zoom sin
+// interferir con el desplazamiento normal de listas y formularios.
+['gesturestart','gesturechange','gestureend'].forEach(function(type){document.addEventListener(type,function(e){e.preventDefault();},{passive:false});});
+document.addEventListener('touchmove',function(e){if(e.touches&&e.touches.length>1)e.preventDefault();},{passive:false});
+document.addEventListener('wheel',function(e){if(e.ctrlKey||e.metaKey)e.preventDefault();},{passive:false});
+window.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&['+','-','=','0'].indexOf(e.key)!==-1)e.preventDefault();});
+</script>
 <script>
 if('serviceWorker' in navigator){
   navigator.serviceWorker.addEventListener('controllerchange',function(){
