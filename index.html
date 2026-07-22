@@ -3107,9 +3107,8 @@ function renderAnnualTab(el){
   var curInc=curTxs.filter(function(t){return t.type==='income'&&dayOf(t.date)<=expCutoff;}).reduce(function(s,t){return s+t.amount;},0);
   var prevInc=prevTxs.filter(function(t){return t.type==='income'&&dayOf(t.date)<=prevExpCutoff;}).reduce(function(s,t){return s+t.amount;},0);
   var expDiff=curExp-prevExp,incDiff=curInc-prevInc;
-  var totalColor=chartCssVar('--text','#1C1C1E');
   function legItem(c,l){return '<span class="chart-legend-item"><span class="chart-legend-dot" style="background:'+c+'"></span>'+l+'</span>';}
-  var lineLegend=accounts.length?(accounts.map(function(a){return legItem(a.color,capEsc(a.name));}).join('')+legItem(totalColor,'Total')):legItem('#8E8E93','Sin datos');
+  var lineLegend=accounts.length?accounts.map(function(a){return legItem(a.color,capEsc(a.name));}).join(''):legItem('#8E8E93','Sin datos');
   var incData=Array(12).fill(0),expData=Array(12).fill(0),savData=[];
   transactions.forEach(function(t){var d=new Date(t.date+'T12:00:00');if(d.getFullYear()!==chartYear)return;var m=d.getMonth();if(t.type==='income')incData[m]+=Number(t.amount)||0;else if(t.type==='expense')expData[m]+=Number(t.amount)||0;});
   for(var m=0;m<12;m++)savData.push(incData[m]-expData[m]);
@@ -3181,11 +3180,6 @@ function renderAnnualTab(el){
   drawBarChart(document.getElementById('barChartCanvas'),incData,expData,savData);
   var lineLabels=MONTHS_S.slice();
   var series=accounts.map(function(a){var hasHistory=accountHistory(a.id).length>0;return {label:capitalize(a.name),color:a.color,data:Array.from({length:12},function(_,m){return hasHistory?accountCalcBalanceAsOf(a.id,lastDayOfMonthStr(chartYear,m+1)):null;})};});
-  if(accounts.length)series.push({label:'Total',color:totalColor,bold:true,data:Array.from({length:12},function(_,m){
-    var vals=accounts.map(function(a){return accountHistory(a.id).length?accountCalcBalanceAsOf(a.id,lastDayOfMonthStr(chartYear,m+1)):null;});
-    if(vals.every(function(v){return v===null;}))return null;
-    return vals.reduce(function(s,v){return s+(v||0);},0);
-  })});
   drawLineChart(document.getElementById('lineChartCanvas'),series,lineLabels);
 }
 
