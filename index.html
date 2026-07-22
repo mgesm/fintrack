@@ -2688,7 +2688,7 @@ function renderCatTab(el,prefix){
     });
     var catColorSwatches=PALETTE.map(function(pc){return '<div class="cat-color-swatch'+(pc.toLowerCase()===String(c.color).toLowerCase()?' active':'')+'" style="background:'+pc+';color:'+pc+'" data-action="set-cat-color" data-id="'+c.id+'" data-sub="'+pc+'"></div>';}).join('');
     html+='<div class="flip-card cat-flip-card" data-cat-id="'+c.id+'"><div class="flip-inner" id="catFlipInner_'+prefix+c.id+'">'
-      +'<div class="cat-row flip-face flip-front" onclick="if(!event.target.closest(\'[data-action],.cat-drag-handle\'))toggleFlip(\'catFlipInner_'+prefix+c.id+'\')">'
+      +'<div class="cat-row flip-face flip-front" onclick="if(!event.target.closest(\'[data-action],.cat-drag-handle,input,textarea,select,button,label\'))toggleFlip(\'catFlipInner_'+prefix+c.id+'\')">'
       +'<div class="cat-row-top">'
       +'<span class="cat-drag-handle" onpointerdown="catDragStart(event,\''+c.id+'\')">⠿</span>'
       +'<div class="cat-color" style="background:'+c.color+'22;cursor:pointer;width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0" data-action="show-colorform" data-id="'+c.id+'">'+catIconSvg(c,18)+'</div>'
