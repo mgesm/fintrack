@@ -14,7 +14,7 @@
 <script src="./supabase-js.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+html,body{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default;}
 input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;}
 :root{
   --accent:#34C759;--accent-dark:#248A3D;
@@ -210,8 +210,10 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto;min-height
   cursor:pointer;border-radius:13px;
   transition:color 0.2s;
   position:relative;z-index:1;
+  border:0;background:transparent;font-family:inherit;
 }
 .auth-tab.active{color:rgba(255,255,255,0.95);}
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;}
 
 /* Grouped input field */
 .auth-field-group{
@@ -352,7 +354,7 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto;min-height
 
 .cat-flip-card .cat-row.flip-front{margin-bottom:0;}
 .cat-flip-card .flip-back{padding:14px 14px;box-sizing:border-box;position:absolute!important;top:0;left:0;}
-.cat-drag-handle{cursor:grab;padding:2px 6px 2px 0;color:var(--text3);touch-action:none;flex-shrink:0;font-size:16px;line-height:1;user-select:none;}
+.cat-drag-handle{cursor:grab;padding:10px;color:var(--text3);touch-action:none;flex-shrink:0;font-size:16px;line-height:1;user-select:none;min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;}
 .cat-flip-card.cat-dragging{opacity:0.9;box-shadow:0 10px 26px rgba(0,0,0,0.22);z-index:60;position:relative;}
 .cat-flip-card.cat-dragging .flip-inner{pointer-events:none;}
 .heatmap-head{width:100%;display:flex;justify-content:space-between;align-items:baseline;padding:2px 4px 12px;}
@@ -1067,7 +1069,8 @@ if('serviceWorker' in navigator){
 </head>
 <body>
 <div class="mesh-bg"><div class="mesh-orb m1"></div><div class="mesh-orb m2"></div><div class="mesh-orb m3"></div></div>
-<div class="offline-banner" id="offlineBanner">&#9888; sin conexión — modo offline</div>
+<div class="offline-banner" id="offlineBanner" role="status" aria-live="polite">&#9888; sin conexión — modo offline</div>
+<div id="ariaLive" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
 <div class="loading-overlay" id="loadingOverlay"><div class="ld-wm"><span class="ld-base">fin<span>track</span><span class="ld-dot">.</span></span><span class="ld-fill">fin<span>track</span><span class="ld-dot">.</span></span></div></div>
 <div class="lock-screen" id="lockScreen" style="display:none">
   <div class="lock-logo">fin<span>track</span></div>
@@ -1100,26 +1103,26 @@ if('serviceWorker' in navigator){
   <!-- Glass card -->
   <div class="auth-glass-card">
     <div class="auth-glass-sheen"></div>
-    <div class="auth-tabs">
+    <div class="auth-tabs" role="tablist" aria-label="Acceso">
       <div class="auth-tab-pill" id="authTabPill"></div>
-      <div class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">Entrar</div>
-      <div class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">Registro</div>
+      <button type="button" class="auth-tab active" id="tabLogin" role="tab" aria-selected="true" onclick="switchAuthTab('login')">Entrar</button>
+      <button type="button" class="auth-tab" id="tabRegister" role="tab" aria-selected="false" onclick="switchAuthTab('register')">Registro</button>
     </div>
     <div id="authForm">
       <div class="auth-field-group">
         <div class="auth-field">
-          <label class="auth-field-label">Email</label>
+          <label class="auth-field-label" for="authEmail">Email</label>
           <input type="email" class="auth-input" id="authEmail" placeholder="tu@email.com" autocomplete="email">
         </div>
         <div class="auth-field-divider"></div>
         <div class="auth-field">
-          <label class="auth-field-label">Contraseña</label>
+          <label class="auth-field-label" for="authPass">Contraseña</label>
           <input type="password" class="auth-input" id="authPass" placeholder="••••••••" autocomplete="current-password">
         </div>
         <div id="pass2Wrap" style="display:none">
           <div class="auth-field-divider"></div>
           <div class="auth-field">
-            <label class="auth-field-label" id="pass2Label">Confirmar contraseña</label>
+          <label class="auth-field-label" id="pass2Label" for="authPass2">Confirmar contraseña</label>
             <input type="password" class="auth-input" id="authPass2" placeholder="••••••••">
           </div>
         </div>
@@ -1157,7 +1160,7 @@ if('serviceWorker' in navigator){
 </div>
 <div class="header" id="appHeader" style="display:none">
   <div class="logo">fin<span>track</span></div>
-  <div class="header-right"><div class="sync-dot" id="syncDot"></div><button class="home-annual-toggle" id="homeAnnualBtn" onclick="toggleHomeAnnual()" title="Vista anual"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="16" y1="3" x2="16" y2="7"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button><div class="month-nav"><button class="nav-btn" id="prevMonth">&#8249;</button><div class="month-label" id="monthLabel"></div><button class="nav-btn" id="nextMonth">&#8250;</button></div></div>
+  <div class="header-right"><div class="sync-dot" id="syncDot"></div><button class="home-annual-toggle" id="homeAnnualBtn" onclick="toggleHomeAnnual()" title="Vista anual" aria-label="Cambiar vista anual"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="16" y1="3" x2="16" y2="7"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button><div class="month-nav"><button class="nav-btn" id="prevMonth" aria-label="Mes anterior">&#8249;</button><div class="month-label" id="monthLabel"></div><button class="nav-btn" id="nextMonth" aria-label="Mes siguiente">&#8250;</button></div></div>
 </div>
 <div id="mainChart" style="display:none">
   <div class="summary">
@@ -1238,21 +1241,21 @@ if('serviceWorker' in navigator){
 </div>
 <div class="tab-content" id="tabContent" style="display:none"></div>
 <button class="fab fab-hidden" id="fabBtn">+</button>
-<div class="modal-bg" id="modalBg">
-  <div class="modal">
+<div class="modal-bg" id="modalBg" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-handle"></div>
     <div class="modal-title" id="modalTitle">Nueva transacción</div>
     <div class="type-toggle"><div class="type-btn active-exp" id="typeExp" onclick="setType('expense')">Gasto</div><div class="type-btn" id="typeInc" onclick="setType('income')">Ingreso</div><div class="type-btn" id="typeTra" onclick="setType('transfer')">Transferencia</div></div>
-    <div class="field-label">Importe</div><input type="number" class="field-input" id="txAmount" placeholder="0,00" min="0" step="0.01" style="font-family:var(--mono);font-size:22px;font-weight:700;letter-spacing:-0.5px;">
-    <div id="txCatWrap"><div class="field-label">Categoría</div><select class="field-input" id="txCat" onchange="populateSubcats()"></select>
-    <div class="field-label">Subcategoría <span style="color:var(--text4);font-size:12px;font-weight:400">(opcional)</span></div><select class="field-input" id="txSubcat"></select></div>
-    <div id="txAccWrap" style="display:none"><div class="field-label">Cuenta <span style="color:var(--text4);font-size:12px;font-weight:400">(opcional)</span></div><select class="field-input" id="txAccount"></select></div>
+    <div class="field-label">Importe</div><input aria-label="Importe" type="number" class="field-input" id="txAmount" placeholder="0,00" min="0" step="0.01" style="font-family:var(--mono);font-size:22px;font-weight:700;letter-spacing:-0.5px;">
+    <div id="txCatWrap"><div class="field-label">Categoría</div><select aria-label="Categoría" class="field-input" id="txCat" onchange="populateSubcats()"></select>
+    <div class="field-label">Subcategoría <span style="color:var(--text4);font-size:12px;font-weight:400">(opcional)</span></div><select aria-label="Subcategoría" class="field-input" id="txSubcat"></select></div>
+    <div id="txAccWrap" style="display:none"><div class="field-label">Cuenta <span style="color:var(--text4);font-size:12px;font-weight:400">(opcional)</span></div><select aria-label="Cuenta" class="field-input" id="txAccount"></select></div>
     <div id="txTransferWrap" style="display:none"><div class="field-label">Desde</div><select class="field-input" id="txFromAccount"></select>
     <div class="field-label">Hacia</div><select class="field-input" id="txToAccount"></select></div>
-    <div class="field-label">Nota <span style="color:var(--text4);font-size:12px;font-weight:400">(opcional)</span></div><input type="text" class="field-input" id="txNote" placeholder="Descripción...">
+    <div class="field-label">Nota <span style="color:var(--text4);font-size:12px;font-weight:400">(opcional)</span></div><input aria-label="Nota" type="text" class="field-input" id="txNote" placeholder="Descripción...">
     <div style="display:none"><div class="field-label">Etiquetas <span style="color:var(--text4);font-size:12px;font-weight:400">(Enter para añadir)</span></div>
     <div class="tags-input-wrap" id="tagsWrap"><input type="text" class="tags-text-input" id="tagInput" placeholder="vacaciones, regalo..."></div></div>
-    <div class="field-label">Fecha</div><input type="date" class="field-input" id="txDate">
+    <div class="field-label">Fecha</div><input aria-label="Fecha" type="date" class="field-input" id="txDate">
     <div id="txRecurWrap"><div class="field-label">Recurrente</div>
     <div class="recurring-toggle" onclick="toggleRecurring()"><div class="toggle-switch" id="recurringSwitch"><div class="toggle-knob"></div></div><span style="font-size:15px;color:var(--text2);font-weight:400">Se repite automáticamente</span></div>
     <div id="recurringOptions" style="display:none">
@@ -1287,10 +1290,10 @@ if('serviceWorker' in navigator){
   </div>
 </div>
 
-<div class="modal-bg" id="exportModalBg">
-  <div class="modal">
+<div class="modal-bg" id="exportModalBg" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="exportModalTitle">
     <div class="modal-handle"></div>
-    <div class="modal-title">Exportar</div>
+    <div class="modal-title" id="exportModalTitle">Exportar</div>
     <div class="field-label">Periodo</div>
     <select class="field-input" id="exportScope" onchange="onExportScopeChange()">
       <option value="month">Un mes</option>
@@ -1451,7 +1454,10 @@ function catIconSvg(c,size){
 function recurrenceSeriesKey(t){
   if(t&&t.recur_series_id)return t.recur_series_id;
   var interval=(t&&t.recur_interval)||'monthly';
-  return 'legacy|'+(t&&t.type||'')+'|'+(t&&t.category||'')+'|'+(t&&t.account_id||'')+'|'+Number(t&&t.amount||0)+'|'+interval;
+  var anchor=(t&&t.recur_anchor_date)||'';
+  // Los datos antiguos no tenían id de serie. Incluir nota, subcategoría y
+  // ancla evita fusionar cuotas legítimas que sólo comparten importe/categoría.
+  return 'legacy|'+(t&&t.type||'')+'|'+(t&&t.category||'')+'|'+(t&&t.account_id||'')+'|'+Number(t&&t.amount||0)+'|'+interval+'|'+anchor+'|'+(t&&t.subcategory||'')+'|'+(t&&t.note||'');
 }
 function isRecurrenceExcluded(seriesKey,date){
   return recurrenceExclusions.some(function(x){return x.recur_series_id===seriesKey&&x.skipped_date===date;});
@@ -1481,7 +1487,8 @@ function autoRecurBudgetBreakdown(catId,year,month){
     var root=group[0];
     group.forEach(function(t){if(new Date(t.date+'T12:00:00')<new Date(root.date+'T12:00:00'))root=t;});
     var interval=root.recur_interval||'monthly';
-    var anchorDay=parseInt(root.date.slice(8,10),10);
+    var anchorSource=root.recur_anchor_date||root.date;
+    var anchorDay=parseInt(anchorSource.slice(8,10),10);
     var endDate=root.recur_end_date?new Date(root.recur_end_date+'T12:00:00'):null;
     var rootDate=new Date(root.date+'T12:00:00');
     var monthStart=new Date(year,month,1,12,0,0);
@@ -1544,7 +1551,7 @@ function totalBudget(year,month){
   var yr=(year!==undefined)?year:viewYear,mo=(month!==undefined)?month:viewMonth;
   return categories.reduce(function(s,c){return isIncomeCat(c.id)?s:s+budgetForCat(c.id,yr,mo);},0);
 }
-function setSync(s){var d=document.getElementById('syncDot');if(d)d.className='sync-dot '+s;}
+function setSync(s){var d=document.getElementById('syncDot');if(d)d.className='sync-dot '+s;var live=document.getElementById('ariaLive');if(live)live.textContent=s==='ok'?'Sincronización completada':s==='syncing'?'Sincronizando':s==='err'?'Hay cambios pendientes o un problema de sincronización':'';}
 function setAccent(color){
   var el=document.documentElement;
   el.style.setProperty('--accent',color);
@@ -1579,13 +1586,17 @@ async function processOfflineQueue(){
   setSync(failed.length?'err':'ok');
 }
 function queueKey(){return 'ft_queue_'+(currentUser?currentUser.id:'anon');}
-function queueOp(op){offlineQueue.push(op);localStorage.setItem(queueKey(),JSON.stringify(offlineQueue));}
+function queueOp(op){
+  offlineQueue.push(op);
+  try{localStorage.setItem(queueKey(),JSON.stringify(offlineQueue));return true;}
+  catch(e){offlineQueue.pop();setSync('err');showSuccessToast('No hay espacio local para guardar este cambio');return false;}
+}
 var ftRealtimeChannel=null,ftRealtimeTimer=null;
 function subscribeRealtime(){
   if(!currentUser||!sb.channel)return;
   if(ftRealtimeChannel){try{sb.removeChannel(ftRealtimeChannel);}catch(e){}}
   var uid=currentUser.id;
-  ftRealtimeChannel=sb.channel('fintrack-'+uid).on('postgres_changes',{event:'*',schema:'public',table:'transactions',filter:'user_id=eq.'+uid},scheduleRemoteRefresh).on('postgres_changes',{event:'*',schema:'public',table:'categories',filter:'user_id=eq.'+uid},scheduleRemoteRefresh).on('postgres_changes',{event:'*',schema:'public',table:'accounts',filter:'user_id=eq.'+uid},scheduleRemoteRefresh).on('postgres_changes',{event:'*',schema:'public',table:'budgets',filter:'user_id=eq.'+uid},scheduleRemoteRefresh).subscribe();
+  ftRealtimeChannel=sb.channel('fintrack-'+uid).on('postgres_changes',{event:'*',schema:'public',table:'transactions',filter:'user_id=eq.'+uid},scheduleRemoteRefresh).on('postgres_changes',{event:'*',schema:'public',table:'categories',filter:'user_id=eq.'+uid},scheduleRemoteRefresh).on('postgres_changes',{event:'*',schema:'public',table:'accounts',filter:'user_id=eq.'+uid},scheduleRemoteRefresh).on('postgres_changes',{event:'*',schema:'public',table:'budgets',filter:'user_id=eq.'+uid},scheduleRemoteRefresh).on('postgres_changes',{event:'*',schema:'public',table:'patrimony',filter:'user_id=eq.'+uid},scheduleRemoteRefresh).on('postgres_changes',{event:'*',schema:'public',table:'recurrence_exclusions',filter:'user_id=eq.'+uid},scheduleRemoteRefresh).on('postgres_changes',{event:'*',schema:'public',table:'transaction_voids',filter:'user_id=eq.'+uid},scheduleRemoteRefresh).subscribe();
 }
 function scheduleRemoteRefresh(){
   if(isOffline||offlineQueue.length||loadDataInFlight)return;
@@ -1596,6 +1607,8 @@ function switchAuthTab(m){
   authMode=m;
   document.getElementById('tabLogin').classList.toggle('active',m==='login');
   document.getElementById('tabRegister').classList.toggle('active',m==='register');
+  document.getElementById('tabLogin').setAttribute('aria-selected',m==='login'?'true':'false');
+  document.getElementById('tabRegister').setAttribute('aria-selected',m==='register'?'true':'false');
   document.getElementById('authSubmitBtn').textContent=m==='login'?'Entrar':'Crear cuenta';
   var p2=document.getElementById('pass2Wrap');if(p2)p2.style.display=m==='register'?'block':'none';
   var fp=document.getElementById('forgotPassWrap');if(fp)fp.style.display=m==='register'?'none':'block';
@@ -1637,7 +1650,7 @@ async function submitAuth(){
   } else {
     var p2=document.getElementById('authPass2').value;
     if(pass!==p2){msg.textContent='las contraseñas no coinciden';msg.className='auth-msg err';return;}
-    if(pass.length<6){msg.textContent='mínimo 6 caracteres';msg.className='auth-msg err';return;}
+    if(pass.length<10){msg.textContent='usa al menos 10 caracteres';msg.className='auth-msg err';return;}
     var r=await sb.auth.signUp({email:email,password:pass});
     if(r.error){msg.textContent=r.error.message;msg.className='auth-msg err';}
     else if(r.data.user&&!r.data.session){msg.textContent='✓ revisa tu email para confirmar la cuenta';msg.className='auth-msg ok';}
@@ -1848,12 +1861,12 @@ function showApp(){
   } else {
     document.getElementById('dtLayout').style.display='none';
     document.getElementById('appHeader').style.display='flex';
-    document.getElementById('mainChart').style.display='block';
+    document.getElementById('mainChart').style.display=(activeTab===0||activeTab===1)?'block':'none';
     document.getElementById('bottomNav').style.display='flex';
     document.getElementById('tabContent').style.display='flex';
-    document.getElementById('fabBtn').classList.remove('fab-hidden');
+    document.getElementById('fabBtn').classList.toggle('fab-hidden',activeTab!==0);
     for(var _bi=0;_bi<5;_bi++){var _bn=document.getElementById('bn'+_bi);if(_bn)_bn.classList.toggle('active',_bi===activeTab);}
-    setTimeout(function(){movePill(0);},100);
+    setTimeout(function(){movePill(activeTab);},100);
   }
   if(!loadingAlready)loadData();
   subscribeRealtime();
@@ -1905,13 +1918,10 @@ async function loadData(){
       sb.from('transaction_voids').select('*').eq('user_id',uid)
     ]),LOAD_REMOTE_TIMEOUT_MS,'La sincronización inicial ha tardado demasiado');
     if(!isActiveLoad(uid,generation))return false;
-    if(!res[0].error)categories=res[0].data||[];
-    if(!res[1].error)transactions=res[1].data||[];
-    if(!res[2].error)accounts=res[2].data||[];
-    if(!res[3].error)patrimony=res[3].data||[];
-    if(!res[4].error)budgets=res[4].data||[];
-    if(!res[5].error)recurrenceExclusions=res[5].data||[];
-    if(!res[6].error)transactionVoids=res[6].data||[];
+    var failedRead=res.find(function(x){return x&&x.error;});
+    if(failedRead)throw failedRead.error;
+    categories=res[0].data||[];transactions=res[1].data||[];accounts=res[2].data||[];
+    patrimony=res[3].data||[];budgets=res[4].data||[];recurrenceExclusions=res[5].data||[];transactionVoids=res[6].data||[];
     
     if(categories.length===0){var cd2=DEFAULT_CATS.map(function(c){return Object.assign({},c,{user_id:uid});});var ins=await withLoadTimeout(sb.from('categories').insert(cd2).select(),LOAD_REMOTE_TIMEOUT_MS,'La creación de categorías iniciales ha tardado demasiado');if(ins.error)throw ins.error;categories=ins.data||cd2;}
     if(!isActiveLoad(uid,generation))return false;
@@ -1939,7 +1949,7 @@ function saveLocalCache(){
   // Also clear drawn flags
   document.querySelectorAll('canvas[data-drawn]').forEach(function(cv){cv.removeAttribute('data-drawn');});
   if(!currentUser)return;
-  try{localStorage.setItem('ft_cache_'+currentUser.id,JSON.stringify({transactions:transactions,categories:categories,accounts:accounts,patrimony:patrimony,budgets:budgets,recurrenceExclusions:recurrenceExclusions,transactionVoids:transactionVoids}));}catch(e){}
+  try{localStorage.setItem('ft_cache_'+currentUser.id,JSON.stringify({transactions:transactions,categories:categories,accounts:accounts,patrimony:patrimony,budgets:budgets,recurrenceExclusions:recurrenceExclusions,transactionVoids:transactionVoids}));}catch(e){setSync('err');showSuccessToast('No se pudo actualizar la copia local');}
 }
 function addInterval(d,interval,anchorDay){
   var nd=new Date(d.getTime());
@@ -1969,10 +1979,20 @@ async function processRecurring(){
     var related=recurring.filter(function(tx){
       var txInterval=tx.recur_interval||'monthly';
       if(t.recur_series_id)return tx.recur_series_id===t.recur_series_id;
-      return !tx.recur_series_id&&tx.category===t.category&&tx.type===t.type&&tx.account_id===t.account_id&&Math.abs(tx.amount-t.amount)<0.01&&txInterval===interval;
+      return !tx.recur_series_id&&tx.category===t.category&&tx.type===t.type&&tx.account_id===t.account_id&&Math.abs(tx.amount-t.amount)<0.01&&txInterval===interval&&(tx.subcategory||'')===(t.subcategory||'')&&(tx.note||'')===(t.note||'');
     });
     var root=related[0];
     related.forEach(function(tx){if(new Date(tx.date+'T12:00:00')<new Date(root.date+'T12:00:00'))root=tx;});
+    if(!root.recur_series_id){
+      var oldSeriesKey=seriesKey,legacySeriesId='rsL_'+root.id;
+      related.forEach(function(tx){tx.recur_series_id=legacySeriesId;tx.recur_anchor_date=root.date;});
+      recurrenceExclusions.filter(function(x){return x.recur_series_id===oldSeriesKey;}).forEach(function(x){x.recur_series_id=legacySeriesId;});
+      var migrated=await Promise.all(related.map(function(tx){return sb.from('transactions').update({recur_series_id:legacySeriesId,recur_anchor_date:root.date}).eq('id',tx.id);}));
+      if(migrated.some(function(x){return x.error;})){setSync('err');continue;}
+      var oldExclusions=recurrenceExclusions.filter(function(x){return x.recur_series_id===legacySeriesId;});
+      await Promise.all(oldExclusions.map(function(x){return sb.from('recurrence_exclusions').update({recur_series_id:legacySeriesId}).eq('id',x.id);}));
+      root.recur_series_id=legacySeriesId;root.recur_anchor_date=root.date;seriesKey=legacySeriesId;processed[legacySeriesId]=true;
+    }
     var anchorDay=parseInt(root.date.slice(8,10),10);
     var endDate=root.recur_end_date?new Date(root.recur_end_date+'T12:00:00'):null;
     var lastDate=new Date(root.date+'T12:00:00');
@@ -1985,9 +2005,9 @@ async function processRecurring(){
         return tx.category===root.category&&tx.type===root.type&&tx.account_id===root.account_id&&Math.abs(tx.amount-root.amount)<0.01&&(tx.recur_interval||'monthly')===interval&&tx.date===newDate;
       });
       if(!dup&&!isRecurrenceExcluded(seriesKey,newDate)){
-        var newTx={id:'tx'+Date.now()+Math.random().toString(36).slice(2,6),type:root.type,amount:root.amount,category:root.category,subcategory:root.subcategory||null,note:root.note||null,date:newDate,recurring:true,recur_interval:interval,recur_end_date:root.recur_end_date||null,tags:root.tags||[],account_id:root.account_id||null,to_account_id:null,recur_series_id:root.recur_series_id||null,user_id:uid};
-        var r=await sb.from('transactions').insert(newTx).select();
-        if(!r.error)transactions.unshift(r.data[0]||newTx);
+        var newTx={id:'tx'+Date.now()+Math.random().toString(36).slice(2,6),type:root.type,amount:root.amount,category:root.category,subcategory:root.subcategory||null,note:root.note||null,date:newDate,recurring:true,recur_interval:interval,recur_end_date:root.recur_end_date||null,tags:root.tags||[],account_id:root.account_id||null,to_account_id:null,recur_series_id:root.recur_series_id||null,recur_anchor_date:root.recur_anchor_date||root.date,user_id:uid};
+        var r=await sb.rpc('create_fintrack_recurring_occurrence',{payload:newTx});
+        if(!r.error&&r.data){var already=transactions.some(function(x){return x.id===r.data.id;});if(!already)transactions.unshift(r.data);}
       }
       next=addInterval(next,interval,anchorDay);
     }
@@ -1995,9 +2015,18 @@ async function processRecurring(){
 }
 function scheduleAutoBackup(){
   if(!currentUser)return;
+  if(localStorage.getItem('ft_auto_backup_'+currentUser.id)!=='enabled')return;
   var last=localStorage.getItem('ft_last_backup_'+currentUser.id);
   var now=new Date();
   if((!last||(now-new Date(last))>7*24*60*60*1000)&&transactions.length>0)downloadBackupNow();
+}
+function toggleAutoBackup(){
+  if(!currentUser)return;
+  var key='ft_auto_backup_'+currentUser.id;
+  var enabled=localStorage.getItem(key)==='enabled';
+  if(!enabled&&!confirm('La copia automática descarga un archivo JSON financiero en este dispositivo cada 7 días. ¿Quieres activarla?'))return;
+  localStorage.setItem(key,enabled?'disabled':'enabled');
+  refreshTab();
 }
 function downloadBackupNow(){
   if(!currentUser)return;
@@ -2006,6 +2035,8 @@ function downloadBackupNow(){
   var blob=new Blob([json],{type:'application/json'});
   var a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='fintrack_autobackup_'+now.toISOString().slice(0,10)+'.json';a.click();
+  // La descarga puede bloquearse: la fecha sólo se guarda tras la activación
+  // explícita o una acción manual del usuario.
   localStorage.setItem('ft_last_backup_'+currentUser.id,now.toISOString());
   refreshTab();
 }
@@ -2318,7 +2349,7 @@ if(document.fonts&&document.fonts.ready){
     }
   });
 }
-function refreshTab(){if(IS_DESKTOP){dtRender();}else{render();}}
+function refreshTab(){if(IS_DESKTOP){dtRender();}else{render();}enableKeyboardControls();}
 function renderTab(){
   var el=document.getElementById('tabContent');
   if(activeTab===0)renderTxTab(el);
@@ -2700,7 +2731,7 @@ function renderCatTab(el,prefix){
       +'</div></div>';
   });
   html+='<div class="section-title" style="margin-top:8px">Nueva categoría</div>'
-    +'</div>'+'<div class="add-cat-form"><div class="form-row"><input type="text" class="add-input" id="newCatInput" placeholder="Nombre..."><button class="add-btn" onclick="addCat()">Añadir</button></div></div>';
+    +'</div>'+'<div class="add-cat-form"><div class="form-row"><input type="text" class="add-input" id="newCatInput" maxlength="80" placeholder="Nombre..."><select class="add-input" id="newCatKind" aria-label="Tipo de categoría" style="max-width:112px"><option value="expense">Gasto</option><option value="income">Ingreso</option></select><button class="add-btn" onclick="addCat()">Añadir</button></div></div>';
   if(archivedCats.length){
     html+='<div class="section-title" style="margin-top:16px;opacity:0.5">Archivadas</div>';
     archivedCats.forEach(function(ac){
@@ -2802,8 +2833,10 @@ function renderPatTab(el){
 function lastDayOfMonthStr(yr,mo){var d=new Date(yr,mo,0);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
 function isLockedAdjust(p){var id=(p&&typeof p==='object')?p.id:p;return typeof id==='string'&&id.indexOf('anchor_')===0;}
 async function ensureRevolutAnchor(uid){}
+var _historyCache={};
 function accountHistory(accountId){
-  return patrimony.filter(function(p){return p.account_id===accountId;}).sort(function(a,b){
+  if(_historyCache[accountId])return _historyCache[accountId];
+  return _historyCache[accountId]=patrimony.filter(function(p){return p.account_id===accountId;}).sort(function(a,b){
     var da=a.reset_date||lastDayOfMonthStr(a.year,a.month),db=b.reset_date||lastDayOfMonthStr(b.year,b.month);
     if(da!==db)return da.localeCompare(db);
     return (a.id||'').localeCompare(b.id||'');
@@ -2864,7 +2897,7 @@ function accountRealBalance(accountId,yr,mo){
   return Number(hist[hist.length-1].amount);
 }
 var _rbCache={};
-function clearBalanceCache(){_rbCache={};}
+function clearBalanceCache(){_rbCache={};_historyCache={};}
 function accountRealBalanceAtDate(accountId,dateStr){
   var key=accountId+'@'+dateStr;
   if(key in _rbCache)return _rbCache[key];
@@ -2883,6 +2916,7 @@ async function applyBalanceAdjustment(accountId){
   var diff=real-theoretical;
   setSync('syncing');var s=document.getElementById('patStatus');if(s){s.textContent='guardando...';s.className='status-msg';}
   var item={id:'p'+accountId+Date.now()+Math.random().toString(36).slice(2,6),account_id:accountId,year:yr,month:mo,amount:real,theoretical_amount:theoretical,reset_date:date,user_id:currentUser.id};
+  if(isOffline){patrimony.push(item);if(!queueOp({type:'insert',table:'patrimony',data:item})){patrimony.pop();return;}saveLocalCache();setSync('err');if(s){s.textContent='guardado (pendiente de sincronizar)';s.className='status-msg status-ok';}refreshTab();return;}
   var r=await sb.from('patrimony').insert(item).select();
   if(r.error){setSync('err');if(s){s.textContent='✗ error';s.className='status-msg status-err';}}
   else{
@@ -2894,7 +2928,7 @@ async function applyBalanceAdjustment(accountId){
     refreshTab();
   }
 }
-async function addAccount(){var inp=document.getElementById('newAccInput');var name=inp.value.trim();if(!name)return;var acc={id:'acc'+Date.now()+Math.random().toString(36).slice(2,6),name:name,color:PALETTE[accounts.length%PALETTE.length],position:accounts.length,user_id:currentUser.id};setSync('syncing');var r=await sb.from('accounts').insert(acc).select();if(!r.error){accounts.push(r.data[0]||acc);saveLocalCache();setSync('ok');inp.value='';refreshTab();}else setSync('err');}
+async function addAccount(){var inp=document.getElementById('newAccInput');var name=inp.value.trim();if(!name||name.length>80)return;var acc={id:'acc'+Date.now()+Math.random().toString(36).slice(2,6),name:name,color:PALETTE[accounts.length%PALETTE.length],position:accounts.length,user_id:currentUser.id};setSync('syncing');if(isOffline){accounts.push(acc);if(!queueOp({type:'insert',table:'accounts',data:acc})){accounts.pop();return;}saveLocalCache();setSync('err');inp.value='';refreshTab();return;}var r=await sb.from('accounts').insert(acc).select();if(!r.error){accounts.push(r.data[0]||acc);saveLocalCache();setSync('ok');inp.value='';refreshTab();}else setSync('err');}
 async function deleteAccount(id){
   var inUse=transactions.some(function(t){return t.account_id===id||t.to_account_id===id;});
   if(inUse){alert('No se puede eliminar: hay transacciones asociadas a esta cuenta. Elimínalas o reasígnalas primero.');return;}
@@ -2927,8 +2961,8 @@ function chartCssVar(name,fallback){var v=getComputedStyle(document.documentElem
 function chartSetup(canvas,cssH){
   if(!canvas)return null;
   canvas.setAttribute('role','img');
-  if(!canvas.getAttribute('aria-label'))canvas.setAttribute('aria-label','Gráfico financiero interactivo. Toca o usa el ratón para consultar cada mes.');
-  var dpr=window.devicePixelRatio||1;
+  if(!canvas.getAttribute('aria-label'))canvas.setAttribute('aria-label','Gráfico financiero mensual. Consulta el resumen mensual situado junto al gráfico.');
+  var dpr=Math.min(window.devicePixelRatio||1,2);
   canvas.style.width='100%';canvas.style.height=cssH+'px';
   var cssW=canvas.clientWidth||canvas.parentNode.clientWidth||320;
   canvas.width=Math.round(cssW*dpr);canvas.height=Math.round(cssH*dpr);
@@ -3025,6 +3059,7 @@ function chartTipRow(color,label,val){return '<div style="display:flex;align-ite
 function hideChartTip(){var t=document.getElementById('chartTip');if(t)t.style.opacity='0';}
 function attachChartTip(canvas){
   var meta=canvas._chart;
+  canvas.tabIndex=0;
   function show(ev){
     var rect=canvas.getBoundingClientRect(),x=ev.clientX-rect.left;
     var m=Math.floor((x-meta.padL)/meta.slot);
@@ -3042,7 +3077,13 @@ function attachChartTip(canvas){
     tip.style.left=tx+'px';tip.style.top=ty+'px';
   }
   canvas.onpointermove=show;canvas.onpointerdown=show;canvas.onpointerleave=hideChartTip;
-  canvas.onpointerup=function(ev){if(ev.pointerType==='mouse')hideChartTip();};canvas.onpointercancel=hideChartTip;
+  canvas.onpointerup=hideChartTip;canvas.onpointercancel=hideChartTip;
+  canvas.onkeydown=function(ev){
+    if(['ArrowLeft','ArrowRight','Home','End'].indexOf(ev.key)===-1)return;
+    ev.preventDefault();var count=meta.count||12,idx=(canvas._chartKeyIndex==null?0:canvas._chartKeyIndex);
+    if(ev.key==='ArrowLeft')idx=Math.max(0,idx-1);else if(ev.key==='ArrowRight')idx=Math.min(count-1,idx+1);else if(ev.key==='Home')idx=0;else idx=count-1;
+    canvas._chartKeyIndex=idx;var rect=canvas.getBoundingClientRect();show({clientX:rect.left+meta.padL+meta.slot*idx+meta.slot/2,clientY:rect.top+10});
+  };
 }
 
 // ANNUAL TAB
@@ -3050,12 +3091,12 @@ function renderAnnualTab(el){
   // La comparativa "vs mes anterior" se ancla SIEMPRE al mes real en curso
   // (no al mes navegado en Inicio), porque el corte por "día de hoy" de los
   // gastos solo tiene sentido para el mes actual.
-  var cmpNow=new Date(),cmpY=cmpNow.getFullYear(),cmpM=cmpNow.getMonth();
+  var cmpNow=new Date(),cmpY=chartYear,cmpM=(chartYear===cmpNow.getFullYear()?cmpNow.getMonth():11);
   var prevM=cmpM===0?11:cmpM-1,prevY=cmpM===0?cmpY-1:cmpY;
   function inMonth(t,yy,mm){var d=new Date(t.date+'T12:00:00');return d.getFullYear()===yy&&d.getMonth()===mm;}
   var curTxs=transactions.filter(function(t){return inMonth(t,cmpY,cmpM);});
   var prevTxs=transactions.filter(function(t){return inMonth(t,prevY,prevM);});
-  var todayDay=cmpNow.getDate();
+  var todayDay=(cmpY===cmpNow.getFullYear()&&cmpM===cmpNow.getMonth())?cmpNow.getDate():new Date(cmpY,cmpM+1,0).getDate();
   var curDaysInMonth=new Date(cmpY,cmpM+1,0).getDate();
   var prevDaysInMonth=new Date(prevY,prevM+1,0).getDate();
   var expCutoff=Math.min(todayDay,curDaysInMonth);
@@ -3138,11 +3179,10 @@ function renderAnnualTab(el){
     +statsHtml
     +'</div>';
   drawBarChart(document.getElementById('barChartCanvas'),incData,expData,savData);
-  var patDates=Array.from(new Set(patrimony.filter(function(p){var d=p.reset_date||lastDayOfMonthStr(p.year,p.month);return d.slice(0,4)===String(chartYear);}).map(function(p){return p.reset_date||lastDayOfMonthStr(p.year,p.month);}))).sort();
-  var lineLabels=patDates.length?patDates.map(function(d,i){var mo=parseInt(d.slice(5,7),10)-1;return (i===0||parseInt(patDates[i-1].slice(5,7),10)-1!==mo)?MONTHS_S[mo]:'';}):null;
-  var series=accounts.map(function(a){return {label:capitalize(a.name),color:a.color,data:patDates.length?patDates.map(function(d){return accountRealBalanceAtDate(a.id,d);}):Array.from({length:12},function(){return null;})};});
-  if(accounts.length&&patDates.length)series.push({label:'Total',color:totalColor,bold:true,data:patDates.map(function(d){
-    var vals=accounts.map(function(a){return accountRealBalanceAtDate(a.id,d);});
+  var lineLabels=MONTHS_S.slice();
+  var series=accounts.map(function(a){var hasHistory=accountHistory(a.id).length>0;return {label:capitalize(a.name),color:a.color,data:Array.from({length:12},function(_,m){return hasHistory?accountCalcBalanceAsOf(a.id,lastDayOfMonthStr(chartYear,m+1)):null;})};});
+  if(accounts.length)series.push({label:'Total',color:totalColor,bold:true,data:Array.from({length:12},function(_,m){
+    var vals=accounts.map(function(a){return accountHistory(a.id).length?accountCalcBalanceAsOf(a.id,lastDayOfMonthStr(chartYear,m+1)):null;});
     if(vals.every(function(v){return v===null;}))return null;
     return vals.reduce(function(s,v){return s+(v||0);},0);
   })});
@@ -3153,6 +3193,7 @@ function renderAnnualTab(el){
 function renderSettingsTab(el){
   var email=currentUser?currentUser.email:'—';
   var lastBackup=currentUser?localStorage.getItem('ft_last_backup_'+currentUser.id):null;
+  var autoBackupEnabled=currentUser&&localStorage.getItem('ft_auto_backup_'+currentUser.id)==='enabled';
   var curTheme=document.documentElement.getAttribute('data-theme')||'system';
   var themeOpts=[{v:'system',label:'Sistema'},{v:'light',label:'Claro'},{v:'dark',label:'Oscuro'}];
   var accentSwatches=ACCENT_COLORS.map(function(c){
@@ -3168,7 +3209,7 @@ function renderSettingsTab(el){
     +'</div></div>'
     +'<div class="settings-section"><div class="settings-title">Tema de color</div><div class="settings-info">Color de acento de la app</div><div class="color-palette">'+accentSwatches+'</div></div>'
     +'<div class="settings-section"><div class="settings-title">Presupuesto total mensual</div><div class="settings-info">Suma automática de los presupuestos de todas las categorías de '+capitalize(MONTHS[viewMonth])+': <strong>'+fmt(totalBudget())+'</strong></div></div>'
-    +'<div class="settings-section"><div class="settings-title">Copia de seguridad automática</div><div class="settings-info">'+(lastBackup?'Última copia: '+new Date(lastBackup).toLocaleDateString('es-ES'):'Sin copia reciente')+'<br>Se descarga automáticamente cada 7 días.</div><button class="settings-btn" onclick="downloadBackupNow()">↓ Descargar copia ahora</button></div>'
+    +'<div class="settings-section"><div class="settings-title">Copia de seguridad automática</div><div class="settings-info">'+(lastBackup?'Última copia: '+new Date(lastBackup).toLocaleDateString('es-ES'):'Sin copia reciente')+'<br>'+((autoBackupEnabled)?'Activa: descarga una copia local cada 7 días.':'Desactivada: las copias se descargan solo cuando tú las pides.')+'</div><button class="settings-btn" onclick="toggleAutoBackup()">'+(autoBackupEnabled?'✓ Copia automática activada':'Activar copia automática')+'</button><button class="settings-btn" onclick="downloadBackupNow()">↓ Descargar copia ahora</button></div>'
     +'<div class="settings-section"><div class="settings-title">Exportar datos</div><button class="settings-btn" onclick="openExportModal()">↓ Exportar (PDF · Excel · CSV)<span class="btn-arrow">›</span></button><button class="settings-btn" onclick="exportJSON()">↓ Exportar JSON (copia)</button></div>'
     +'<div class="settings-section"><div class="settings-title">Importar copia</div><textarea id="importArea" style="width:100%;background:var(--bg3);border:1px solid var(--card-border);color:var(--text2);border-radius:var(--radius-sm);padding:8px 10px;font-size:12px;font-family:var(--mono);resize:vertical;outline:none;min-height:80px;max-height:240px" placeholder=\'{"transactions":[...],"categories":[...]}\'></textarea><button class="settings-btn" onclick="importJSON()">↑ Importar JSON</button><div class="status-msg" id="importStatus"></div></div>'
     +'<div class="settings-section"><div class="settings-title">Sincronización</div><button class="settings-btn" onclick="forceSync()">↺ Sincronizar ahora</button><div class="status-msg" id="syncStatusMsg"></div></div>'
@@ -3177,7 +3218,17 @@ function renderSettingsTab(el){
     +'<div style="text-align:center;padding:16px 0;font-size:11px;font-family:var(--mono);color:var(--text3)">fintrack · '+email+'</div>'
     +'</div>';
 }
-async function signOut(){var cKey='ft_cache_'+(currentUser?currentUser.id:'');offlineQueue=[];localStorage.removeItem(queueKey());if(cKey!=='ft_cache_')localStorage.removeItem(cKey);await sb.auth.signOut();transactions=[];categories=[];accounts=[];patrimony=[];budgets=[];recurrenceExclusions=[];transactionVoids=[];_monthTxCache={};_yearTxCache={};txVersion++;showAuth();}
+async function signOut(){
+  var cKey='ft_cache_'+(currentUser?currentUser.id:'');
+  if(offlineQueue.length&&!isOffline){await processOfflineQueue();}
+  if(offlineQueue.length&&!confirm('Hay '+offlineQueue.length+' cambio(s) pendientes. Aceptar: cerrar sesión y conservarlos para cuando vuelvas a entrar. Cancelar: seguir en la app.'))return;
+  // La cola se conserva por usuario; la caché visible se elimina antes de
+  // esperar a la red para no dejar datos financieros en este dispositivo.
+  if(cKey!=='ft_cache_')localStorage.removeItem(cKey);
+  transactions=[];categories=[];accounts=[];patrimony=[];budgets=[];recurrenceExclusions=[];transactionVoids=[];_monthTxCache={};_yearTxCache={};txVersion++;
+  try{await sb.auth.signOut();}catch(e){}
+  showAuth();
+}
 async function forceSync(){
   var s=document.getElementById('syncStatusMsg');
   if(isOffline){if(s){s.textContent='sin conexión · los cambios se guardarán al reconectar';s.className='status-msg status-err';}return;}
@@ -3187,15 +3238,18 @@ async function forceSync(){
   if(s){s.textContent=ok?'✓ sincronizado':'No se ha podido sincronizar · reintenta';s.className='status-msg '+(ok?'status-ok':'status-err');}
 }
 async function clearTxs(){
-  if(!confirm('¿Borrar TODAS las transacciones y sus exclusiones de recurrencias?'))return;
+  if(!confirm('Se descargará una copia previa. ¿Borrar TODAS las transacciones, exclusiones y anulaciones? Esta acción no se puede deshacer.'))return;
+  try{exportJSON();}catch(e){showSuccessToast('No se pudo descargar la copia previa');return;}
   setSync('syncing');
-  var results=await Promise.all([sb.from('transactions').delete().eq('user_id',currentUser.id),sb.from('recurrence_exclusions').delete().eq('user_id',currentUser.id),sb.from('transaction_voids').delete().eq('user_id',currentUser.id)]);
-  if(results.some(function(r){return r.error;})){setSync('err');return;}
+  var cleared=await sb.rpc('clear_fintrack_data');
+  if(cleared.error){setSync('err');return;}
   transactions=[];recurrenceExclusions=[];transactionVoids=[];saveLocalCache();setSync('ok');refreshTab();
 }
 
 // TX MODAL
+var lastModalTrigger=null;
 function openModal(){
+  lastModalTrigger=document.activeElement;
   editingTxId=null;txTags=[];isRecurring=false;
   document.getElementById('modalTitle').textContent='Nueva transacción';
   var _dn=new Date();document.getElementById('txDate').value=_dn.getFullYear()+'-'+pad(_dn.getMonth()+1)+'-'+pad(_dn.getDate());
@@ -3211,6 +3265,7 @@ function openModal(){
   setTimeout(function(){document.getElementById('txAmount').focus();},300);
 }
 function editTx(id){
+  lastModalTrigger=document.activeElement;
   var tx=transactions.find(function(t){return t.id===id;});if(!tx)return;
   editingTxId=id;txTags=(tx.tags||[]).slice();isRecurring=!!tx.recurring;
   document.getElementById('modalTitle').textContent='Editar transacción';
@@ -3232,7 +3287,7 @@ function editTx(id){
   document.getElementById('modalBg').classList.add('visible');
   document.getElementById('modalBg').setAttribute('aria-hidden','false');
 }
-function closeModal(){document.getElementById('modalBg').classList.remove('visible');document.getElementById('modalBg').setAttribute('aria-hidden','true');document.getElementById('fabBtn').classList.remove('open');document.getElementById('fabBtn').focus();editingTxId=null;}
+function closeModal(){document.getElementById('modalBg').classList.remove('visible');document.getElementById('modalBg').setAttribute('aria-hidden','true');document.getElementById('fabBtn').classList.remove('open');if(lastModalTrigger&&document.contains(lastModalTrigger))lastModalTrigger.focus();editingTxId=null;}
 function setType(t){
   txType=t;
   document.getElementById('typeExp').className='type-btn'+(t==='expense'?' active-exp':'');
@@ -3285,9 +3340,9 @@ function renderTagsInput(){
     else if(e.key==='Backspace'&&!this.value&&txTags.length){txTags.pop();renderTagsInput();}
   });
 }
-async function syncRecurSeries(seriesId,editedId,fields){
+async function syncRecurSeries(seriesId,editedId,fromDate,fields){
   if(!seriesId)return;
-  var siblings=transactions.filter(function(t){return t.recur_series_id===seriesId&&t.id!==editedId;});
+  var siblings=transactions.filter(function(t){return t.recur_series_id===seriesId&&t.id!==editedId&&t.date>=fromDate;});
   siblings.forEach(function(t){Object.assign(t,fields);});
   if(siblings.length)saveLocalCache();
   if(isOffline){
@@ -3295,7 +3350,7 @@ async function syncRecurSeries(seriesId,editedId,fields){
     return;
   }
   try{
-    var r=await sb.from('transactions').update(fields).eq('recur_series_id',seriesId).neq('id',editedId);
+    var r=await sb.from('transactions').update(fields).eq('recur_series_id',seriesId).gte('date',fromDate).neq('id',editedId);
     if(r&&r.error){siblings.forEach(function(t){queueOp({type:'update',table:'transactions',id:t.id,data:fields});});setSync('err');}
   }catch(ex){
     siblings.forEach(function(t){queueOp({type:'update',table:'transactions',id:t.id,data:fields});});setSync('err');
@@ -3335,6 +3390,7 @@ async function saveTx(){
   if(editingTxId){
     var oldTx=transactions.find(function(t){return t.id===editingTxId;});
     if(payload.recurring&&oldTx&&!oldTx.recurring&&!oldTx.recur_series_id)payload.recur_series_id='rs'+Date.now()+Math.random().toString(36).slice(2,6);
+    if(payload.recurring)payload.recur_anchor_date=(oldTx&&oldTx.recur_anchor_date)||(oldTx&&oldTx.date)||payload.date;
     if(isOffline){var idx2=transactions.findIndex(function(t){return t.id===editingTxId;});if(idx2>=0)transactions[idx2]=Object.assign(transactions[idx2],payload);queueOp({type:'update',table:'transactions',id:editingTxId,data:payload});saveLocalCache();}
     else{
       try{
@@ -3351,13 +3407,13 @@ async function saveTx(){
       var applyFuture=confirm('¿Aplicar estos cambios también a las ocurrencias futuras de esta recurrencia?\n\nAceptar: esta y futuras. Cancelar: solo esta.');
       if(applyFuture){
         var seriesFields={type:payload.type,amount:payload.amount,category:payload.category,subcategory:payload.subcategory,note:payload.note,tags:payload.tags,account_id:payload.account_id,to_account_id:payload.to_account_id,recurring:payload.recurring,recur_interval:payload.recurring?payload.recur_interval:null,recur_end_date:payload.recurring?payload.recur_end_date:null};
-        try{await syncRecurSeries(seriesIdForSync,editingTxId,seriesFields);}catch(ex){}
+        try{await syncRecurSeries(seriesIdForSync,editingTxId,payload.date,seriesFields);}catch(ex){}
       }
     }
   } else {
     var newTxId='tx'+Date.now()+Math.random().toString(36).slice(2,6);
     var seriesId=(payload.recurring)?('rs'+Date.now()+Math.random().toString(36).slice(2,6)):null;
-    var tx=Object.assign({},payload,{id:newTxId,user_id:currentUser.id,recur_series_id:seriesId});
+    var tx=Object.assign({},payload,{id:newTxId,user_id:currentUser.id,recur_series_id:seriesId,recur_anchor_date:payload.recurring?payload.date:null});
     if(isOffline){transactions.unshift(tx);queueOp({type:'insert',table:'transactions',data:tx});saveLocalCache();}
     else{
       try{
@@ -3413,14 +3469,12 @@ async function deleteOnlyRecurringOccurrence(tx){
     return;
   }
   try{
-    var r=await sb.from('recurrence_exclusions').insert(exclusion).select();
-    // A duplicate means the occurrence was already marked as skipped: it is
-    // still safe to complete the transaction deletion.
-    if(r.error&&r.error.code!=='23505'){setSync('err');return;}
-    var savedExclusion=(r.data&&r.data[0])||exclusion;
-    if(!isRecurrenceExcluded(seriesKey,tx.date))recurrenceExclusions.push(savedExclusion);
-    saveLocalCache();
-    await deleteTx(tx.id,savedExclusion);
+    var r=await sb.rpc('skip_fintrack_recurring_occurrence',{target_id:tx.id,series_id:seriesKey});
+    if(r.error){setSync('err');return;}
+    if(!isRecurrenceExcluded(seriesKey,tx.date))recurrenceExclusions.push(exclusion);
+    transactionVoids.push({id:'tv'+Date.now(),user_id:currentUser.id,transaction_id:tx.id,transaction_data:Object.assign({},tx),voided_at:new Date().toISOString()});
+    transactions=transactions.filter(function(item){return item.id!==tx.id;});
+    saveLocalCache();setSync('ok');refreshTab();showUndoToast('Transacción eliminada',function(){undoRecurringOccurrenceDelete(tx,exclusion);});
   }catch(ex){setSync('err');}
 }
 async function deleteRecurringFromHere(tx){
@@ -3428,21 +3482,22 @@ async function deleteRecurringFromHere(tx){
   var all=transactions.filter(function(item){return item.recurring&&recurrenceSeriesKey(item)===seriesKey;});
   var past=all.filter(function(item){return item.date<tx.date;});
   var toDelete=all.filter(function(item){return item.date>=tx.date;});
-  var stopFields={recurring:false,recur_interval:null,recur_end_date:null};
+  var stopFields={recurring:false,recur_interval:null,recur_end_date:null,recur_series_id:null};
   setSync('syncing');
   if(isOffline){
     past.forEach(function(item){Object.assign(item,stopFields);queueOp({type:'update',table:'transactions',id:item.id,data:stopFields});});
-    toDelete.forEach(function(item){queueOp({type:'delete',table:'transactions',id:item.id});});
+    toDelete.forEach(function(item){var v={id:'tv'+Date.now()+Math.random().toString(36).slice(2,7),user_id:currentUser.id,transaction_id:item.id,transaction_data:Object.assign({},item),voided_at:new Date().toISOString()};transactionVoids.push(v);queueOp({type:'insert',table:'transaction_voids',data:v});queueOp({type:'delete',table:'transactions',id:item.id});});
     var deleteIds={};toDelete.forEach(function(item){deleteIds[item.id]=true;});
     transactions=transactions.filter(function(item){return !deleteIds[item.id];});
     saveLocalCache();setSync('err');refreshTab();showSuccessToast('Recurrencia eliminada');
     return;
   }
   try{
-    var updates=await Promise.all(past.map(function(item){return sb.from('transactions').update(stopFields).eq('id',item.id);}));
-    var deletions=await Promise.all(toDelete.map(function(item){return sb.from('transactions').delete().eq('id',item.id);}));
-    if(updates.some(function(r){return r.error;})||deletions.some(function(r){return r.error;})){setSync('err');return;}
+    if(!tx.recur_series_id){setSync('err');showSuccessToast('Actualiza esta recurrencia una vez antes de cancelarla');return;}
+    var cancelled=await sb.rpc('cancel_fintrack_recurrence_from',{target_id:tx.id});
+    if(cancelled.error){setSync('err');return;}
     past.forEach(function(item){Object.assign(item,stopFields);});
+    toDelete.forEach(function(item){transactionVoids.push({id:'tv'+Date.now()+Math.random().toString(36).slice(2,7),user_id:currentUser.id,transaction_id:item.id,transaction_data:Object.assign({},item),voided_at:new Date().toISOString()});});
     var deleteIds={};toDelete.forEach(function(item){deleteIds[item.id]=true;});
     transactions=transactions.filter(function(item){return !deleteIds[item.id];});
     saveLocalCache();setSync('ok');refreshTab();showSuccessToast('Recurrencia eliminada');
@@ -3497,7 +3552,7 @@ async function restoreTx(tx){
 var undoToastTimer=null;
 function showSuccessToast(msg){
   var t=document.getElementById('undoToast');
-  if(!t){t=document.createElement('div');t.id='undoToast';t.className='undo-toast';document.body.appendChild(t);}
+  if(!t){t=document.createElement('div');t.id='undoToast';t.className='undo-toast';t.setAttribute('role','status');t.setAttribute('aria-live','polite');document.body.appendChild(t);}
   t.innerHTML='<span>'+htmlEscape(msg)+'</span>';
   clearTimeout(undoToastTimer);
   requestAnimationFrame(function(){t.classList.add('show');});
@@ -3505,7 +3560,7 @@ function showSuccessToast(msg){
 }
 function showUndoToast(msg,onUndo){
   var t=document.getElementById('undoToast');
-  if(!t){t=document.createElement('div');t.id='undoToast';t.className='undo-toast';document.body.appendChild(t);}
+  if(!t){t=document.createElement('div');t.id='undoToast';t.className='undo-toast';t.setAttribute('role','status');t.setAttribute('aria-live','polite');document.body.appendChild(t);}
   t.innerHTML='<span>'+htmlEscape(msg)+'</span><button class="undo-toast-btn" id="undoToastBtn">Deshacer</button>';
   var done=false;
   document.getElementById('undoToastBtn').onclick=function(){if(done)return;done=true;clearTimeout(undoToastTimer);t.classList.remove('show');onUndo();};
@@ -3524,17 +3579,23 @@ async function saveBudget(catId){
   var my=monthKey(viewYear,viewMonth);
   var existing=budgets.find(function(b){return b.category_id===catId&&!b.is_total&&b.month_year===my;});
   setSync('syncing');
+  if(isOffline){
+    if(existing){existing.amount=val;existing.note=note;queueOp({type:'update',table:'budgets',id:existing.id,data:{amount:val,note:note}});}
+    else{var offlineBudget={id:'b'+Date.now(),category_id:catId,amount:val,is_total:false,month_year:my,note:note,user_id:currentUser.id};budgets.push(offlineBudget);queueOp({type:'insert',table:'budgets',data:offlineBudget});}
+    document.getElementById('budgetform_'+pfx+catId).style.display='none';saveLocalCache();setSync('err');showSuccessToast('Presupuesto pendiente de sincronizar');refreshTab();return;
+  }
   if(existing){var ru=await sb.from('budgets').update({amount:val,note:note}).eq('id',existing.id);if(ru.error){setSync('err');return;}existing.amount=val;existing.note=note;}
   else{var nb={id:'b'+Date.now(),category_id:catId,amount:val,is_total:false,month_year:my,note:note,user_id:currentUser.id};var r=await sb.from('budgets').insert(nb).select();if(r.error){setSync('err');return;}budgets.push(r.data?r.data[0]:nb);}
   document.getElementById('budgetform_'+pfx+catId).style.display='none';
   saveLocalCache();setSync('ok');showSuccessToast('✓ Presupuesto guardado');refreshTab();
 }
-async function addCat(){var inp=document.getElementById('newCatInput');var name=inp.value.trim().toLowerCase();if(!name)return;if(categories.some(function(c){return String(c.name).trim().toLocaleLowerCase()===name.toLocaleLowerCase();})){alert('Ya existe una categoría con ese nombre');return;}var cat={id:'c'+Date.now(),name:name,color:PALETTE[categories.length%PALETTE.length],subcats:[],position:categories.length,user_id:currentUser.id};setSync('syncing');var r=await sb.from('categories').insert(cat).select();if(!r.error){categories.push(r.data[0]||cat);saveLocalCache();setSync('ok');inp.value='';refreshTab();}else setSync('err');}
+async function addCat(){var inp=document.getElementById('newCatInput');var name=inp.value.trim().toLowerCase();var kind=(document.getElementById('newCatKind')||{}).value||'expense';if(!name)return;if(name.length>80){showSuccessToast('El nombre es demasiado largo');return;}if(categories.some(function(c){return String(c.name).trim().toLocaleLowerCase()===name.toLocaleLowerCase();})){alert('Ya existe una categoría con ese nombre');return;}var cat={id:'c'+Date.now(),name:name,color:PALETTE[categories.length%PALETTE.length],subcats:[],position:categories.length,kind:kind,user_id:currentUser.id};setSync('syncing');if(isOffline){categories.push(cat);if(!queueOp({type:'insert',table:'categories',data:cat})){categories.pop();return;}saveLocalCache();inp.value='';setSync('err');refreshTab();return;}var r=await sb.from('categories').insert(cat).select();if(!r.error){categories.push(r.data[0]||cat);saveLocalCache();setSync('ok');inp.value='';refreshTab();}else setSync('err');}
 
 async function archiveCat(id){
   var cat=categories.find(function(c){return c.id===id;});if(!cat)return;
   var newArchived=!cat.archived;
   setSync('syncing');
+  if(isOffline){cat.archived=newArchived;if(queueOp({type:'update',table:'categories',id:id,data:{archived:newArchived}})){saveLocalCache();setSync('err');refreshTab();}return;}
   var r=await sb.from('categories').update({archived:newArchived}).eq('id',id);
   if(!r.error){cat.archived=newArchived;saveLocalCache();setSync('ok');refreshTab();}
   else setSync('err');
@@ -3573,7 +3634,7 @@ async function restoreCat(cat,catBudgets,affectedTx){
   }
   saveLocalCache();setSync('ok');refreshTab();
 }
-async function addSubcat(catId){var pfx=IS_DESKTOP?'dt':'';var inp=document.getElementById('subinput_'+pfx+catId);var name=inp.value.trim().toLowerCase();if(!name)return;var cat=categories.find(function(c){return c.id===catId;});if(!cat||cat.subcats.includes(name))return;cat.subcats.push(name);setSync('syncing');var r=await sb.from('categories').update({subcats:cat.subcats}).eq('id',catId);if(!r.error){saveLocalCache();setSync('ok');inp.value='';refreshTab();}else{setSync('err');var ix=cat.subcats.indexOf(name);if(ix>=0)cat.subcats.splice(ix,1);}}
+async function addSubcat(catId){var pfx=IS_DESKTOP?'dt':'';var inp=document.getElementById('subinput_'+pfx+catId);var name=inp.value.trim().toLowerCase();if(!name)return;var cat=categories.find(function(c){return c.id===catId;});if(!cat||name.length>60||(cat.subcats||[]).some(function(s){return String(s).toLowerCase()===name.toLowerCase();}))return;cat.subcats.push(name);setSync('syncing');if(isOffline){if(queueOp({type:'update',table:'categories',id:catId,data:{subcats:cat.subcats}})){saveLocalCache();inp.value='';setSync('err');refreshTab();}return;}var r=await sb.from('categories').update({subcats:cat.subcats}).eq('id',catId);if(!r.error){saveLocalCache();setSync('ok');inp.value='';refreshTab();}else{setSync('err');var ix=cat.subcats.indexOf(name);if(ix>=0)cat.subcats.splice(ix,1);}}
 async function deleteSubcat(catId,sub){var cat=categories.find(function(c){return c.id===catId;});if(!cat)return;if(!confirm('¿Quitar esta subcategoría de las nuevas transacciones? Los movimientos históricos conservarán su referencia.'))return;var previous=(cat.subcats||[]).slice();cat.subcats=previous.filter(function(s){return s!==sub;});setSync('syncing');var r=await sb.from('categories').update({subcats:cat.subcats}).eq('id',catId);if(!r.error){saveLocalCache();setSync('ok');refreshTab();}else{setSync('err');cat.subcats=previous;}}
 async function saveCatColor(catId,color){var cat=categories.find(function(c){return c.id===catId;});if(!cat)return;var prev=cat.color;cat.color=color;setSync('syncing');var r=await sb.from('categories').update({color:color}).eq('id',catId);if(!r.error){saveLocalCache();setSync('ok');refreshTab();}else{setSync('err');cat.color=prev;}}
 
@@ -3597,11 +3658,12 @@ function exportDailyBalanceRange(from,to){
   return arr;
 }
 function openExportModal(){
+  lastModalTrigger=document.activeElement;
   var mEl=document.getElementById('exportMonth');if(mEl&&!mEl.value)mEl.value=viewYear+'-'+pad(viewMonth+1);
   onExportScopeChange();
-  document.getElementById('exportModalBg').classList.add('visible');
+  document.getElementById('exportModalBg').classList.add('visible');document.getElementById('exportModalBg').setAttribute('aria-hidden','false');
 }
-function closeExportModal(){document.getElementById('exportModalBg').classList.remove('visible');}
+function closeExportModal(){document.getElementById('exportModalBg').classList.remove('visible');document.getElementById('exportModalBg').setAttribute('aria-hidden','true');if(lastModalTrigger&&document.contains(lastModalTrigger))lastModalTrigger.focus();}
 function onExportScopeChange(){
   var s=document.getElementById('exportScope').value;
   document.getElementById('exportMonthWrap').style.display=s==='month'?'block':'none';
@@ -3631,8 +3693,8 @@ function loadScript(src,ms){
 async function runExport(fmt){
   var range=exportRangeFromUI();if(!range)return;
   try{
-    if(fmt==='pdf'&&typeof window.jspdf==='undefined')await loadScript('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js');
-    if(fmt==='xlsx'&&typeof ExcelJS==='undefined')await loadScript('https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js');
+    if(fmt==='pdf'&&typeof window.jspdf==='undefined')await loadScript('./vendor/jspdf.umd.min.js');
+    if(fmt==='xlsx'&&typeof ExcelJS==='undefined')await loadScript('./vendor/exceljs.min.js');
   }catch(e){alert('No se pudo cargar la librería necesaria. Comprueba tu conexión e inténtalo de nuevo.');return;}
   if(fmt==='pdf')exportPDF(range);else if(fmt==='xlsx')exportXLSX(range);else if(fmt==='csv')exportCSV(range);
   closeExportModal();
@@ -3809,6 +3871,7 @@ function validateImportData(d){
   function isNum(v){return typeof v==='number'&&isFinite(v);}
   function isId(v){return typeof v==='string'&&v.length>=1&&v.length<=100&&/^[A-Za-z0-9_|.-]+$/.test(v);}
   function isColor(v){return typeof v==='string'&&/^#[0-9a-fA-F]{3,8}$/.test(v);}
+  function isDate(v){if(!isStr(v,10)||!/^\d{4}-\d{2}-\d{2}$/.test(v))return false;var d2=new Date(v+'T12:00:00');return !isNaN(d2)&&d2.toISOString().slice(0,10)===v;}
   function checkDupIds(arr,label){
     var seen={};
     arr.forEach(function(x,i){if(x&&x.id){if(seen[x.id])throw new Error(label+' #'+i+': id duplicado ('+x.id+')');seen[x.id]=true;}});
@@ -3822,6 +3885,7 @@ function validateImportData(d){
     if(c.subcats!==undefined&&(!Array.isArray(c.subcats)||c.subcats.some(function(s){return !isStr(s,60);})))throw new Error('categoría #'+i+': subcategorías inválidas');
     if(c.position!==undefined&&!isNum(c.position))throw new Error('categoría #'+i+': posición inválida');
     if(c.archived!==undefined&&typeof c.archived!=='boolean')throw new Error('categoría #'+i+': estado archivado inválido');
+    if(c.kind!==undefined&&['expense','income'].indexOf(c.kind)===-1)throw new Error('categoría #'+i+': tipo inválido');
   });
   checkDupIds(d.categories,'categoría');
   var validTypes=['expense','income','transfer'];
@@ -3833,9 +3897,9 @@ function validateImportData(d){
     if(t.category!=null&&t.category!=='transfer'&&!isId(t.category))throw new Error('transacción #'+i+': categoría inválida');
     if(t.subcategory!=null&&!isStr(t.subcategory,60))throw new Error('transacción #'+i+': subcategoría inválida');
     if(t.note!=null&&!isStr(t.note,1000))throw new Error('transacción #'+i+': nota demasiado larga');
-    if(!isStr(t.date,10)||!/^\d{4}-\d{2}-\d{2}$/.test(t.date))throw new Error('transacción #'+i+': fecha inválida');
+    if(!isDate(t.date))throw new Error('transacción #'+i+': fecha inválida');
     if(t.recur_interval!=null&&validIntervals.indexOf(t.recur_interval)===-1)throw new Error('transacción #'+i+': intervalo de recurrencia inválido');
-    if(t.recur_end_date!=null&&!/^\d{4}-\d{2}-\d{2}$/.test(t.recur_end_date))throw new Error('transacción #'+i+': fecha de fin inválida');
+    if(t.recur_end_date!=null&&!isDate(t.recur_end_date))throw new Error('transacción #'+i+': fecha de fin inválida');
     if(t.recur_series_id!=null&&!isId(t.recur_series_id))throw new Error('transacción #'+i+': id de serie inválido');
     if(t.tags!==undefined&&(!Array.isArray(t.tags)||t.tags.some(function(g){return !isStr(g,40);})))throw new Error('transacción #'+i+': etiquetas inválidas');
     if(t.account_id!=null&&!isId(t.account_id))throw new Error('transacción #'+i+': cuenta inválida');
@@ -3880,11 +3944,17 @@ function validateImportData(d){
     });
     checkDupIds(d.recurrenceExclusions,'exclusiÃ³n');
   }
+  if(d.transactionVoids!==undefined){
+    if(!Array.isArray(d.transactionVoids))throw new Error('anulaciones: formato inválido');
+    d.transactionVoids.forEach(function(v,i){if(!v||!isId(v.id)||!isId(v.transaction_id)||!v.transaction_data||typeof v.transaction_data!=='object'||!isStr(v.voided_at,40))throw new Error('anulación #'+i+': datos inválidos');});
+    checkDupIds(d.transactionVoids,'anulación');
+  }
 }
 async function importJSON(){
   var raw=document.getElementById('importArea').value.trim();var s=document.getElementById('importStatus');
   function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
   try{
+    if(raw.length>10485760)throw new Error('la copia supera el tamaño máximo de 10 MB');
     var d=JSON.parse(raw);
     validateImportData(d);
     var uid=currentUser.id;
@@ -4368,6 +4438,11 @@ function enableKeyboardControls(){
 enableKeyboardControls();
 document.getElementById('modalBg').addEventListener('click',function(e){if(e.target===document.getElementById('modalBg'))closeModal();});
 document.addEventListener('keydown',function(e){
+  var openBg=document.querySelector('.modal-bg.visible');
+  if(e.key==='Tab'&&openBg){
+    var focusable=openBg.querySelectorAll('button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])');
+    if(focusable.length){var first=focusable[0],last=focusable[focusable.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}
+  }
   if(e.key!=='Escape')return;
   if(document.getElementById('recurrenceDeleteBg').classList.contains('visible')){closeRecurringDeleteDialog();return;}
   if(document.getElementById('exportModalBg').classList.contains('visible')){closeExportModal();return;}
