@@ -2926,7 +2926,7 @@ async function applyBalanceAdjustment(accountId){
   var adjustment=null;
   if(Math.abs(diff)>0.005){
     var adjustmentType=diff<0?'expense':'income';
-    adjustment={id:'txbal_'+item.id,type:adjustmentType,amount:Math.abs(diff),category:null,subcategory:null,note:'Actualización de saldo',date:date,recurring:false,recur_interval:null,recur_end_date:null,recur_series_id:null,recur_anchor_date:null,tags:[],account_id:accountId,to_account_id:null,is_balance_adjustment:true,balance_adjustment_patrimony_id:item.id,user_id:currentUser.id};
+    adjustment={id:'txbal_'+item.id,type:adjustmentType,amount:Math.abs(diff),category:balanceAdjustmentCategorySpec(adjustmentType).id,subcategory:null,note:'Actualización de saldo',date:date,recurring:false,recur_interval:null,recur_end_date:null,recur_series_id:null,recur_anchor_date:null,tags:[],account_id:accountId,to_account_id:null,is_balance_adjustment:true,balance_adjustment_patrimony_id:item.id,user_id:currentUser.id};
   }
   if(isOffline){
     patrimony.push(item);if(!queueOp({type:'insert',table:'patrimony',data:item})){patrimony.pop();return;}
