@@ -2852,6 +2852,8 @@ function accountLatestReset(accountId,yr,mo){
   return candidates[candidates.length-1];
 }
 function accountTxDelta(t,accountId){
+  // Los ajustes automáticos cuentan en los totales, no en el saldo teórico.
+  if(t.is_balance_adjustment)return 0;
   if(t.type==='transfer'){
     var d=0;
     var toExists=t.to_account_id&&accounts.some(function(a){return a.id===t.to_account_id;});
@@ -2863,7 +2865,7 @@ function accountTxDelta(t,accountId){
   if(!(t.account_id===accountId||(!t.account_id&&accounts.length===1)))return 0;
   return t.type==='expense'?-Number(t.amount):Number(t.amount);
 }
-function accountTouchesAccount(t,accountId){return t.account_id===accountId||t.to_account_id===accountId||(!t.account_id&&t.type!=='transfer'&&accounts.length===1);}
+function accountTouchesAccount(t,accountId){return !t.is_balance_adjustment&&(t.account_id===accountId||t.to_account_id===accountId||(!t.account_id&&t.type!=='transfer'&&accounts.length===1));}
 function accountVoidDelta(voided,accountId,baseDate,asOfDate){
   var tx=voided&&voided.transaction_data;if(!tx||!accountTouchesAccount(tx,accountId))return 0;
   var voidedDate=String(voided.voided_at||'').slice(0,10);
@@ -2916,17 +2918,48 @@ async function applyBalanceAdjustment(accountId){
   var diff=real-theoretical;
   setSync('syncing');var s=document.getElementById('patStatus');if(s){s.textContent='guardando...';s.className='status-msg';}
   var item={id:'p'+accountId+Date.now()+Math.random().toString(36).slice(2,6),account_id:accountId,year:yr,month:mo,amount:real,theoretical_amount:theoretical,reset_date:date,user_id:currentUser.id};
-  if(isOffline){patrimony.push(item);if(!queueOp({type:'insert',table:'patrimony',data:item})){patrimony.pop();return;}saveLocalCache();setSync('err');if(s){s.textContent='guardado (pendiente de sincronizar)';s.className='status-msg status-ok';}refreshTab();return;}
-  var r=await sb.from('patrimony').insert(item).select();
+  var adjustment=null;
+  if(Math.abs(diff)>0.005){
+    var adjustmentType=diff<0?'expense':'income';
+    var categoryId=await ensureBalanceAdjustmentCategory(adjustmentType);
+    if(!categoryId){setSync('err');return;}
+    adjustment={id:'txbal_'+item.id,type:adjustmentType,amount:Math.abs(diff),category:categoryId,subcategory:null,note:'Actualización de saldo',date:date,recurring:false,recur_interval:null,recur_end_date:null,recur_series_id:null,recur_anchor_date:null,tags:[],account_id:accountId,to_account_id:null,is_balance_adjustment:true,balance_adjustment_patrimony_id:item.id,user_id:currentUser.id};
+  }
+  if(isOffline){
+    patrimony.push(item);if(!queueOp({type:'insert',table:'patrimony',data:item})){patrimony.pop();return;}
+    if(adjustment){transactions.unshift(adjustment);if(!queueOp({type:'insert',table:'transactions',data:adjustment})){transactions.shift();patrimony.pop();return;}}
+    saveLocalCache();setSync('err');if(s){s.textContent='guardado (pendiente de sincronizar)';s.className='status-msg status-ok';}refreshTab();return;
+  }
+  var r=await sb.rpc('save_fintrack_balance_adjustment',{snapshot:item,adjustment:adjustment});
   if(r.error){setSync('err');if(s){s.textContent='✗ error';s.className='status-msg status-err';}}
   else{
-    var saved=r.data?r.data[0]:item;
+    var saved=r.data&&r.data.patrimony?r.data.patrimony:item;
     patrimony.push(saved);
+    if(r.data&&r.data.transaction)transactions.unshift(r.data.transaction);
     saveLocalCache();setSync('ok');
     var diffMsg=Math.abs(diff)>0.01?(diff>0?'+':'')+fmt(diff)+' de desfase':'sin desfase';
     if(s){s.textContent='✓ saldo actualizado · '+diffMsg;s.className='status-msg status-ok';}
     refreshTab();
   }
+}
+function balanceAdjustmentCategorySpec(type){
+  return type==='income'
+    ?{id:'cat_balance_adjustment_income',name:'Ajuste de saldo (ingreso)',color:'#34C759',kind:'income'}
+    :{id:'cat_balance_adjustment_expense',name:'Ajuste de saldo (gasto)',color:'#FF3B30',kind:'expense'};
+}
+async function ensureBalanceAdjustmentCategory(type){
+  var spec=balanceAdjustmentCategorySpec(type);
+  if(categories.some(function(c){return c.id===spec.id;}))return spec.id;
+  var category={id:spec.id,name:spec.name,color:spec.color,subcats:[],position:categories.length,archived:true,kind:spec.kind,user_id:currentUser.id};
+  if(isOffline){
+    categories.push(category);
+    if(!queueOp({type:'insert',table:'categories',data:category})){categories.pop();return null;}
+    return category.id;
+  }
+  var r=await sb.from('categories').upsert(category,{onConflict:'id'}).select();
+  if(r.error)return null;
+  categories.push(r.data&&r.data[0]?r.data[0]:category);
+  return category.id;
 }
 async function addAccount(){var inp=document.getElementById('newAccInput');var name=inp.value.trim();if(!name||name.length>80)return;var acc={id:'acc'+Date.now()+Math.random().toString(36).slice(2,6),name:name,color:PALETTE[accounts.length%PALETTE.length],position:accounts.length,user_id:currentUser.id};setSync('syncing');if(isOffline){accounts.push(acc);if(!queueOp({type:'insert',table:'accounts',data:acc})){accounts.pop();return;}saveLocalCache();setSync('err');inp.value='';refreshTab();return;}var r=await sb.from('accounts').insert(acc).select();if(!r.error){accounts.push(r.data[0]||acc);saveLocalCache();setSync('ok');inp.value='';refreshTab();}else setSync('err');}
 async function deleteAccount(id){
@@ -2954,7 +2987,25 @@ async function restoreAccount(acc,pats){
   if(pats.length){var r2=await sb.from('patrimony').insert(pats);if(!r2.error)patrimony=patrimony.concat(pats);}
   saveLocalCache();setSync('ok');refreshTab();
 }
-async function deleteAdjustment(id){if(isLockedAdjust(id)){alert('Este saldo inicial es fijo y no se puede eliminar.');return;}if(!confirm('¿Eliminar este ajuste del historial?'))return;setSync('syncing');var r=await sb.from('patrimony').delete().eq('id',id);if(!r.error){patrimony=patrimony.filter(function(p){return p.id!==id;});saveLocalCache();setSync('ok');refreshTab();}else setSync('err');}
+async function deleteAdjustment(id){
+  if(isLockedAdjust(id)){alert('Este saldo inicial es fijo y no se puede eliminar.');return;}
+  if(!confirm('¿Eliminar este ajuste y su actualización de saldo del historial?'))return;
+  var linked=transactions.filter(function(t){return t.balance_adjustment_patrimony_id===id;});
+  setSync('syncing');
+  if(isOffline){
+    linked.forEach(function(t){queueOp({type:'delete',table:'transactions',id:t.id});});
+    if(!queueOp({type:'delete',table:'patrimony',id:id}))return;
+    transactions=transactions.filter(function(t){return t.balance_adjustment_patrimony_id!==id;});
+    patrimony=patrimony.filter(function(p){return p.id!==id;});
+    saveLocalCache();setSync('err');refreshTab();return;
+  }
+  var r=await sb.rpc('delete_fintrack_balance_adjustment',{snapshot_id:id});
+  if(!r.error){
+    transactions=transactions.filter(function(t){return t.balance_adjustment_patrimony_id!==id;});
+    patrimony=patrimony.filter(function(p){return p.id!==id;});
+    saveLocalCache();setSync('ok');refreshTab();
+  }else setSync('err');
+}
 
 // ── NATIVE MINI-CHARTS (no external library) ───────────────────
 function chartCssVar(name,fallback){var v=getComputedStyle(document.documentElement).getPropertyValue(name).trim();return v||fallback;}
