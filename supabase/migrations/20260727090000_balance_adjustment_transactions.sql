@@ -42,6 +42,30 @@ $$;
 
 grant execute on function public.delete_fintrack_balance_adjustment(text) to authenticated;
 
+-- Repara ajustes antiguos o sincronizados parcialmente. Es idempotente:
+-- cada fotografía sólo puede tener un movimiento asociado.
+create or replace function public.repair_fintrack_balance_adjustments()
+returns setof public.transactions
+language plpgsql security invoker set search_path=public as $$
+declare uid uuid:=auth.uid(); p record; saved public.transactions;
+begin
+  if uid is null then raise exception 'Usuario no autenticado'; end if;
+  for p in
+    select p.* from public.patrimony p
+    where p.user_id=uid and p.theoretical_amount is not null
+      and abs(p.amount-p.theoretical_amount)>0.005
+      and not exists (select 1 from public.transactions t where t.user_id=uid and t.balance_adjustment_patrimony_id=p.id)
+  loop
+    insert into public.transactions(id,type,amount,category,subcategory,note,date,recurring,tags,account_id,to_account_id,is_balance_adjustment,balance_adjustment_patrimony_id,user_id)
+    values ('txbal_'||p.id,case when p.amount-p.theoretical_amount<0 then 'expense' else 'income' end,abs(p.amount-p.theoretical_amount),null,null,'Actualización de saldo',p.reset_date,false,'[]'::jsonb,p.account_id,null,true,p.id,uid)
+    returning * into saved;
+    return next saved;
+  end loop;
+end;
+$$;
+
+grant execute on function public.repair_fintrack_balance_adjustments() to authenticated;
+
 -- Las restauraciones completas mantienen el carácter de conciliación.
 create or replace function public.replace_fintrack_data(payload jsonb)
 returns void language plpgsql security invoker set search_path=public as $$

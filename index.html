@@ -1925,6 +1925,9 @@ async function loadData(){
     if(failedRead)throw failedRead.error;
     categories=res[0].data||[];transactions=res[1].data||[];accounts=res[2].data||[];
     patrimony=res[3].data||[];budgets=res[4].data||[];recurrenceExclusions=res[5].data||[];transactionVoids=res[6].data||[];
+    // Repara movimientos de actualización que falten en ajustes antiguos o
+    // que quedaron a medias por una caída de red.
+    try{var repaired=await withLoadTimeout(sb.rpc('repair_fintrack_balance_adjustments'),5000,'reparación de ajustes');if(!repaired.error&&repaired.data&&repaired.data.length)transactions=transactions.concat(repaired.data);}catch(repairError){}
     
     if(categories.length===0){var cd2=DEFAULT_CATS.map(function(c){return Object.assign({},c,{user_id:uid});});var ins=await withLoadTimeout(sb.from('categories').insert(cd2).select(),LOAD_REMOTE_TIMEOUT_MS,'La creación de categorías iniciales ha tardado demasiado');if(ins.error)throw ins.error;categories=ins.data||cd2;}
     if(!isActiveLoad(uid,generation))return false;
