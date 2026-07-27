@@ -53,8 +53,8 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;}
   --shadow-sm:0 8px 22px rgba(0,0,0,0.4),0 1px 2px rgba(0,0,0,0.25);
   --nav-glass:rgba(70,70,78,0.20);
 }}
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;letter-spacing:-0.1px;font-variant-numeric:tabular-nums;}
-body{display:flex;flex-direction:column;max-width:430px;margin:0 auto;min-height:100dvh;position:relative;}
+html,body{height:100%;max-width:100%;overflow-x:hidden;overscroll-behavior-x:none;background:var(--bg);color:var(--text);font-family:var(--font);font-size:16px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;letter-spacing:-0.1px;font-variant-numeric:tabular-nums;}
+body{display:flex;flex-direction:column;width:100%;max-width:430px;margin:0 auto;min-height:100dvh;position:relative;}
 
 /* AMBIENT MESH BACKGROUND — gives the glass something to refract */
 .mesh-bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;}
@@ -2919,19 +2919,31 @@ async function applyBalanceAdjustment(accountId){
   setSync('syncing');var s=document.getElementById('patStatus');if(s){s.textContent='guardando...';s.className='status-msg';}
   var item={id:'p'+accountId+Date.now()+Math.random().toString(36).slice(2,6),account_id:accountId,year:yr,month:mo,amount:real,theoretical_amount:theoretical,reset_date:date,user_id:currentUser.id};
   var adjustment=null;
-  if(Math.abs(diff)>0.005){
-    var adjustmentType=diff<0?'expense':'income';
-    var categoryId=await ensureBalanceAdjustmentCategory(adjustmentType);
-    if(!categoryId){setSync('err');return;}
-    adjustment={id:'txbal_'+item.id,type:adjustmentType,amount:Math.abs(diff),category:categoryId,subcategory:null,note:'Actualización de saldo',date:date,recurring:false,recur_interval:null,recur_end_date:null,recur_series_id:null,recur_anchor_date:null,tags:[],account_id:accountId,to_account_id:null,is_balance_adjustment:true,balance_adjustment_patrimony_id:item.id,user_id:currentUser.id};
-  }
+  try{
+    if(Math.abs(diff)>0.005){
+      var adjustmentType=diff<0?'expense':'income';
+      var categoryId=await withLoadTimeout(ensureBalanceAdjustmentCategory(adjustmentType),8000,'No se pudo preparar la actualización de saldo');
+      if(!categoryId)throw new Error('No se pudo preparar la actualización de saldo');
+      adjustment={id:'txbal_'+item.id,type:adjustmentType,amount:Math.abs(diff),category:categoryId,subcategory:null,note:'Actualización de saldo',date:date,recurring:false,recur_interval:null,recur_end_date:null,recur_series_id:null,recur_anchor_date:null,tags:[],account_id:accountId,to_account_id:null,is_balance_adjustment:true,balance_adjustment_patrimony_id:item.id,user_id:currentUser.id};
+    }
+  }catch(e){setSync('err');if(s){s.textContent='✕ '+(e.message||'error al preparar el ajuste');s.className='status-msg status-err';}return;}
   if(isOffline){
     patrimony.push(item);if(!queueOp({type:'insert',table:'patrimony',data:item})){patrimony.pop();return;}
     if(adjustment){transactions.unshift(adjustment);if(!queueOp({type:'insert',table:'transactions',data:adjustment})){transactions.shift();patrimony.pop();return;}}
     saveLocalCache();setSync('err');if(s){s.textContent='guardado (pendiente de sincronizar)';s.className='status-msg status-ok';}refreshTab();return;
   }
-  var r=await sb.rpc('save_fintrack_balance_adjustment',{snapshot:item,adjustment:adjustment});
-  if(r.error){setSync('err');if(s){s.textContent='✗ error';s.className='status-msg status-err';}}
+  var r;
+  try{
+    r=await withLoadTimeout(sb.rpc('save_fintrack_balance_adjustment',{snapshot:item,adjustment:adjustment}),8000,'Tiempo de espera al guardar el ajuste');
+    if(r.error)throw new Error(r.error.message||'No se pudo guardar el ajuste');
+  }catch(rpcError){
+    // Compatibilidad: si la función atómica aún no está disponible, usa el
+    // guardado habitual y deshace la fotografía si falla su movimiento asociado.
+    try{r=await saveBalanceAdjustmentFallback(item,adjustment);}catch(fallbackError){
+      setSync('err');if(s){s.textContent='✕ '+(fallbackError.message||rpcError.message||'error al guardar');s.className='status-msg status-err';}return;
+    }
+  }
+  if(r.error){setSync('err');if(s){s.textContent='✗ '+(r.error.message||'error');s.className='status-msg status-err';}}
   else{
     var saved=r.data&&r.data.patrimony?r.data.patrimony:item;
     patrimony.push(saved);
@@ -2960,6 +2972,17 @@ async function ensureBalanceAdjustmentCategory(type){
   if(r.error)return null;
   categories.push(r.data&&r.data[0]?r.data[0]:category);
   return category.id;
+}
+async function saveBalanceAdjustmentFallback(item,adjustment){
+  var p=await withLoadTimeout(sb.from('patrimony').insert(item).select(),8000,'Tiempo de espera al guardar el saldo real');
+  if(p.error)throw new Error(p.error.message||'No se pudo guardar el saldo real');
+  var saved=p.data&&p.data[0]?p.data[0]:item,tx=null;
+  if(adjustment){
+    var tr=await withLoadTimeout(sb.from('transactions').insert(adjustment).select(),8000,'Tiempo de espera al guardar la actualización de saldo');
+    if(tr.error){await sb.from('patrimony').delete().eq('id',item.id);throw new Error(tr.error.message||'No se pudo guardar la actualización de saldo');}
+    tx=tr.data&&tr.data[0]?tr.data[0]:adjustment;
+  }
+  return {patrimony:saved,transaction:tx};
 }
 async function addAccount(){var inp=document.getElementById('newAccInput');var name=inp.value.trim();if(!name||name.length>80)return;var acc={id:'acc'+Date.now()+Math.random().toString(36).slice(2,6),name:name,color:PALETTE[accounts.length%PALETTE.length],position:accounts.length,user_id:currentUser.id};setSync('syncing');if(isOffline){accounts.push(acc);if(!queueOp({type:'insert',table:'accounts',data:acc})){accounts.pop();return;}saveLocalCache();setSync('err');inp.value='';refreshTab();return;}var r=await sb.from('accounts').insert(acc).select();if(!r.error){accounts.push(r.data[0]||acc);saveLocalCache();setSync('ok');inp.value='';refreshTab();}else setSync('err');}
 async function deleteAccount(id){
