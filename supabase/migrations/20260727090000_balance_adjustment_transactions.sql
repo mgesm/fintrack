@@ -59,6 +59,7 @@ begin
     where pat.user_id=uid and pat.theoretical_amount is not null
       and abs(pat.amount-pat.theoretical_amount)>0.005
       and not exists (select 1 from public.transactions t where t.user_id=uid and t.balance_adjustment_patrimony_id=pat.id)
+      and not exists (select 1 from public.transaction_voids v where v.user_id=uid and (v.transaction_id='txbal_'||pat.id or v.transaction_data->>'balance_adjustment_patrimony_id'=pat.id))
   loop
     catid:=case when p.amount-p.theoretical_amount<0 then 'cat_balance_adjustment_expense' else 'cat_balance_adjustment_income' end;
     insert into public.transactions(id,type,amount,category,subcategory,note,date,recurring,tags,account_id,to_account_id,is_balance_adjustment,balance_adjustment_patrimony_id,user_id)
@@ -81,6 +82,7 @@ begin
     where pat.theoretical_amount is not null
       and abs(pat.amount-pat.theoretical_amount)>0.005
       and not exists (select 1 from public.transactions t where t.user_id=pat.user_id and t.balance_adjustment_patrimony_id=pat.id)
+      and not exists (select 1 from public.transaction_voids v where v.user_id=pat.user_id and (v.transaction_id='txbal_'||pat.id or v.transaction_data->>'balance_adjustment_patrimony_id'=pat.id))
   loop
     catid:=case when p.amount-p.theoretical_amount<0 then 'cat_balance_adjustment_expense' else 'cat_balance_adjustment_income' end;
     insert into public.categories(id,name,color,subcats,position,archived,kind,user_id)
