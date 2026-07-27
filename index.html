@@ -333,6 +333,7 @@ body{display:flex;flex-direction:column;width:100%;max-width:430px;margin:0 auto
 .legend{display:flex;flex-wrap:wrap;gap:6px 16px;padding:10px 16px 4px;justify-content:center;}
 .leg-item{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--text2);}
 .leg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.balance-adjustment-note{width:100%;text-align:center;margin:8px 0 0;font-size:12px;font-weight:600;min-height:16px;}
 
 /* DONUT ⇄ HEATMAP FLIP */
 .flip-card{margin:4px 16px 0;perspective:1600px;}
@@ -1176,7 +1177,7 @@ if('serviceWorker' in navigator){
    <div class="flip-inner" id="homeFlipInner">
     <div class="chart-area flip-face flip-front" onclick="onFrontClick(event)">
       <div class="donut-container"><canvas id="donutCanvas" width="190" height="190"></canvas><div class="donut-center"><div class="dc-pct" id="dcPct">GASTOS</div><div class="dc-amount" id="dcAmt">0 €</div><div class="dc-cat" id="dcCat"></div></div></div>
-      <div class="legend" id="legend"></div>
+      <div class="legend" id="legend"></div><div class="balance-adjustment-note" id="balanceAdjustmentNote"></div>
     </div>
     <div class="chart-area flip-face flip-back" onclick="onBackClick(event)">
       <div class="heatmap-head"><span class="heatmap-title" id="hmTitle">Gasto diario</span><span class="heatmap-tot" id="hmTot"></span></div>
@@ -2088,7 +2089,7 @@ function render(){
   document.getElementById('monthLabel').textContent=homeAnnualMode?(''+viewYear):(capitalize(MONTHS[viewMonth])+' '+viewYear);
   var hab=document.getElementById('homeAnnualBtn');if(hab)hab.classList.toggle('active',homeAnnualMode);
   var txs=getDashboardTx();
-  var exps=txs.filter(function(t){return txExpenseImpact(t)>0;});
+  var exps=txs.filter(function(t){return !t.is_balance_adjustment&&txExpenseImpact(t)>0;});
   var incs=txs.filter(function(t){return txIncomeImpact(t)>0;});
   var tExp=txs.reduce(function(s,t){return s+txExpenseImpact(t);},0);
   var tInc=txs.reduce(function(s,t){return s+txIncomeImpact(t);},0);
@@ -2104,7 +2105,14 @@ function render(){
     var col=tExp/tb*100>=100?'var(--red)':budgetGradientColor(tExp/tb*100);
     tbEl.innerHTML='<div class="budget-total-bar"><div class="btb-top"><span class="btb-label">Presupuesto mensual</span><span class="btb-value" style="color:'+col+'">'+fmt(tExp)+' / '+fmt(tb)+'</span></div><div class="btb-bar-bg"><div class="btb-bar-fill" style="background:'+col+';width:'+pct+'%"></div></div></div>';
   } else tbEl.innerHTML='';
+  renderBalanceAdjustmentNote(txs,'balanceAdjustmentNote');
   if(!IS_DESKTOP){renderDonut(exps,tExp);renderLegend(exps);renderHeatmap(exps);renderTab();setFlipHeight('homeFlipInner');}
+}
+function renderBalanceAdjustmentNote(txs,id){
+  var el=document.getElementById(id);if(!el)return;
+  var net=txs.reduce(function(s,t){return s+(t.is_balance_adjustment?(t.type==='income'?Number(t.amount):-Number(t.amount)):0);},0);
+  el.textContent=Math.abs(net)>0.005?'Actualización de saldo: '+(net>=0?'+':'−')+fmt(Math.abs(net)):'';
+  el.style.color=net>=0?'var(--green)':'var(--red)';
 }
 // Color helpers for the tinted-glass donut
 function donutRgb(hex){hex=(hex||'#8E8E93').replace('#','');if(hex.length===3)hex=hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];return [parseInt(hex.substr(0,2),16)||140,parseInt(hex.substr(2,2),16)||140,parseInt(hex.substr(4,2),16)||150];}
@@ -2194,15 +2202,16 @@ function renderDonut(exps,total){
   if(sig===_donutSig&&canvas.dataset.drawn)return;
   _donutSig=sig;canvas.dataset.drawn='1';
   var entries=donutEntries(exps);
+  var chartTotal=entries.reduce(function(s,e){return s+e.value;},0);
   function refresh(){
-    drawDonut(canvas,entries,total,190,{activeId:activeCatId});
+    drawDonut(canvas,entries,chartTotal,190,{activeId:activeCatId});
     if(activeCatId){var a=entries.filter(function(e){return e.id===activeCatId;})[0];
       if(a)setCenter(Math.round(a.value/total*100)+'%',fmt(a.value),capitalize(activeCatId==='__balance_adjustment'?'Actualización de saldo':catById(activeCatId).name));
       else setCenter('gastos',total?fmt(total):'0 €','');}
     else setCenter('gastos',total?fmt(total):'0 €','');
   }
   refresh();
-  canvas.onclick=function(ev){var id=donutHit(canvas,ev,entries,total,190);activeCatId=(id&&activeCatId===id)?null:(id||null);refresh();};
+  canvas.onclick=function(ev){var id=donutHit(canvas,ev,entries,chartTotal,190);activeCatId=(id&&activeCatId===id)?null:(id||null);refresh();};
 }
 var _fitCenterCanvas=null,_fitGen=0,_centerValues={p:'',a:'',c:''};
 try{if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){_fitGen++;var da=document.getElementById('dcAmt');if(da)fitCenterText(da,132,21);});}catch(e){}
@@ -4373,7 +4382,7 @@ function dtRender(){
   }
   // Compute stats
   var txs=getDashboardTx();
-  var exps=txs.filter(function(t){return txExpenseImpact(t)>0;});
+  var exps=txs.filter(function(t){return !t.is_balance_adjustment&&txExpenseImpact(t)>0;});
   var incs=txs.filter(function(t){return txIncomeImpact(t)>0;});
   var tExp=txs.reduce(function(s,t){return s+txExpenseImpact(t);},0);
   var tInc=txs.reduce(function(s,t){return s+txIncomeImpact(t);},0);
@@ -4422,7 +4431,7 @@ function dtRender(){
     +'<div class="dt-dc-amount" style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--text);letter-spacing:-0.5px;" id="dtDcAmt">'+fmt(tExp)+'</div>'
     +'<div style="font-size:11px;color:var(--text3);max-width:100px;text-align:center;line-height:1.3;" id="dtDcCat"></div>'
     +'</div></div>'
-    +'<div class="dt-legend-row">'+legendHtml+'</div>'
+    +'<div class="dt-legend-row">'+legendHtml+'</div><div class="balance-adjustment-note" id="dtBalanceAdjustmentNote"></div>'
     +'</div>'
     +'<div class="dt-donut-section flip-face flip-back" onclick="dtOnBackClick(event)">'
     +'<div class="heatmap-head"><span class="heatmap-title" id="dtHmTitle">Gasto diario</span><span class="heatmap-tot" id="dtHmTot"></span></div>'
@@ -4456,6 +4465,7 @@ function dtRender(){
   if(showTopBar){
     var canvas=document.getElementById('dtDonutCanvas');
     if(canvas)dtRenderDonut(exps,tExp,240);
+    renderBalanceAdjustmentNote(txs,'dtBalanceAdjustmentNote');
     renderHeatmap(exps,HM_DESKTOP);
   }
 }
@@ -4464,17 +4474,18 @@ function dtRenderDonut(exps,total,size){
   size=size||240;
   var canvas=document.getElementById('dtDonutCanvas'); if(!canvas) return;
   var entries=donutEntries(exps);
+  var chartTotal=entries.reduce(function(s,e){return s+e.value;},0);
   function refresh(){
-    drawDonut(canvas,entries,total,size,{activeId:dtActiveCat});
+    drawDonut(canvas,entries,chartTotal,size,{activeId:dtActiveCat});
     if(dtActiveCat){var a=entries.filter(function(e){return e.id===dtActiveCat;})[0];
       if(a)dtSetCenter(Math.round(a.value/total*100)+'%',fmt(a.value),capitalize(dtActiveCat==='__balance_adjustment'?'Actualización de saldo':catById(dtActiveCat).name));
       else dtSetCenter('GASTOS',total?fmt(total):'0 €','');}
     else dtSetCenter('GASTOS',total?fmt(total):'0 €','');
   }
   refresh();
-  canvas.onmousemove=function(ev){if(dtActiveCat)return;var id=donutHit(canvas,ev,entries,total,size);if(id){var a=entries.filter(function(e){return e.id===id;})[0];dtSetCenter(Math.round(a.value/total*100)+'%',fmt(a.value),capitalize(id==='__balance_adjustment'?'Actualización de saldo':catById(id).name));}else dtSetCenter('GASTOS',total?fmt(total):'0 €','');canvas.style.cursor=id?'pointer':'default';};
+  canvas.onmousemove=function(ev){if(dtActiveCat)return;var id=donutHit(canvas,ev,entries,chartTotal,size);if(id){var a=entries.filter(function(e){return e.id===id;})[0];dtSetCenter(Math.round(a.value/chartTotal*100)+'%',fmt(a.value),capitalize(id==='__balance_adjustment'?'Actualización de saldo':catById(id).name));}else dtSetCenter('GASTOS',total?fmt(total):'0 €','');canvas.style.cursor=id?'pointer':'default';};
   canvas.onmouseleave=function(){if(!dtActiveCat)dtSetCenter('GASTOS',total?fmt(total):'0 €','');};
-  canvas.onclick=function(ev){var id=donutHit(canvas,ev,entries,total,size);dtActiveCat=(id&&dtActiveCat===id)?null:(id||null);refresh();};
+  canvas.onclick=function(ev){var id=donutHit(canvas,ev,entries,chartTotal,size);dtActiveCat=(id&&dtActiveCat===id)?null:(id||null);refresh();};
 }
 function dtSetCenter(p,a,c){var dp=document.getElementById('dtDcPct');var da=document.getElementById('dtDcAmt');var dc=document.getElementById('dtDcCat');if(dp)dp.textContent=p;if(da){da.textContent=a;fitCenterText(da,168,22);}if(dc)dc.textContent=c;}
 
