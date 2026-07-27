@@ -1,8 +1,9 @@
-var CACHE_NAME='fintrack-cache-v64';
+var CACHE_NAME='fintrack-cache-v65';
 var CACHE_PREFIX='fintrack-cache-';
 var PRECACHE=['./','./index.html','./manifest.json','./supabase-js.min.js','./icon-192.png','./icon-512.png','./vendor/jspdf.umd.min.js','./vendor/exceljs.min.js'];
 
 self.addEventListener('install',function(e){
+  self.skipWaiting();
   e.waitUntil(caches.open(CACHE_NAME).then(function(cache){
     // index.html es crítico: si falla, que falle la instalación. El resto es best-effort.
     return cache.add('./index.html').then(function(){
