@@ -1426,6 +1426,16 @@ function budgetGradientColor(pct){
   return 'rgb('+r+','+g+','+b+')';
 }
 function catById(id){if(!id)return {name:'',color:'#8E8E93',icon:'📦',subcats:[]};return categories.find(function(c){return c.id===id;})||{name:'(cat. eliminada)',color:'#8E8E93',icon:'📦',subcats:[],ghost:true};}
+function txDisplayCategory(t){
+  if(t&&t.is_balance_adjustment)return {name:'Actualización de saldo',color:t.type==='expense'?'#FF3B30':'#34C759',icon:'↕',subcats:[]};
+  return catById(t&&t.category);
+}
+function txExpenseImpact(t){
+  if(!t)return 0;
+  if(t.is_balance_adjustment)return t.type==='expense'?Number(t.amount):-Number(t.amount);
+  return t.type==='expense'?Number(t.amount):0;
+}
+function txIncomeImpact(t){return t&&!t.is_balance_adjustment&&t.type==='income'?Number(t.amount):0;}
 var CAT_ICON_PATHS={
   'compras':'<path d="M6 8H18L19 20C19 20.55 18.55 21 18 21H6C5.45 21 5 20.55 5 20L6 8Z"/><path d="M9 8V6C9 4.34 10.34 3 12 3C13.66 3 15 4.34 15 6V8"/>',
   'deporte':'<rect x="2" y="9" width="3" height="6" rx="1"/><rect x="19" y="9" width="3" height="6" rx="1"/><rect x="5.5" y="10.3" width="2" height="3.4" rx="0.6"/><rect x="16.5" y="10.3" width="2" height="3.4" rx="0.6"/><line x1="7.5" y1="12" x2="16.5" y2="12"/>',
@@ -2078,10 +2088,10 @@ function render(){
   document.getElementById('monthLabel').textContent=homeAnnualMode?(''+viewYear):(capitalize(MONTHS[viewMonth])+' '+viewYear);
   var hab=document.getElementById('homeAnnualBtn');if(hab)hab.classList.toggle('active',homeAnnualMode);
   var txs=getDashboardTx();
-  var exps=txs.filter(function(t){return t.type==='expense';});
-  var incs=txs.filter(function(t){return t.type==='income';});
-  var tExp=exps.reduce(function(s,t){return s+t.amount;},0);
-  var tInc=incs.reduce(function(s,t){return s+t.amount;},0);
+  var exps=txs.filter(function(t){return txExpenseImpact(t)>0;});
+  var incs=txs.filter(function(t){return txIncomeImpact(t)>0;});
+  var tExp=txs.reduce(function(s,t){return s+txExpenseImpact(t);},0);
+  var tInc=txs.reduce(function(s,t){return s+txIncomeImpact(t);},0);
   var bal=tInc-tExp;
   var incEl=document.getElementById('totalInc'),expEl=document.getElementById('totalExp'),bel=document.getElementById('totalBal');
   bel.style.color=bal>=0?'var(--green)':'var(--red)';
@@ -2172,9 +2182,9 @@ function donutHit(canvas,ev,entries,total,size){
 var _lastDonutExps=null,_lastDonutEntries=null;
 function donutEntries(exps){
   if(exps===_lastDonutExps)return _lastDonutEntries;
-  var bycat={};exps.forEach(function(t){bycat[t.category]=(bycat[t.category]||0)+t.amount;});
+  var bycat={};exps.forEach(function(t){var k=t.is_balance_adjustment?'__balance_adjustment':t.category;bycat[k]=(bycat[k]||0)+txExpenseImpact(t);});
   var entries=Object.keys(bycat).sort(function(a,b){return bycat[b]-bycat[a];})
-    .map(function(id){return {id:id,color:catById(id).color,value:bycat[id]};});
+    .map(function(id){return {id:id,color:id==='__balance_adjustment'?'#FF3B30':catById(id).color,value:bycat[id]};});
   _lastDonutExps=exps;_lastDonutEntries=entries;
   return entries;
 }
@@ -2187,7 +2197,7 @@ function renderDonut(exps,total){
   function refresh(){
     drawDonut(canvas,entries,total,190,{activeId:activeCatId});
     if(activeCatId){var a=entries.filter(function(e){return e.id===activeCatId;})[0];
-      if(a)setCenter(Math.round(a.value/total*100)+'%',fmt(a.value),capitalize(catById(activeCatId).name));
+      if(a)setCenter(Math.round(a.value/total*100)+'%',fmt(a.value),capitalize(activeCatId==='__balance_adjustment'?'Actualización de saldo':catById(activeCatId).name));
       else setCenter('gastos',total?fmt(total):'0 €','');}
     else setCenter('gastos',total?fmt(total):'0 €','');
   }
@@ -2274,7 +2284,7 @@ function renderHeatmapDetail(exps,cfg){
   var h='<div class="hm-det-top"><span class="hm-det-day">'+dayName+'</span><span class="hm-det-tot">−'+fmt(tot)+'</span></div>';
   if(!items.length)h+='<div class="hm-det-empty">Sin gastos este día</div>';
   else h+=items.map(function(t){
-    var cat=catById(t.category);
+    var cat=txDisplayCategory(t);
     return '<div class="hm-det-row hm-det-row-btn" onclick="hmEditTx(\''+t.id+'\')">'
       +'<span class="d" style="background:'+cat.color+'"></span>'
       +'<span class="n">'+capitalize(htmlEscape(cat.name))+'</span>'
@@ -2296,8 +2306,8 @@ function hmEditTx(id){
 function accentRgb(){var v=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();var h=v.replace('#','');if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];if(/^[0-9a-fA-F]{6}$/.test(h))return [parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)];return [61,186,138];}
 function accentRgba(a){var c=accentRgb();return 'rgba('+c[0]+','+c[1]+','+c[2]+','+a+')';}
 function renderLegend(exps){
-  var bycat={};exps.forEach(function(t){bycat[t.category]=(bycat[t.category]||0)+t.amount;});
-  document.getElementById('legend').innerHTML=Object.entries(bycat).sort(function(a,b){return b[1]-a[1];}).map(function(e){var c=catById(e[0]);return '<div class="leg-item"><span class="leg-dot" style="background:'+c.color+'"></span>'+capEsc(c.name)+'</div>';}).join('');
+  var bycat={};exps.forEach(function(t){var k=t.is_balance_adjustment?'__balance_adjustment':t.category;bycat[k]=(bycat[k]||0)+txExpenseImpact(t);});
+  document.getElementById('legend').innerHTML=Object.entries(bycat).filter(function(e){return e[1]>0;}).sort(function(a,b){return b[1]-a[1];}).map(function(e){var c=e[0]==='__balance_adjustment'?{name:'Actualización de saldo',color:'#FF3B30'}:catById(e[0]);return '<div class="leg-item"><span class="leg-dot" style="background:'+c.color+'"></span>'+capEsc(c.name)+'</div>';}).join('');
 }
 document.getElementById('prevMonth').onclick=function(){if(homeAnnualMode){viewYear--;}else if(viewMonth===0){viewMonth=11;viewYear--;}else viewMonth--;activeCatId=null;hmSelDay=null;filterDateFrom='';filterDateTo='';saveUiState();refreshTab();};
 document.getElementById('nextMonth').onclick=function(){if(homeAnnualMode){viewYear++;}else if(viewMonth===11){viewMonth=0;viewYear++;}else viewMonth++;activeCatId=null;hmSelDay=null;filterDateFrom='';filterDateTo='';saveUiState();refreshTab();};
@@ -2506,7 +2516,7 @@ function renderTxList(){
   var txs=homeAnnualMode?getYearTx():((filterDateFrom||filterDateTo)?transactions.slice():getMonthTx());
   if(filterDateFrom)txs=txs.filter(function(t){return t.date>=filterDateFrom;});
   if(filterDateTo)txs=txs.filter(function(t){return t.date<=filterDateTo;});
-  if(searchQuery){var q=searchQuery.toLowerCase();txs=txs.filter(function(t){var c=catById(t.category);return c.name.includes(q)||(t.note&&t.note.toLowerCase().includes(q))||(t.subcategory&&t.subcategory.includes(q))||((t.tags||[]).some(function(g){return g.includes(q);}));});}
+  if(searchQuery){var q=searchQuery.toLowerCase();txs=txs.filter(function(t){var c=txDisplayCategory(t);return c.name.toLowerCase().includes(q)||(t.note&&t.note.toLowerCase().includes(q))||(t.subcategory&&t.subcategory.includes(q))||((t.tags||[]).some(function(g){return g.includes(q);}));});}
   if(filterType!=='all')txs=txs.filter(function(t){return t.type===filterType;});
   if(filterCat)txs=txs.filter(function(t){return t.category===filterCat;});
   txs=applySort(txs);
@@ -2562,7 +2572,7 @@ function buildTxItem(t){
       +'<div class="tx-right"><span class="tx-amount" style="color:var(--blue)">'+fmt(t.amount)+'</span>'+rec
       +delBtn+'</div></div></div>';
   }
-  var c=t.is_balance_adjustment?{name:'Actualización de saldo',color:t.type==='expense'?'#FF3B30':'#34C759',icon:'↕',subcats:[]}:catById(t.category);var sign=t.type==='expense'?'−':'+';var col=t.type==='expense'?'var(--red)':'var(--green)';
+  var c=txDisplayCategory(t);var sign=t.is_balance_adjustment?(t.type==='expense'?'−':'+'):(t.type==='expense'?'−':'+');var col=t.type==='expense'?'var(--red)':'var(--green)';
   var sub=t.subcategory?'<span class="tx-subcat">'+capitalize(htmlEscape(t.subcategory))+'</span>':'';
   var rec=t.recurring?'<div class="tx-recurring-badge">↺ Recurrente</div>':'';
   var delBtn=IS_DESKTOP?'<div class="tx-actions"><button class="tx-btn del" data-action="del-tx" data-id="'+t.id+'" title="eliminar">×</button></div>':'';
@@ -4363,17 +4373,17 @@ function dtRender(){
   }
   // Compute stats
   var txs=getDashboardTx();
-  var exps=txs.filter(function(t){return t.type==='expense';});
-  var incs=txs.filter(function(t){return t.type==='income';});
-  var tExp=exps.reduce(function(s,t){return s+t.amount;},0);
-  var tInc=incs.reduce(function(s,t){return s+t.amount;},0);
+  var exps=txs.filter(function(t){return txExpenseImpact(t)>0;});
+  var incs=txs.filter(function(t){return txIncomeImpact(t)>0;});
+  var tExp=txs.reduce(function(s,t){return s+txExpenseImpact(t);},0);
+  var tInc=txs.reduce(function(s,t){return s+txIncomeImpact(t);},0);
   var bal=tInc-tExp;
   var tb=totalBudget();
   // Build by-cat for donut
   var bycat={};
-  exps.forEach(function(t){bycat[t.category]=(bycat[t.category]||0)+t.amount;});
+  exps.forEach(function(t){var k=t.is_balance_adjustment?'__balance_adjustment':t.category;bycat[k]=(bycat[k]||0)+txExpenseImpact(t);});
   var legendHtml=Object.entries(bycat).sort(function(a,b){return b[1]-a[1];}).map(function(e){
-    var c=catById(e[0]);
+    var c=e[0]==='__balance_adjustment'?{name:'Actualización de saldo',color:'#FF3B30'}:catById(e[0]);
     return '<div style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2)">'
       +'<div style="width:9px;height:9px;border-radius:50%;background:'+c.color+'"></div>'+capEsc(c.name)+'</div>';
   }).join('');
@@ -4457,12 +4467,12 @@ function dtRenderDonut(exps,total,size){
   function refresh(){
     drawDonut(canvas,entries,total,size,{activeId:dtActiveCat});
     if(dtActiveCat){var a=entries.filter(function(e){return e.id===dtActiveCat;})[0];
-      if(a)dtSetCenter(Math.round(a.value/total*100)+'%',fmt(a.value),capitalize(catById(dtActiveCat).name));
+      if(a)dtSetCenter(Math.round(a.value/total*100)+'%',fmt(a.value),capitalize(dtActiveCat==='__balance_adjustment'?'Actualización de saldo':catById(dtActiveCat).name));
       else dtSetCenter('GASTOS',total?fmt(total):'0 €','');}
     else dtSetCenter('GASTOS',total?fmt(total):'0 €','');
   }
   refresh();
-  canvas.onmousemove=function(ev){if(dtActiveCat)return;var id=donutHit(canvas,ev,entries,total,size);if(id){var a=entries.filter(function(e){return e.id===id;})[0];dtSetCenter(Math.round(a.value/total*100)+'%',fmt(a.value),capitalize(catById(id).name));}else dtSetCenter('GASTOS',total?fmt(total):'0 €','');canvas.style.cursor=id?'pointer':'default';};
+  canvas.onmousemove=function(ev){if(dtActiveCat)return;var id=donutHit(canvas,ev,entries,total,size);if(id){var a=entries.filter(function(e){return e.id===id;})[0];dtSetCenter(Math.round(a.value/total*100)+'%',fmt(a.value),capitalize(id==='__balance_adjustment'?'Actualización de saldo':catById(id).name));}else dtSetCenter('GASTOS',total?fmt(total):'0 €','');canvas.style.cursor=id?'pointer':'default';};
   canvas.onmouseleave=function(){if(!dtActiveCat)dtSetCenter('GASTOS',total?fmt(total):'0 €','');};
   canvas.onclick=function(ev){var id=donutHit(canvas,ev,entries,total,size);dtActiveCat=(id&&dtActiveCat===id)?null:(id||null);refresh();};
 }
