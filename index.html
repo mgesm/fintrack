@@ -1374,6 +1374,7 @@ if('serviceWorker' in navigator){
 </div>
 
 <script>
+var APP_VERSION='2026.08.03.1';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
 var sb=window.supabase.createClient(SB_URL,SB_KEY);
@@ -3308,6 +3309,7 @@ function renderSettingsTab(el){
     +'<div class="settings-section"><div class="settings-title">Exportar datos</div><button class="settings-btn" onclick="openExportModal()">↓ Exportar (PDF · Excel · CSV)<span class="btn-arrow">›</span></button><button class="settings-btn" onclick="exportJSON()">↓ Exportar JSON (copia)</button></div>'
     +'<div class="settings-section"><div class="settings-title">Importar copia</div><textarea id="importArea" style="width:100%;background:var(--bg3);border:1px solid var(--card-border);color:var(--text2);border-radius:var(--radius-sm);padding:8px 10px;font-size:12px;font-family:var(--mono);resize:vertical;outline:none;min-height:80px;max-height:240px" placeholder=\'{"transactions":[...],"categories":[...]}\'></textarea><button class="settings-btn" onclick="importJSON()">↑ Importar JSON</button><div class="status-msg" id="importStatus"></div></div>'
     +'<div class="settings-section"><div class="settings-title">Sincronización</div><button class="settings-btn" onclick="forceSync()">↺ Sincronizar ahora</button><div class="status-msg" id="syncStatusMsg"></div></div>'
+    +'<div class="settings-section"><div class="settings-title">Versión</div><div class="settings-info">FinTrack <strong>'+APP_VERSION+'</strong><br><span style="font-size:12px;color:var(--text3)">Última versión instalada</span></div></div>'
 
     +'<div class="settings-section"><div class="settings-title">Zona de peligro</div><button class="settings-btn danger" onclick="clearTxs()">⚠ Borrar todas las transacciones</button></div>'
     +'<div style="text-align:center;padding:16px 0;font-size:11px;font-family:var(--mono);color:var(--text3)">fintrack · '+email+'</div>'
