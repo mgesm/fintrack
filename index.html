@@ -1250,7 +1250,7 @@ if('serviceWorker' in navigator){
     <div class="modal-handle"></div>
     <div class="modal-title" id="modalTitle">Nueva transacción</div>
     <div class="type-toggle"><div class="type-btn active-exp" id="typeExp" onclick="setType('expense')">Gasto</div><div class="type-btn" id="typeInc" onclick="setType('income')">Ingreso</div><div class="type-btn" id="typeTra" onclick="setType('transfer')">Transferencia</div></div>
-    <div class="field-label">Importe</div><input aria-label="Importe" type="number" class="field-input" id="txAmount" placeholder="0,00" min="0" step="0.01" style="font-family:var(--mono);font-size:22px;font-weight:700;letter-spacing:-0.5px;">
+    <div class="field-label">Importe</div><input aria-label="Importe" type="number" inputmode="decimal" enterkeyhint="done" class="field-input" id="txAmount" placeholder="0,00" min="0" step="0.01" style="font-family:var(--mono);font-size:22px;font-weight:700;letter-spacing:-0.5px;">
     <div id="txCatWrap"><div class="field-label">Categoría</div><select aria-label="Categoría" class="field-input" id="txCat" onchange="populateSubcats()"></select>
     <div class="field-label">Subcategoría <span style="color:var(--text4);font-size:12px;font-weight:400">(opcional)</span></div><select aria-label="Subcategoría" class="field-input" id="txSubcat"></select></div>
     <div id="txAccWrap" style="display:none"><div class="field-label">Cuenta <span style="color:var(--text4);font-size:12px;font-weight:400">(opcional)</span></div><select aria-label="Cuenta" class="field-input" id="txAccount"></select></div>
@@ -2841,7 +2841,7 @@ function renderPatTab(el){
       +'</div>'
       +'<div id="adjustform_'+a.id+'" class="pat-adjust-form" style="display:none">'
       +'<input type="date" class="add-input" id="adjdate_'+a.id+'" value="'+new Date().toISOString().split('T')[0]+'">'
-      +'<input type="number" class="add-input" id="adjamount_'+a.id+'" placeholder="Saldo real en esa fecha" step="0.01">'
+      +'<input type="number" inputmode="decimal" enterkeyhint="done" class="add-input" id="adjamount_'+a.id+'" placeholder="Saldo real en esa fecha" step="0.01">'
       +'<button class="add-btn" data-action="apply-adjust" data-id="'+a.id+'">Corregir</button>'
       +'</div>'
       +(hist.length?'<div class="pat-acc-hist-hint">Historial ('+hist.length+') · pulsa la cuenta para ver</div>':'')
@@ -2895,7 +2895,7 @@ function accountVoidDelta(voided,accountId,baseDate,asOfDate){
   var voidedDate=String(voided.voided_at||'').slice(0,10);
   // Solo compensa una anulación posterior a la fotografía real: los movimientos
   // posteriores ya desaparecen del cálculo normal al haber sido borrados.
-  if(!voidedDate||voidedDate>asOfDate||tx.date>baseDate)return 0;
+  if(!voidedDate||voidedDate>asOfDate||tx.date<baseDate)return 0;
   return -accountTxDelta(tx,accountId);
 }
 function accountCalcBalance(accountId,yr,mo){
@@ -2903,7 +2903,7 @@ function accountCalcBalance(accountId,yr,mo){
   var reset=accountLatestReset(accountId,yr,mo);
   var base=reset?Number(reset.amount):0;
   var baseDate=reset?(reset.reset_date||lastDayOfMonthStr(reset.year,reset.month)):'0000-01-01';
-  var live=transactions.filter(function(t){return accountTouchesAccount(t,accountId)&&t.date>baseDate&&t.date<cutoff;}).reduce(function(s,t){return s+accountTxDelta(t,accountId);},0);
+  var live=transactions.filter(function(t){return accountTouchesAccount(t,accountId)&&t.date>=baseDate&&t.date<cutoff;}).reduce(function(s,t){return s+accountTxDelta(t,accountId);},0);
   var voids=transactionVoids.reduce(function(s,v){return s+accountVoidDelta(v,accountId,baseDate,lastDayOfMonthStr(yr,mo));},0);
   return base+live+voids;
 }
@@ -2912,7 +2912,7 @@ function accountCalcBalanceAsOf(accountId,dateStr){
   var reset=hist.length?hist[hist.length-1]:null;
   var base=reset?Number(reset.amount):0;
   var baseDate=reset?(reset.reset_date||lastDayOfMonthStr(reset.year,reset.month)):'0000-01-01';
-  var live=transactions.filter(function(t){return accountTouchesAccount(t,accountId)&&t.date>baseDate&&t.date<=dateStr;}).reduce(function(s,t){return s+accountTxDelta(t,accountId);},0);
+  var live=transactions.filter(function(t){return accountTouchesAccount(t,accountId)&&t.date>=baseDate&&t.date<=dateStr;}).reduce(function(s,t){return s+accountTxDelta(t,accountId);},0);
   var voids=transactionVoids.reduce(function(s,v){return s+accountVoidDelta(v,accountId,baseDate,dateStr);},0);
   return base+live+voids;
 }
