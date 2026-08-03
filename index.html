@@ -569,6 +569,8 @@ body{display:flex;flex-direction:column;width:100%;max-width:430px;margin:0 auto
 .del-btn-sm:hover{color:var(--red);background:rgba(255,59,48,0.08);}
 .add-sub-btn{font-size:12px;font-weight:500;color:var(--text3);background:var(--bg3);border:none;border-radius:99px;padding:5px 12px;cursor:pointer;transition:all 0.15s;}
 .add-sub-btn:hover{color:var(--text);background:var(--bg4);}
+.budget-icon-btn{position:relative;width:34px;height:30px;padding:0!important;display:inline-flex;align-items:center;justify-content:center;font-size:17px;line-height:1;}
+.budget-icon-btn .budget-badge{position:absolute;top:-7px;right:-8px;min-width:19px;height:17px;padding:0 4px;border-radius:9px;background:var(--amber);color:#fff;font-family:var(--mono);font-size:9px;font-weight:700;line-height:17px;text-align:center;white-space:nowrap;}
 .budget-input-row{display:flex;align-items:center;gap:8px;margin-top:8px;}
 .settings-section .budget-input-row{padding:0 16px 14px;margin-top:0;}
 .settings-section .theme-switch-row{margin:0 16px 14px;}
@@ -2732,7 +2734,7 @@ function renderCatTab(el,prefix){
       +(subcatHtml?'<div class="subcat-list">'+subcatHtml+'</div>':'')
       +'<div style="display:flex;gap:6px;margin-top:6px;align-items:center">'
       +'<button class="add-sub-btn" data-action="show-subform" data-id="'+c.id+'">+ Subcategoría</button>'
-      +(isInc?'':'<button class="add-sub-btn" data-action="show-budgetform" data-id="'+c.id+'" style="color:var(--amber);border-color:rgba(212,146,15,0.3)">💰 Presupuesto</button>')
+      +(isInc?'':'<button class="add-sub-btn budget-icon-btn" data-action="show-budgetform" data-id="'+c.id+'" title="Presupuesto" aria-label="Presupuesto">💰'+(budget>0?'<span class="budget-badge">'+fmt(budget)+'</span>':'')+'</button>')
       +'</div>'
       +'<div id="subform_'+prefix+c.id+'" style="display:none;margin-top:6px">'
       +'<div class="form-row"><input type="text" class="add-input" id="subinput_'+prefix+c.id+'" placeholder="Nombre...">'
