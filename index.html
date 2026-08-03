@@ -2895,7 +2895,7 @@ function accountVoidDelta(voided,accountId,baseDate,asOfDate){
   var voidedDate=String(voided.voided_at||'').slice(0,10);
   // Solo compensa una anulación posterior a la fotografía real: los movimientos
   // posteriores ya desaparecen del cálculo normal al haber sido borrados.
-  if(!voidedDate||voidedDate>asOfDate||tx.date<baseDate)return 0;
+  if(!voidedDate||voidedDate>asOfDate||tx.date>baseDate)return 0;
   return -accountTxDelta(tx,accountId);
 }
 function accountCalcBalance(accountId,yr,mo){
@@ -2903,7 +2903,7 @@ function accountCalcBalance(accountId,yr,mo){
   var reset=accountLatestReset(accountId,yr,mo);
   var base=reset?Number(reset.amount):0;
   var baseDate=reset?(reset.reset_date||lastDayOfMonthStr(reset.year,reset.month)):'0000-01-01';
-  var live=transactions.filter(function(t){return accountTouchesAccount(t,accountId)&&t.date>=baseDate&&t.date<cutoff;}).reduce(function(s,t){return s+accountTxDelta(t,accountId);},0);
+  var live=transactions.filter(function(t){return accountTouchesAccount(t,accountId)&&t.date>baseDate&&t.date<cutoff;}).reduce(function(s,t){return s+accountTxDelta(t,accountId);},0);
   var voids=transactionVoids.reduce(function(s,v){return s+accountVoidDelta(v,accountId,baseDate,lastDayOfMonthStr(yr,mo));},0);
   return base+live+voids;
 }
@@ -2912,7 +2912,7 @@ function accountCalcBalanceAsOf(accountId,dateStr){
   var reset=hist.length?hist[hist.length-1]:null;
   var base=reset?Number(reset.amount):0;
   var baseDate=reset?(reset.reset_date||lastDayOfMonthStr(reset.year,reset.month)):'0000-01-01';
-  var live=transactions.filter(function(t){return accountTouchesAccount(t,accountId)&&t.date>=baseDate&&t.date<=dateStr;}).reduce(function(s,t){return s+accountTxDelta(t,accountId);},0);
+  var live=transactions.filter(function(t){return accountTouchesAccount(t,accountId)&&t.date>baseDate&&t.date<=dateStr;}).reduce(function(s,t){return s+accountTxDelta(t,accountId);},0);
   var voids=transactionVoids.reduce(function(s,v){return s+accountVoidDelta(v,accountId,baseDate,dateStr);},0);
   return base+live+voids;
 }
