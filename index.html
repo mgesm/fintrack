@@ -1988,6 +1988,7 @@ async function processRecurring(){
   if(isOffline)return;
   var uid=currentUser.id;
   var recurring=transactions.filter(function(t){return t.recurring&&typeof t.date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(t.date);});
+  var created=0,failures=[];
   var today=new Date();today.setHours(23,59,59,999);
   var processed={};
   for(var i=0;i<recurring.length;i++){
@@ -2028,12 +2029,38 @@ async function processRecurring(){
       });
       if(!dup&&!isRecurrenceExcluded(seriesKey,newDate)){
         var newTx={id:'tx'+Date.now()+Math.random().toString(36).slice(2,6),type:root.type,amount:root.amount,category:root.category,subcategory:root.subcategory||null,note:root.note||null,date:newDate,recurring:true,recur_interval:interval,recur_end_date:root.recur_end_date||null,tags:root.tags||[],account_id:root.account_id||null,to_account_id:null,recur_series_id:root.recur_series_id||null,recur_anchor_date:root.recur_anchor_date||root.date,user_id:uid};
-        var r=await sb.rpc('create_fintrack_recurring_occurrence',{payload:newTx});
-        if(!r.error&&r.data){var already=transactions.some(function(x){return x.id===r.data.id;});if(!already)transactions.unshift(r.data);}
+        try{
+          var r=await sb.rpc('create_fintrack_recurring_occurrence',{payload:newTx});
+          // Un fallo de red puede llegar después de que Supabase haya guardado la
+          // cuota. Antes de reintentarlo comprobamos la serie y la fecha para no
+          // duplicarla; si no existe, usamos una inserción normal como recuperación.
+          if(r.error||!r.data){
+            var existing=await sb.from('transactions').select('*').eq('user_id',uid).eq('recur_series_id',newTx.recur_series_id).eq('date',newDate).limit(1);
+            if(existing.error)throw existing.error;
+            if(existing.data&&existing.data.length)r={data:existing.data[0]};
+            else{
+              var fallback=await sb.from('transactions').insert(newTx).select();
+              if(fallback.error)throw fallback.error;
+              r={data:fallback.data&&fallback.data[0]};
+            }
+          }
+          if(!r.data)throw new Error('La recurrencia no devolvió una transacción');
+          var already=transactions.some(function(x){return x.id===r.data.id;});
+          if(!already){transactions.unshift(r.data);created++;}
+        }catch(recurrenceError){
+          failures.push(newDate+' · '+(root.note||catById(root.category).name||'gasto recurrente'));
+          console.error('No se pudo generar una recurrencia',recurrenceError);
+        }
       }
       next=addInterval(next,interval,anchorDay);
     }
   }
+  if(failures.length){
+    setSync('err');
+    showSuccessToast('No se pudieron registrar '+failures.length+' recurrencia(s). Reintenta sincronizar.');
+    throw new Error('Recurrencias pendientes: '+failures.join(', '));
+  }
+  return created;
 }
 function scheduleAutoBackup(){
   if(!currentUser)return;
