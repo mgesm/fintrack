@@ -301,6 +301,9 @@ body{display:flex;flex-direction:column;width:100%;max-width:430px;margin:0 auto
 .nav-btn:active{background:var(--bg4);transform:scale(0.94);}
 .month-label{font-size:14px;font-weight:500;color:var(--text);min-width:106px;text-align:center;letter-spacing:-0.2px;}
 
+/* INVESTMENTS */
+.invest-wrap{padding:12px 16px 28px;width:100%;}.invest-title{font-size:28px;font-weight:800;letter-spacing:-1px;margin:4px 0 14px;}.portfolio-card,.invest-stats>div,.positions{background:var(--bg2);border:1px solid var(--card-border);box-shadow:var(--shadow-sm);}.portfolio-card{border-radius:var(--radius);padding:20px 18px 14px;}.portfolio-card>span,.invest-stats small,.position small{color:var(--text3);font-size:13px;display:block;}.portfolio-card>strong{display:block;font-family:var(--mono);font-size:30px;letter-spacing:-1.2px;margin-top:8px;}.portfolio-card>b,.positive,.position-value b{color:var(--green);font-size:15px;}.portfolio-chart{color:var(--green);margin-top:14px;}.portfolio-chart svg{height:96px;width:100%;}.portfolio-chart small{display:block;color:var(--text3);font-size:10px;white-space:nowrap;}.invest-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 22px;}.invest-stats>div{border-radius:20px;padding:12px 10px;overflow:hidden;}.invest-stats strong{font-size:14px;white-space:nowrap;display:block;margin-top:4px;}.invest-wrap h3{font-size:18px;margin:0 0 9px;}.positions{border-radius:var(--radius-sm);overflow:hidden;}.position{display:grid;grid-template-columns:34px minmax(0,1fr) 30px auto;gap:9px;align-items:center;padding:13px 12px;border-bottom:1px solid var(--separator2);}.position:last-child{border:0}.position i{width:32px;height:32px;background:color-mix(in srgb,var(--brand-green) 15%,transparent);border-radius:10px;color:var(--brand-green);display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:800;}.position>div:nth-child(2){min-width:0}.position>div:nth-child(2)>strong{font-size:13px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.position-spark{color:var(--green);font-size:25px;transform:rotate(-16deg)}.position-value{text-align:right;white-space:nowrap}.position-value strong,.position-value b{display:block;font-size:13px;}.invest-operation{width:100%;border:0;border-radius:20px;background:var(--accent);color:#fff;font-family:var(--font);font-size:16px;font-weight:700;padding:15px;margin-top:16px;box-shadow:0 6px 16px rgba(52,199,89,.25);}
+
 /* SUMMARY CARDS */
 .summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:8px 16px;}
 .scard{background:var(--bg2);border-radius:var(--radius-sm);padding:15px 14px 14px;box-shadow:var(--shadow-sm);border:1px solid var(--card-border);transition:transform 0.15s;}
@@ -1233,6 +1236,10 @@ if('serviceWorker' in navigator){
     </div>
     <span class="bnav-label">Anual</span>
   </button>
+  <button class="bnav-btn" id="bn4" onclick="switchTab(4)">
+    <div class="bnav-icon-wrap"><svg viewBox="0 0 24 24" fill="none"><path d="M4 18V10M10 18V6M16 18v-4M22 18H2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 8l5-4 5 4 7-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <span class="bnav-label">Inversión</span>
+  </button>
 </div>
 <div class="tab-content" id="tabContent" style="display:none"></div>
 <button class="fab fab-hidden" id="fabBtn">+</button>
@@ -1336,6 +1343,9 @@ if('serviceWorker' in navigator){
       <button class="dt-nav-item" data-tab="3" onclick="switchTab(3)">
         <svg viewBox="0 0 24 24" fill="none"><polyline points="3,17 8,11 12,14 17,8 21,10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><polyline points="17,8 21,8 21,12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span>Anual</span>
+      </button>
+      <button class="dt-nav-item" data-tab="4" onclick="switchTab(4)">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 18V10M10 18V6M16 18v-4M22 18H2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 8l5-4 5 4 7-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Inversión</span>
       </button>
     </nav>
     <button class="dt-add-btn" onclick="openModal()">
@@ -1570,10 +1580,10 @@ function syncStatusSummary(){
   var last=currentUser?localStorage.getItem('ft_last_sync_'+currentUser.id):null;
   return last?'Sincronizado · '+new Date(last).toLocaleString('es-ES',{dateStyle:'medium',timeStyle:'short'}):'Sincronizado correctamente.';
 }
-function openSettings(){switchTab(4);}
+function openSettings(){switchTab(5);}
 function updatePeriodToolbar(){
   var header=document.getElementById('appHeader');
-  if(header)header.classList.toggle('period-hidden',activeTab===3||activeTab===4);
+  if(header)header.classList.toggle('period-hidden',activeTab===3||activeTab===5);
 }
 function setAccent(color){
   var el=document.documentElement;
@@ -1880,7 +1890,7 @@ function showApp(){
     document.getElementById('dtLayout').style.display='flex';
     ['appHeader','mainChart','bottomNav','tabContent'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});
     document.getElementById('fabBtn').classList.add('fab-hidden');
-    if(currentUser){var em=currentUser.email||'';var av=document.getElementById('dtAvatar');if(av)av.textContent=em[0]?em[0].toUpperCase():'?';var de=document.getElementById('dtEmail');if(de)de.textContent=activeTab===4?em:maskEmail(em);}
+    if(currentUser){var em=currentUser.email||'';var av=document.getElementById('dtAvatar');if(av)av.textContent=em[0]?em[0].toUpperCase():'?';var de=document.getElementById('dtEmail');if(de)de.textContent=activeTab===5?em:maskEmail(em);}
   } else {
     document.getElementById('dtLayout').style.display='none';
     document.getElementById('appHeader').style.display='flex';
@@ -1888,7 +1898,7 @@ function showApp(){
     document.getElementById('bottomNav').style.display='flex';
     document.getElementById('tabContent').style.display='flex';
     document.getElementById('fabBtn').classList.toggle('fab-hidden',activeTab!==0);
-    for(var _bi=0;_bi<4;_bi++){var _bn=document.getElementById('bn'+_bi);if(_bn)_bn.classList.toggle('active',_bi===activeTab);}
+    for(var _bi=0;_bi<5;_bi++){var _bn=document.getElementById('bn'+_bi);if(_bn)_bn.classList.toggle('active',_bi===activeTab);}
     updatePeriodToolbar();
     setTimeout(function(){movePill(activeTab);},100);
   }
@@ -2370,7 +2380,7 @@ function switchTab(i){
     if(typeof dtRender==='function')dtRender();
   } else {
     // Mobile: update bottom nav
-    for(var j=0;j<4;j++){var bn=document.getElementById('bn'+j);if(bn)bn.classList.toggle('active',j===i);}
+    for(var j=0;j<5;j++){var bn=document.getElementById('bn'+j);if(bn)bn.classList.toggle('active',j===i);}
     document.getElementById('mainChart').style.display=(i===0||i===1)?'block':'none';
     if(i===0||i===1)setFlipHeight('homeFlipInner');
     document.getElementById('fabBtn').classList.toggle('fab-hidden',i!==0);
@@ -2420,6 +2430,7 @@ function renderTab(){
   else if(activeTab===1)renderCatTab(el);
   else if(activeTab===2)renderPatTab(el);
   else if(activeTab===3)renderAnnualTab(el);
+  else if(activeTab===4)renderInvestmentsTab(el);
   else renderSettingsTab(el);
 }
 
@@ -3320,6 +3331,11 @@ function renderAnnualTab(el){
 }
 
 // SETTINGS TAB
+function renderInvestmentsTab(el){
+  var positions=[['Vanguard FTSE All-World','Fondo indexado','5.450 €','+6,8 %','V'],['Microsoft','Acción','2.180 €','+12,4 %','▦'],['Fondo monetario','Monetario','3.580 €','+2,1 %','◈']];
+  el.innerHTML='<div class="invest-wrap"><div class="invest-title">Inversiones</div><section class="portfolio-card"><span>Valor total</span><strong>12.450,32 €</strong><b>+620,31 € · +5,25 %</b><div class="portfolio-chart"><svg viewBox="0 0 320 100" preserveAspectRatio="none"><path d="M0 82 L20 74 L42 77 L65 66 L88 69 L110 51 L132 58 L156 44 L179 49 L200 35 L222 40 L246 21 L268 28 L290 14 L320 8" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><small>1 ago.　　　　　　　　15 ago.　　　　　　　　29 ago.</small></div></section><div class="invest-stats"><div><small>Invertido</small><strong>11.830 €</strong></div><div><small>Rentabilidad</small><strong class="positive">+5,25 %</strong></div><div><small>Liquidez</small><strong>1.240 €</strong></div></div><h3>Posiciones</h3><section class="positions">'+positions.map(function(p){return '<div class="position"><i>'+p[4]+'</i><div><strong>'+p[0]+'</strong><small>'+p[1]+'</small></div><div class="position-spark">⌁</div><div class="position-value"><strong>'+p[2]+'</strong><b>'+p[3]+'</b></div></div>';}).join('')+'</section><button class="invest-operation" onclick="showToast(\'Las operaciones llegarán en el siguiente paso\')">＋ Operación</button></div>';
+}
+
 function renderSettingsTab(el){
   var email=currentUser?currentUser.email:'—';
   var lastBackup=currentUser?localStorage.getItem('ft_last_backup_'+currentUser.id):null;
@@ -4396,7 +4412,7 @@ function applyLayout(){
     document.getElementById('bottomNav').style.display='flex';
     document.getElementById('tabContent').style.display='flex';
     var fab=document.getElementById('fabBtn'); if(fab) fab.classList.toggle('fab-hidden',activeTab!==0);
-    for(var j=0;j<4;j++){var bn=document.getElementById('bn'+j);if(bn)bn.classList.toggle('active',j===activeTab);}
+    for(var j=0;j<5;j++){var bn=document.getElementById('bn'+j);if(bn)bn.classList.toggle('active',j===activeTab);}
     updatePeriodToolbar();
     render();
     movePill(activeTab);
@@ -4407,7 +4423,7 @@ function dtRender(){
   if(!IS_DESKTOP) return;
   clearBalanceCache();
   // Month labels in sidebar
-  var showPeriodControls=activeTab!==3&&activeTab!==4;
+  var showPeriodControls=activeTab!==3&&activeTab!==5;
   var dtMonthNav=document.querySelector('.dt-month-nav');if(dtMonthNav)dtMonthNav.style.display=showPeriodControls?'flex':'none';
   var ml=document.getElementById('dtMonthLabel');if(ml)ml.textContent=homeAnnualMode?(''+viewYear):(capitalize(MONTHS[viewMonth])+' '+viewYear);
   var dhab=document.getElementById('dtHomeAnnualBtn');if(dhab){dhab.style.display=showPeriodControls?'flex':'none';dhab.classList.toggle('active',homeAnnualMode);}
@@ -4416,13 +4432,13 @@ function dtRender(){
     btn.classList.toggle('active',parseInt(btn.getAttribute('data-tab'))===activeTab);
   });
   // Page title
-  var titles=['Inicio','Categorías','Cuentas','Anual','Ajustes'];
+  var titles=['Inicio','Categorías','Cuentas','Anual','Inversiones','Ajustes'];
   var pt=document.getElementById('dtPageTitle');if(pt)pt.textContent=titles[activeTab]||'';
   // User info
   if(currentUser){
     var em=currentUser.email||'';
     var av=document.getElementById('dtAvatar');if(av)av.textContent=em[0]?em[0].toUpperCase():'?';
-    var de=document.getElementById('dtEmail');if(de)de.textContent=activeTab===4?em:maskEmail(em);
+    var de=document.getElementById('dtEmail');if(de)de.textContent=activeTab===5?em:maskEmail(em);
   }
   // Compute stats
   var txs=getDashboardTx();
@@ -4503,6 +4519,7 @@ function dtRender(){
     else if(activeTab===1)renderCatTab(tabInner,'dt');
     else if(activeTab===2)renderPatTab(tabInner);
     else if(activeTab===3)renderAnnualTab(tabInner);
+    else if(activeTab===4)renderInvestmentsTab(tabInner);
     else renderSettingsTab(tabInner);
   }
   // Render donut after DOM update (canvas now in DOM)
