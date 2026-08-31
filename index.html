@@ -2864,7 +2864,7 @@ function renderPatTab(el){
           // El teórico correcto es el que se calculó y guardó al hacer el ajuste
           // (excluye el propio ajuste). Recalcularlo aquí lo incluiría como punto
           // de partida y el desfase saldría siempre 0.
-          var th=isLockedAdjust(p)?null:(p.theoretical_amount!=null?Number(p.theoretical_amount):accountCalcBalanceAsOf(a.id,pDate));
+          var th=isLockedAdjust(p)?null:accountCalcBalanceAsOf(a.id,pDate);
           var d=th===null?(p.amount-0):(p.amount-th);
           var desfaseStr=th===null?'—':((Math.abs(d)>0.01?(d>0?'+':'')+fmt(d):'sin desfase'));
           return '<div class="pat-hist-row">'
@@ -2994,7 +2994,10 @@ async function applyBalanceAdjustment(accountId){
   var theoretical=accountCalcBalanceAsOf(accountId,date);
   var diff=real-theoretical;
   setSync('syncing');var s=document.getElementById('patStatus');if(s){s.textContent='guardando...';s.className='status-msg';}
-  var item={id:'p'+accountId+Date.now()+Math.random().toString(36).slice(2,6),account_id:accountId,year:yr,month:mo,amount:real,theoretical_amount:theoretical,reset_date:date,user_id:currentUser.id};
+  // El ajuste se convierte en el nuevo punto de partida: en su misma fecha
+  // el saldo real y el teórico coinciden. El desfase previo queda registrado
+  // aparte como movimiento de conciliación.
+  var item={id:'p'+accountId+Date.now()+Math.random().toString(36).slice(2,6),account_id:accountId,year:yr,month:mo,amount:real,theoretical_amount:real,reset_date:date,user_id:currentUser.id};
   var adjustment=null;
   if(Math.abs(diff)>0.005){
     var adjustmentType=diff<0?'expense':'income';
