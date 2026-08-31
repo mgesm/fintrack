@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
   if (!secret || !supplied || await sha256(supplied) !== secret.token_hash) return json({error:"Unauthorized"},401);
   const now=new Date(), start=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth()-1,1)), end=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),1)), previous=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth()-2,1));
   const key=start.toISOString().slice(0,7), from=start.toISOString().slice(0,10), to=end.toISOString().slice(0,10), previousFrom=previous.toISOString().slice(0,10);
-  const { data: sent }=await db.from("monthly_report_runs").select("id").eq("user_id",USER_ID).eq("report_month",key).maybeSingle();
+  const { data: sent }=await db.from("monthly_report_runs").select("id").eq("user_id",USER_ID).eq("report_month",key).eq("status","completed").maybeSingle();
   if (sent) return json({ok:true,status:"already_sent",month:key});
   try {
     const { data: user, error: userError } = await db.auth.admin.getUserById(USER_ID); if (userError || !user.user.email) throw new Error("No destination email configured");
