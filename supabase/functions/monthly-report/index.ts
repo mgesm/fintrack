@@ -34,10 +34,12 @@ Deno.serve(async (req) => {
   const supplied = req.headers.get("x-backup-cron-token");
   const { data: secret } = await db.from("backup_scheduler_secret").select("token_hash").eq("singleton",true).maybeSingle();
   if (!secret || !supplied || await sha256(supplied) !== secret.token_hash) return json({error:"Unauthorized"},401);
-  const now=new Date(), start=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth()-1,1)), end=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),1)), previous=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth()-2,1));
+  const body = await req.json().catch(() => ({}));
+  const preview = body?.preview === true && typeof body?.month === "string" && /^\d{4}-\d{2}$/.test(body.month);
+  const now=new Date(), requested=preview ? new Date(Date.UTC(Number(body.month.slice(0,4)),Number(body.month.slice(5,7))-1,1)) : new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth()-1,1)), start=requested, end=new Date(Date.UTC(start.getUTCFullYear(),start.getUTCMonth()+1,1)), previous=new Date(Date.UTC(start.getUTCFullYear(),start.getUTCMonth()-1,1));
   const key=start.toISOString().slice(0,7), from=start.toISOString().slice(0,10), to=end.toISOString().slice(0,10), previousFrom=previous.toISOString().slice(0,10);
   const { data: sent }=await db.from("monthly_report_runs").select("id").eq("user_id",USER_ID).eq("report_month",key).eq("status","completed").maybeSingle();
-  if (sent) return json({ok:true,status:"already_sent",month:key});
+  if (!preview && sent) return json({ok:true,status:"already_sent",month:key});
   try {
     const { data: user, error: userError } = await db.auth.admin.getUserById(USER_ID); if (userError || !user.user.email) throw new Error("No destination email configured");
     const [{data: tx,error:txError},{data:voids},{data:cats},{data:budgets},{data:previousTx},{data:resendKey}] = await Promise.all([
@@ -55,15 +57,15 @@ Deno.serve(async (req) => {
     expensesTx.forEach(x=>totals.set(x.category,(totals.get(x.category)??0)+Number(x.amount)));
     const categories=Array.from(new Set([...totals.keys(),...budgetByCategory.keys()])).map(id=>({name:names.get(id)??"Sin categoría",spent:totals.get(id)??0,budget:budgetByCategory.get(id)??0}));
     const med=median(expensesTx.map(x=>Number(x.amount))), unusual=expensesTx.filter(x=>med>0&&Number(x.amount)>=Math.max(med*2.5,100)).sort((a,b)=>Number(b.amount)-Number(a.amount)).slice(0,6).map(x=>({note:x.note,amount:Number(x.amount)}));
-    const monthTitle=new Intl.DateTimeFormat("es-ES",{month:"long",year:"numeric"}).format(start), bytes=await reportPdf(monthTitle,income,expense,previousExpense,categories,unusual), path=USER_ID+"/informe-"+key+".pdf";
+    const monthTitle=new Intl.DateTimeFormat("es-ES",{month:"long",year:"numeric"}).format(start), bytes=await reportPdf(monthTitle,income,expense,previousExpense,categories,unusual), path=USER_ID+"/"+(preview ? "vista-previa-" : "informe-")+key+".pdf";
     const {error: uploadError}=await db.storage.from("fintrack-reports").upload(path,bytes,{contentType:"application/pdf",upsert:false}); if(uploadError) throw new Error(uploadError.message);
-    const email=await fetch("https://api.resend.com/emails",{method:"POST",headers:{Authorization:"Bearer "+resendKey,"Content-Type":"application/json"},body:JSON.stringify({from:"FinTrack <onboarding@resend.dev>",to:[user.user.email],subject:"FinTrack · Informe de "+monthTitle,html:"<p>Ya tienes listo tu informe mensual de <strong>"+monthTitle+"</strong>.</p><p>Adjunto encontrarás el PDF con el cierre y los principales avisos.</p>",attachments:[{filename:"fintrack-"+key+".pdf",content:base64(bytes)}]})});
+    const email=await fetch("https://api.resend.com/emails",{method:"POST",headers:{Authorization:"Bearer "+resendKey,"Content-Type":"application/json"},body:JSON.stringify({from:"FinTrack <onboarding@resend.dev>",to:[user.user.email],subject:(preview ? "Vista previa · " : "FinTrack · Informe de ")+monthTitle,html:"<p>"+(preview ? "Esta es una vista previa" : "Ya tienes listo tu informe mensual")+" de <strong>"+monthTitle+"</strong>.</p><p>Adjunto encontrarás el PDF con el cierre y los principales avisos.</p>",attachments:[{filename:"fintrack-"+key+".pdf",content:base64(bytes)}]})});
     if(!email.ok) { await db.storage.from("fintrack-reports").remove([path]); throw new Error("Email service returned "+email.status); }
-    const {error: recordError}=await db.from("monthly_report_runs").insert({user_id:USER_ID,report_month:key,path,status:"completed"}); if(recordError) throw new Error(recordError.message);
-    return json({ok:true,status:"sent",month:key});
+    if (!preview) { const {error: recordError}=await db.from("monthly_report_runs").insert({user_id:USER_ID,report_month:key,path,status:"completed"}); if(recordError) throw new Error(recordError.message); }
+    return json({ok:true,status:preview ? "preview_sent" : "sent",month:key});
   } catch(error) {
     const detail=error instanceof Error?error.message:"Unknown report error";
-    await db.from("monthly_report_runs").upsert({user_id:USER_ID,report_month:key,path:USER_ID+"/failed-"+key+".pdf",status:"failed",error_message:detail},{onConflict:"user_id,report_month"});
+    if (!preview) await db.from("monthly_report_runs").upsert({user_id:USER_ID,report_month:key,path:USER_ID+"/failed-"+key+".pdf",status:"failed",error_message:detail},{onConflict:"user_id,report_month"});
     return json({ok:false,error:detail},500);
   }
 });
