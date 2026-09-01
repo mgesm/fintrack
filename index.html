@@ -1379,7 +1379,7 @@ if('serviceWorker' in navigator){
 </div>
 
 <script>
-var APP_VERSION='2026.09.01.17';
+var APP_VERSION='2026.09.01.18';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
 var sb=window.supabase.createClient(SB_URL,SB_KEY);
@@ -2873,7 +2873,7 @@ function renderPatTab(el){
           // El teórico correcto es el que se calculó y guardó al hacer el ajuste
           // (excluye el propio ajuste). Recalcularlo aquí lo incluiría como punto
           // de partida y el desfase saldría siempre 0.
-          var th=isLockedAdjust(p)?null:accountCalcBalanceAsOf(a.id,pDate);
+          var th=isLockedAdjust(p)?null:Number(p.theoretical_amount!==null&&p.theoretical_amount!==undefined?p.theoretical_amount:accountCalcTheoreticalAsOf(a.id,pDate));
           var d=th===null?(p.amount-0):(p.amount-th);
           var desfaseStr=th===null?'—':((Math.abs(d)>0.01?(d>0?'+':'')+fmt(d):'sin desfase'));
           return '<div class="pat-hist-row">'
@@ -2981,6 +2981,15 @@ function accountCalcBalanceAsOf(accountId,dateStr){
   var voids=transactionVoids.reduce(function(s,v){return s+accountVoidDelta(v,accountId,baseDate,dateStr);},0);
   return base+live+voids;
 }
+function accountCalcTheoreticalAsOf(accountId,dateStr){
+  var hist=accountHistory(accountId).filter(function(p){var d=p.reset_date||lastDayOfMonthStr(p.year,p.month);return d<=dateStr;});
+  var reset=hist.length?hist[hist.length-1]:null;
+  var base=reset?Number(reset.theoretical_amount!==null&&reset.theoretical_amount!==undefined?reset.theoretical_amount:reset.amount):0;
+  var baseDate=reset?(reset.reset_date||lastDayOfMonthStr(reset.year,reset.month)):'0000-01-01';
+  var live=transactions.filter(function(t){return accountTouchesAccount(t,accountId)&&t.date>baseDate&&t.date<=dateStr;}).reduce(function(s,t){return s+accountTxDelta(t,accountId);},0);
+  var voids=transactionVoids.reduce(function(s,v){return s+accountVoidDelta(v,accountId,baseDate,dateStr);},0);
+  return base+live+voids;
+}
 function accountRealBalance(accountId,yr,mo){
   var cutoff=(mo===12)?(yr+1)+'-01-01':yr+'-'+pad(mo+1)+'-01';
   var hist=accountHistory(accountId).filter(function(p){var d=p.reset_date||lastDayOfMonthStr(p.year,p.month);return d<cutoff;});
@@ -3003,13 +3012,13 @@ async function applyBalanceAdjustment(accountId){
   var laterExists=accountHistory(accountId).some(function(p){return (p.reset_date||lastDayOfMonthStr(p.year,p.month))>date;});
   if(laterExists&&!confirm('Ya existe un ajuste posterior a esta fecha. Este nuevo ajuste no afectará al saldo actual mostrado, solo al histórico. ¿Continuar?'))return;
   var yr=parseInt(date.slice(0,4)),mo=parseInt(date.slice(5,7));
-  var theoretical=accountCalcBalanceAsOf(accountId,date);
+  var theoretical=accountCalcTheoreticalAsOf(accountId,date);
   var diff=real-theoretical;
   setSync('syncing');var s=document.getElementById('patStatus');if(s){s.textContent='guardando...';s.className='status-msg';}
   // El ajuste se convierte en el nuevo punto de partida: en su misma fecha
   // el saldo real y el teórico coinciden. El desfase previo queda registrado
   // aparte como movimiento de conciliación.
-  var item={id:'p'+accountId+Date.now()+Math.random().toString(36).slice(2,6),account_id:accountId,year:yr,month:mo,amount:real,theoretical_amount:real,reset_date:date,user_id:currentUser.id};
+  var item={id:'p'+accountId+Date.now()+Math.random().toString(36).slice(2,6),account_id:accountId,year:yr,month:mo,amount:real,theoretical_amount:theoretical,reset_date:date,user_id:currentUser.id};
   var adjustment=null;
   if(Math.abs(diff)>0.005){
     var adjustmentType=diff<0?'expense':'income';
