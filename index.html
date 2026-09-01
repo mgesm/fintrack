@@ -1373,7 +1373,7 @@ if('serviceWorker' in navigator){
 </div>
 
 <script>
-var APP_VERSION='2026.09.01.7';
+var APP_VERSION='2026.09.01.8';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
 var sb=window.supabase.createClient(SB_URL,SB_KEY);
@@ -3378,7 +3378,6 @@ function refreshAssetPeriodChange(sheet){
   var nums=values.map(function(v){return Number(v.close);}).filter(Number.isFinite);if(nums.length<2)return;
   var pct=(nums[nums.length-1]-nums[0])/nums[0]*100,label=(sheet.querySelector('#assetRanges button.active')||{}).textContent||'período',text=(pct>=0?'+':'')+pct.toLocaleString('es-ES',{maximumFractionDigits:2})+' %';
   if(change.dataset.periodValue!==text){change.dataset.periodValue=text;change.textContent=text;change.classList.toggle('negative',pct<0);}
-  if(data){var cards=data.querySelectorAll('div');if(cards[1]&&cards[1].dataset.periodValue!==text){cards[1].dataset.periodValue=text;cards[1].innerHTML='<small>Variación '+htmlEscape(label)+'</small><strong class="'+(pct<0?'negative':'positive')+'">'+text+'</strong>';}}
 }
 var assetPeriodObserver=new MutationObserver(function(records){var sheets=[];records.forEach(function(record){var node=record.target.nodeType===1?record.target:record.target.parentElement, sheet=node&&node.closest&&node.closest('.asset-sheet');if(sheet&&sheets.indexOf(sheet)<0)sheets.push(sheet);});sheets.forEach(function(sheet){refreshAssetPeriodChange(sheet);});});
 assetPeriodObserver.observe(document.body,{subtree:true,childList:true,characterData:true});
