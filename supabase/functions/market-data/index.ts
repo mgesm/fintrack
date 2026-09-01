@@ -8,8 +8,8 @@ const isIsin = (value: string) => /^[A-Z]{2}[A-Z0-9]{9}[0-9]$/i.test(value);
 
 // Algunas clases de fondos se negocian en mercados con un símbolo distinto al ISIN.
 // La búsqueda de Yahoo cubre el resto; estos alias hacen la resolución inmediata.
-const fundAliases: Record<string, string> = {
-  IE00BYX5MX67: "IE00BYX5MX67.SG", // Fidelity S&P 500 Index Fund P-ACC-EUR
+const knownFunds: Record<string, { symbol: string; name: string }> = {
+  IE00BYX5MX67: { symbol: "IE00BYX5MX67.SG", name: "Fidelity S&P 500 Index Fund P-ACC-EUR" },
 };
 
 async function getYahooSearch(query: string) {
@@ -19,7 +19,7 @@ async function getYahooSearch(query: string) {
 }
 async function yahooSymbolFor(input: string) {
   const upper = input.toUpperCase();
-  if (fundAliases[upper]) return fundAliases[upper];
+  if (knownFunds[upper]) return knownFunds[upper].symbol;
   if (!isIsin(upper)) return upper;
   const data = await getYahooSearch(upper);
   const match = (data?.quotes || []).find((q: any) => q?.symbol && (q?.quoteType === "MUTUALFUND" || q?.quoteType === "ETF" || q?.isYahooFinance));
@@ -74,7 +74,11 @@ Deno.serve(async (req: Request) => {
 
     // Los ISIN se resuelven por la fuente especializada de fondos.
     if (isIsin(input)) {
-      if (action === "search") return Response.json({ data: { data: yahooSearchItems(await getYahooSearch(input), input) } }, { headers: corsHeaders });
+      if (action === "search") {
+        const known = knownFunds[input.toUpperCase()];
+        if (known) return Response.json({ data: { data: [{ symbol: input.toUpperCase(), instrument_name: known.name, instrument_type: "Fondo de inversión" }] } }, { headers: corsHeaders });
+        return Response.json({ data: { data: yahooSearchItems(await getYahooSearch(input), input) } }, { headers: corsHeaders });
+      }
       if (action === "quote") return Response.json({ data: await yahooQuote(input) }, { headers: corsHeaders });
       if (action === "history") return Response.json({ data: await yahooHistory(input, safe(body?.interval, 8), Number(body?.outputsize) || 90) }, { headers: corsHeaders });
     }
