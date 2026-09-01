@@ -50,6 +50,35 @@ async function yahooChart(symbol: string, range: string, interval: string) {
   }
   throw new Error("Yahoo Finance no ha devuelto datos para este fondo. " + failures.join(" · "));
 }
+// Respaldo para clases de fondos que Yahoo Finance no sirve desde sus endpoints
+// públicos. La ficha de Investing contiene el último NAV publicado y su cierre.
+async function investingFundQuote(input: string) {
+  if (input.toUpperCase() !== "IE00BYX5MX67") throw new Error("No hay una fuente alternativa para este fondo");
+  const response = await fetch("https://www.investing.com/funds/ie00byx5mx67", { headers: yahooHeaders });
+  const raw = await response.text();
+  if (!response.ok) throw new Error("La fuente alternativa no está disponible (" + response.status + ")");
+  const readNumber = (patterns: RegExp[]) => {
+    for (const pattern of patterns) {
+      const match = raw.match(pattern);
+      if (match?.[1]) {
+        const value = Number(match[1].replace(/,/g, ""));
+        if (Number.isFinite(value)) return value;
+      }
+    }
+    return null;
+  };
+  const price = readNumber([
+    /"last_last"\s*:\s*"?([0-9]+(?:[.,][0-9]+)?)"?/i,
+    /"last"\s*:\s*"?([0-9]+(?:[.,][0-9]+)?)"?/i,
+    /data-test="instrument-header-details"[\s\S]{0,800}?([0-9]+\.[0-9]{2,4})/i,
+  ]);
+  const previous = readNumber([
+    /"last_close"\s*:\s*"?([0-9]+(?:[.,][0-9]+)?)"?/i,
+    /Prev\. Close[\s\S]{0,160}?([0-9]+\.[0-9]{2,4})/i,
+  ]) || price;
+  if (!price) throw new Error("La fuente alternativa no ha incluido el valor liquidativo");
+  return { symbol: "IE00BYX5MX67", close: price, price, previous_close: previous, percent_change: previous ? (price - previous) / previous * 100 : 0, currency: "EUR", volume: null, source: "investing-fund" };
+}
 function yahooSearchItems(data: any, input: string) {
   return (data?.quotes || []).filter((q: any) => q?.symbol).map((q: any) => ({
     // Conservamos el ISIN: así las posteriores consultas de precio e histórico
@@ -61,11 +90,16 @@ function yahooSearchItems(data: any, input: string) {
 }
 async function yahooQuote(input: string) {
   const symbol = await yahooSymbolFor(input);
-  const result = await yahooChart(symbol, "7d", "1d");
-  const closes = (result?.indicators?.quote?.[0]?.close || []).filter((v: unknown) => Number.isFinite(Number(v))).map(Number);
-  const close = closes[closes.length - 1], previous = closes[closes.length - 2] || result?.meta?.previousClose || close;
-  if (!Number.isFinite(close)) throw new Error("El fondo todavía no tiene un valor liquidativo disponible");
-  return { symbol, close, price: close, previous_close: previous, percent_change: previous ? (close - previous) / previous * 100 : 0, currency: result?.meta?.currency || "EUR", volume: null, source: "yahoo-fund" };
+  try {
+    const result = await yahooChart(symbol, "7d", "1d");
+    const closes = (result?.indicators?.quote?.[0]?.close || []).filter((v: unknown) => Number.isFinite(Number(v))).map(Number);
+    const close = closes[closes.length - 1], previous = closes[closes.length - 2] || result?.meta?.previousClose || close;
+    if (!Number.isFinite(close)) throw new Error("El fondo todavía no tiene un valor liquidativo disponible");
+    return { symbol, close, price: close, previous_close: previous, percent_change: previous ? (close - previous) / previous * 100 : 0, currency: result?.meta?.currency || "EUR", volume: null, source: "yahoo-fund" };
+  } catch (error) {
+    if (isIsin(input)) return await investingFundQuote(input);
+    throw error;
+  }
 }
 async function yahooHistory(input: string, interval: string, outputsize: number) {
   const symbol = await yahooSymbolFor(input);
