@@ -1,4 +1,4 @@
-var CACHE_NAME='fintrack-cache-v96';
+var CACHE_NAME='fintrack-cache-v95';
 var CACHE_PREFIX='fintrack-cache-';
 var PRECACHE=['./','./index.html','./manifest.json','./supabase-js.min.js','./icon-192.png','./icon-512.png','./vendor/jspdf.umd.min.js','./vendor/exceljs.min.js'];
 
