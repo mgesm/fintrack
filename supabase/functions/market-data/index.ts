@@ -26,6 +26,30 @@ async function yahooSymbolFor(input: string) {
   if (!match?.symbol) throw new Error("No se ha encontrado una cotización para este ISIN");
   return String(match.symbol);
 }
+const yahooHeaders = {
+  "Accept": "application/json, text/plain, */*",
+  // Yahoo rechaza algunas peticiones de servidores si no se identifica un navegador.
+  "User-Agent": "Mozilla/5.0 (compatible; FinTrack/1.0; +https://mgesm.github.io/fintrack/)",
+};
+async function yahooChart(symbol: string, range: string, interval: string) {
+  const path = "/v8/finance/chart/" + encodeURIComponent(symbol) + "?range=" + encodeURIComponent(range) + "&interval=" + encodeURIComponent(interval) + "&includePrePost=false&events=div%2Csplits";
+  const hosts = ["https://query1.finance.yahoo.com", "https://query2.finance.yahoo.com"];
+  const failures: string[] = [];
+  for (const host of hosts) {
+    try {
+      const response = await fetch(host + path, { headers: yahooHeaders });
+      const raw = await response.text();
+      let payload: any = null;
+      try { payload = JSON.parse(raw); } catch { /* se informa abajo con el estado */ }
+      const result = payload?.chart?.result?.[0];
+      if (response.ok && result) return result;
+      failures.push(new URL(host).hostname + " (" + response.status + "): " + (payload?.chart?.error?.description || raw.slice(0, 120) || "sin detalle"));
+    } catch (error) {
+      failures.push(new URL(host).hostname + ": " + (error instanceof Error ? error.message : "error de red"));
+    }
+  }
+  throw new Error("Yahoo Finance no ha devuelto datos para este fondo. " + failures.join(" · "));
+}
 function yahooSearchItems(data: any, input: string) {
   return (data?.quotes || []).filter((q: any) => q?.symbol).map((q: any) => ({
     // Conservamos el ISIN: así las posteriores consultas de precio e histórico
@@ -37,10 +61,7 @@ function yahooSearchItems(data: any, input: string) {
 }
 async function yahooQuote(input: string) {
   const symbol = await yahooSymbolFor(input);
-  const response = await fetch("https://query1.finance.yahoo.com/v8/finance/chart/" + encodeURIComponent(symbol) + "?range=7d&interval=1d");
-  const payload = await response.json();
-  const result = payload?.chart?.result?.[0];
-  if (!response.ok || !result) throw new Error(payload?.chart?.error?.description || "No hay valor liquidativo disponible");
+  const result = await yahooChart(symbol, "7d", "1d");
   const closes = (result?.indicators?.quote?.[0]?.close || []).filter((v: unknown) => Number.isFinite(Number(v))).map(Number);
   const close = closes[closes.length - 1], previous = closes[closes.length - 2] || result?.meta?.previousClose || close;
   if (!Number.isFinite(close)) throw new Error("El fondo todavía no tiene un valor liquidativo disponible");
@@ -52,10 +73,7 @@ async function yahooHistory(input: string, interval: string, outputsize: number)
   const isIntraday = false;
   const range = isIntraday ? "5d" : interval === "1week" ? "5y" : outputsize <= 35 ? "3mo" : outputsize <= 190 ? "1y" : "5y";
   const yahooInterval = isIntraday ? "5m" : interval === "1week" ? "1wk" : "1d";
-  const response = await fetch("https://query1.finance.yahoo.com/v8/finance/chart/" + encodeURIComponent(symbol) + "?range=" + range + "&interval=" + yahooInterval);
-  const payload = await response.json();
-  const result = payload?.chart?.result?.[0];
-  if (!response.ok || !result) throw new Error(payload?.chart?.error?.description || "No hay histórico disponible");
+  const result = await yahooChart(symbol, range, yahooInterval);
   const values = (result.timestamp || []).map((ts: number, i: number) => {
     const close = result?.indicators?.quote?.[0]?.close?.[i];
     if (!Number.isFinite(Number(close))) return null;
