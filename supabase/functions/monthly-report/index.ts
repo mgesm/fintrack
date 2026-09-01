@@ -69,6 +69,8 @@ Deno.serve(async (req) => {
   const { data: secret } = await db.from("backup_scheduler_secret").select("token_hash").eq("singleton",true).maybeSingle();
   if (!secret || !supplied || await sha256(supplied) !== secret.token_hash) return json({error:"Unauthorized"},401);
   const body = await req.json().catch(() => ({}));
+  const madridHour = Number(new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Madrid", hour: "2-digit", hourCycle: "h23" }).format(new Date()));
+  if (body?.source === "supabase-cron" && madridHour !== 14) return json({ ok: true, status: "outside_madrid_delivery_window" });
   const preview = body?.preview === true && typeof body?.month === "string" && /^\d{4}-\d{2}$/.test(body.month);
   const now=new Date(), requested=preview ? new Date(Date.UTC(Number(body.month.slice(0,4)),Number(body.month.slice(5,7))-1,1)) : new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth()-1,1)), start=requested, end=new Date(Date.UTC(start.getUTCFullYear(),start.getUTCMonth()+1,1)), previous=new Date(Date.UTC(start.getUTCFullYear(),start.getUTCMonth()-1,1));
   const key=start.toISOString().slice(0,7), from=start.toISOString().slice(0,10), to=end.toISOString().slice(0,10), previousFrom=previous.toISOString().slice(0,10);
