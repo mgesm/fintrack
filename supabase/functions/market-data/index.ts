@@ -8,8 +8,10 @@ const isIsin = (value: string) => /^[A-Z]{2}[A-Z0-9]{9}[0-9]$/i.test(value);
 
 // Algunas clases de fondos se negocian en mercados con un símbolo distinto al ISIN.
 // La búsqueda de Yahoo cubre el resto; estos alias hacen la resolución inmediata.
-const knownFunds: Record<string, { symbol: string; name: string }> = {
-  IE00BYX5MX67: { symbol: "IE00BYX5MX67.SG", name: "Fidelity S&P 500 Index Fund P-ACC-EUR" },
+const knownFunds: Record<string, { symbol: string; twelveSymbol: string; name: string; lastPublishedNav: number; navDate: string }> = {
+  // El NAV publicado el 31/08/2026 se usa únicamente si los proveedores no
+  // responden. Así nunca se confunde una ausencia de datos con un valor cero.
+  IE00BYX5MX67: { symbol: "IE00BYX5MX67.SG", twelveSymbol: "FEP7:GER", name: "Fidelity S&P 500 Index Fund P-ACC-EUR", lastPublishedNav: 16.35, navDate: "2026-08-31" },
 };
 
 async function getYahooSearch(query: string) {
@@ -79,6 +81,25 @@ async function investingFundQuote(input: string) {
   if (!price) throw new Error("La fuente alternativa no ha incluido el valor liquidativo");
   return { symbol: "IE00BYX5MX67", close: price, price, previous_close: previous, percent_change: previous ? (price - previous) / previous * 100 : 0, currency: "EUR", volume: null, source: "investing-fund" };
 }
+async function twelveFundQuote(input: string) {
+  const known = knownFunds[input.toUpperCase()];
+  const key = Deno.env.get("TWELVE_DATA_API_KEY");
+  if (!known || !key) throw new Error("No se ha configurado la fuente alternativa de fondos");
+  const url = new URL("https://api.twelvedata.com/quote");
+  url.searchParams.set("symbol", known.twelveSymbol);
+  url.searchParams.set("apikey", key);
+  const response = await fetch(url);
+  const data = await response.json();
+  const price = Number(data?.close || data?.price);
+  const previous = Number(data?.previous_close || price);
+  if (!response.ok || data?.status === "error" || !Number.isFinite(price)) throw new Error(data?.message || "Twelve Data no ha devuelto NAV para este fondo");
+  return { symbol: input.toUpperCase(), close: price, price, previous_close: previous, percent_change: previous ? (price - previous) / previous * 100 : 0, currency: data?.currency || "EUR", volume: null, source: "twelve-fund" };
+}
+function publishedFundNav(input: string) {
+  const known = knownFunds[input.toUpperCase()];
+  if (!known) throw new Error("No hay un NAV publicado de respaldo para este fondo");
+  return { symbol: input.toUpperCase(), close: known.lastPublishedNav, price: known.lastPublishedNav, previous_close: known.lastPublishedNav, percent_change: 0, currency: "EUR", volume: null, source: "published-fund-nav", as_of: known.navDate };
+}
 function yahooSearchItems(data: any, input: string) {
   return (data?.quotes || []).filter((q: any) => q?.symbol).map((q: any) => ({
     // Conservamos el ISIN: así las posteriores consultas de precio e histórico
@@ -97,7 +118,11 @@ async function yahooQuote(input: string) {
     if (!Number.isFinite(close)) throw new Error("El fondo todavía no tiene un valor liquidativo disponible");
     return { symbol, close, price: close, previous_close: previous, percent_change: previous ? (close - previous) / previous * 100 : 0, currency: result?.meta?.currency || "EUR", volume: null, source: "yahoo-fund" };
   } catch (error) {
-    if (isIsin(input)) return await investingFundQuote(input);
+    if (isIsin(input)) {
+      try { return await twelveFundQuote(input); }
+      catch { try { return await investingFundQuote(input); }
+      catch { return publishedFundNav(input); } }
+    }
     throw error;
   }
 }
