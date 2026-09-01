@@ -1377,7 +1377,7 @@ if('serviceWorker' in navigator){
 </div>
 
 <script>
-var APP_VERSION='2026.09.01.12';
+var APP_VERSION='2026.09.01.13';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
 var sb=window.supabase.createClient(SB_URL,SB_KEY);
@@ -3375,7 +3375,7 @@ function inspectAssetGraph(svg,event){
 }
 function clearAssetGraph(svg){var chart=svg.parentElement,tip=chart.querySelector('.asset-chart-tooltip'),guide=svg.querySelector('.asset-chart-guide'),dot=svg.querySelector('.asset-chart-dot');if(guide)guide.setAttribute('opacity','0');if(dot)dot.setAttribute('opacity','0');if(tip)tip.style.opacity='0';chart.classList.remove('is-inspecting');}
 var ASSET_LOGO_DOMAINS={AAPL:'apple.com',MSFT:'microsoft.com',GOOG:'google.com',GOOGL:'google.com',AMZN:'amazon.com',META:'meta.com',NVDA:'nvidia.com',TSLA:'tesla.com',NFLX:'netflix.com',AMD:'amd.com',INTC:'intel.com',ORCL:'oracle.com',IBM:'ibm.com',CRM:'salesforce.com',ADBE:'adobe.com',SPY:'ssga.com',VOO:'vanguard.com',VWCE:'vanguard.co.uk',VWRL:'vanguard.co.uk',QQQ:'invesco.com',IWDA:'blackrock.com',EUNL:'ishares.com',IUSA:'ishares.com'};
-function decorateAssetLogo(el,symbol){if(!el||el.dataset.logoReady)return;symbol=String(symbol||'').toUpperCase();el.dataset.logoReady='1';var domain=ASSET_LOGO_DOMAINS[symbol],fallback=htmlEscape(symbol.slice(0,1)||'•');if(!domain){el.classList.add('logo-fallback-only');el.innerHTML='<span class="logo-fallback">'+fallback+'</span>';return;}el.innerHTML='<img src="https://www.google.com/s2/favicons?domain='+encodeURIComponent(domain)+'&sz=128" alt="" referrerpolicy="no-referrer"><span class="logo-fallback">'+fallback+'</span>';var img=el.querySelector('img');img.onerror=function(){el.classList.add('logo-fallback-only');img.remove();};}
+function decorateAssetLogo(el,symbol){if(!el||el.dataset.logoReady)return;symbol=String(symbol||'').toUpperCase();el.dataset.logoReady='1';var domain=ASSET_LOGO_DOMAINS[symbol],fallback=htmlEscape(symbol.slice(0,1)||'•');if(!domain){el.classList.add('logo-fallback-only');el.innerHTML='<span class="logo-fallback">'+fallback+'</span>';return;}el.innerHTML='<img src="https://logo.clearbit.com/'+encodeURIComponent(domain)+'" alt="" referrerpolicy="no-referrer"><span class="logo-fallback">'+fallback+'</span>';var img=el.querySelector('img');img.onerror=function(){el.classList.add('logo-fallback-only');img.remove();};}
 function decorateInvestmentLogos(root){(root||document).querySelectorAll('.search-result i:not([data-logo-ready]),.asset-logo:not([data-logo-ready]),.position i:not([data-logo-ready])').forEach(function(el){var parent=el.closest('.search-result'),symbol=parent&&parent.dataset.symbol;if(!symbol&&el.closest('.asset-sheet')){symbol=((el.closest('.asset-sheet').querySelector('.asset-type')||{}).textContent||'').split(' · ')[0];}if(!symbol&&el.closest('.position')){symbol=((el.closest('.position').querySelector('small')||{}).textContent||'').split(' · ')[0];}decorateAssetLogo(el,symbol);});}
 var investmentLogoObserver=new MutationObserver(function(){decorateInvestmentLogos(document);});
 investmentLogoObserver.observe(document.body,{subtree:true,childList:true});
