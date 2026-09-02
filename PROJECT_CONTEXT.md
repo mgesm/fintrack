@@ -351,6 +351,8 @@ Las entradas son acumulativas. Toda entrada nueva debe incluir fecha, cambio, ar
 
 | 2026-09-02 | Se colocó la restauración al final de las opciones de copia, con estilo neutro, y se cambió la lectura de JSON a `FileReader` para compatibilidad con la app instalada. | `index.html`, `serviceworker.js`. | JavaScript validado y caché renovada. |
 
+| 2026-09-02 | Se simplificaron y reordenaron Ajustes: versión y sincronización, apariencia compacta, exportación, copias, cuenta y zona de peligro. Se eliminaron color de acento, presupuesto mensual y estado de sincronización. | `index.html`, `serviceworker.js`. | JavaScript validado y caché renovada. |
+
 ## 12. Lista de comprobación rápida por tipo de cambio
 
 ### Interfaz
