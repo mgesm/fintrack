@@ -1,6 +1,6 @@
 # FinTrack — contexto técnico y operativo
 
-> **Versión del documento:** 1.6  
+> **Versión del documento:** 1.7  
 > **Última actualización:** 2026-09-02  
 > **Repositorio:** `mgesm/fintrack` (rama `main`)  
 > **Producción:** https://mgesm.github.io/fintrack/  
@@ -144,7 +144,7 @@ Conceptos no negociables:
 
 Al ajustar un saldo real, el valor real **no debe sobrescribir** el teórico. Para cuadrar la contabilidad se crea una transacción vinculada de ajuste (`is_balance_adjustment=true`, `balance_adjustment_patrimony_id`) por la diferencia, como ingreso o gasto según el sentido. Esta transacción se conserva para cuadrar resultados, pero se excluye del cálculo del saldo teórico: si no se excluyera, se enmascararía el desfase y real/teórico pasarían artificialmente a coincidir.
 
-Los ajustes de saldo se ignoran completamente en el cálculo del teórico y del desfase: no se usan como base, ni como movimiento, ni para reconstruir valores históricos. Si un snapshot antiguo no tiene `theoretical_amount`, el frontend lo calcula desde snapshots anteriores y movimientos ordinarios, excluyendo los ajustes.
+El movimiento de actualización se ignora completamente en el cálculo del teórico y del desfase: nunca se suma ni se resta como gasto/ingreso. Sin embargo, el saldo real de cada snapshot pasa a ser el punto de partida para los movimientos posteriores. Así, un desfase anterior no se arrastra al siguiente ajuste; cada snapshot compara el real con los movimientos ordinarios desde el ajuste previo.
 
 El cálculo debe considerar la fecha del snapshot, movimientos hasta esa fecha, traspasos, anulaciones y ajustes posteriores. Un ajuste a 30 de agosto, por ejemplo, no debe hacer que el teórico de ese día incluya gastos posteriores ni convertirlo en el real introducido.
 
@@ -339,6 +339,7 @@ Las entradas son acumulativas. Toda entrada nueva debe incluir fecha, cambio, ar
 | 2026-09-02 | Se corrigió la reconstrucción del saldo teórico para snapshots históricos, excluyendo definitivamente las actualizaciones de saldo del desfase. | `index.html`, `serviceworker.js`, `PROJECT_CONTEXT.md`. | Tres scripts embebidos validados; publicado con versión `2026.09.02.6` y caché `v107`. |
 | 2026-09-02 | Se publicó una reconstrucción desde ajuste vinculado, posteriormente descartada por no cumplir la regla financiera acordada. | `index.html`, `serviceworker.js`, `PROJECT_CONTEXT.md`. | Sustituida inmediatamente por la versión `2026.09.02.8`. |
 | 2026-09-02 | Se corrigió definitivamente el cálculo: ajustes de saldo excluidos por completo del teórico/desfase; los históricos sin teórico se resuelven solo con movimientos ordinarios. También se ocultaron Invertido y Rentabilidad con el modo privado. | `index.html`, `serviceworker.js`, `PROJECT_CONTEXT.md`. | Tres scripts embebidos validados; publicado con versión `2026.09.02.8` y caché `v109`. |
+| 2026-09-02 | Se corrigió el encadenamiento entre ajustes: el saldo real del ajuste previo ancla el siguiente cálculo, pero su transacción de actualización queda excluida. | `index.html`, `serviceworker.js`, `PROJECT_CONTEXT.md`. | Tres scripts embebidos validados; publicado con versión `2026.09.02.9` y caché `v110`. |
 
 ## 12. Lista de comprobación rápida por tipo de cambio
 
