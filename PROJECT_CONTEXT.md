@@ -353,6 +353,8 @@ Las entradas son acumulativas. Toda entrada nueva debe incluir fecha, cambio, ar
 
 | 2026-09-02 | Se simplificaron y reordenaron Ajustes: versión y sincronización, apariencia compacta, exportación, copias, cuenta y zona de peligro. Se eliminaron color de acento, presupuesto mensual y estado de sincronización. | `index.html`, `serviceworker.js`. | JavaScript validado y caché renovada. |
 
+| 2026-09-02 | La importación manual acepta tanto la exportación local como un archivo procedente de la copia automática de Supabase; normaliza el bloque `data` y las claves técnicas antes de validar. | `index.html`, `automatic-backup`. | Validado el formato de ambas variantes y renovada la caché. |
+
 ## 12. Lista de comprobación rápida por tipo de cambio
 
 ### Interfaz
