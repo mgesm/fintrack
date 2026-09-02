@@ -1,6 +1,6 @@
 # FinTrack — contexto técnico y operativo
 
-> **Versión del documento:** 1.5  
+> **Versión del documento:** 1.6  
 > **Última actualización:** 2026-09-02  
 > **Repositorio:** `mgesm/fintrack` (rama `main`)  
 > **Producción:** https://mgesm.github.io/fintrack/  
@@ -144,7 +144,7 @@ Conceptos no negociables:
 
 Al ajustar un saldo real, el valor real **no debe sobrescribir** el teórico. Para cuadrar la contabilidad se crea una transacción vinculada de ajuste (`is_balance_adjustment=true`, `balance_adjustment_patrimony_id`) por la diferencia, como ingreso o gasto según el sentido. Esta transacción se conserva para cuadrar resultados, pero se excluye del cálculo del saldo teórico: si no se excluyera, se enmascararía el desfase y real/teórico pasarían artificialmente a coincidir.
 
-Para todo snapshot con una transacción de ajuste vinculada, el frontend reconstruye el teórico desde ella, incluso si existe un `theoretical_amount` histórico potencialmente incorrecto: ajuste de gasto = `real + ajuste`; ajuste de ingreso = `real - ajuste`. Nunca debe usar el saldo real como sustituto automático del teórico en ese caso.
+Los ajustes de saldo se ignoran completamente en el cálculo del teórico y del desfase: no se usan como base, ni como movimiento, ni para reconstruir valores históricos. Si un snapshot antiguo no tiene `theoretical_amount`, el frontend lo calcula desde snapshots anteriores y movimientos ordinarios, excluyendo los ajustes.
 
 El cálculo debe considerar la fecha del snapshot, movimientos hasta esa fecha, traspasos, anulaciones y ajustes posteriores. Un ajuste a 30 de agosto, por ejemplo, no debe hacer que el teórico de ese día incluya gastos posteriores ni convertirlo en el real introducido.
 
@@ -337,7 +337,8 @@ Las entradas son acumulativas. Toda entrada nueva debe incluir fecha, cambio, ar
 | 2026-09-02 | Se revirtió el último cambio visual de Inversión tras un bloqueo de entrada reportado por el usuario. | `index.html`, `serviceworker.js`, `PROJECT_CONTEXT.md`. | La pantalla pública vuelve a salir de carga hacia Acceso; publicado con versión `2026.09.02.4` y caché `v105`. |
 | 2026-09-02 | Se amplió el modo privado de cartera para enmascarar todas las cifras de posiciones abiertas. | `index.html`, `serviceworker.js`, `PROJECT_CONTEXT.md`. | Tres scripts embebidos validados; publicado con versión `2026.09.02.5` y caché `v106`. |
 | 2026-09-02 | Se corrigió la reconstrucción del saldo teórico para snapshots históricos, excluyendo definitivamente las actualizaciones de saldo del desfase. | `index.html`, `serviceworker.js`, `PROJECT_CONTEXT.md`. | Tres scripts embebidos validados; publicado con versión `2026.09.02.6` y caché `v107`. |
-| 2026-09-02 | Se reforzó la corrección: todo snapshot con ajuste vinculado reconstruye el teórico desde el desfase, aunque tenga un valor histórico guardado. | `index.html`, `serviceworker.js`, `PROJECT_CONTEXT.md`. | Tres scripts embebidos validados; publicado con versión `2026.09.02.7` y caché `v108`. |
+| 2026-09-02 | Se publicó una reconstrucción desde ajuste vinculado, posteriormente descartada por no cumplir la regla financiera acordada. | `index.html`, `serviceworker.js`, `PROJECT_CONTEXT.md`. | Sustituida inmediatamente por la versión `2026.09.02.8`. |
+| 2026-09-02 | Se corrigió definitivamente el cálculo: ajustes de saldo excluidos por completo del teórico/desfase; los históricos sin teórico se resuelven solo con movimientos ordinarios. También se ocultaron Invertido y Rentabilidad con el modo privado. | `index.html`, `serviceworker.js`, `PROJECT_CONTEXT.md`. | Tres scripts embebidos validados; publicado con versión `2026.09.02.8` y caché `v109`. |
 
 ## 12. Lista de comprobación rápida por tipo de cambio
 
