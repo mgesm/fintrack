@@ -1379,7 +1379,7 @@ if('serviceWorker' in navigator){
 </div>
 
 <script>
-var APP_VERSION='2026.09.02.14';
+var APP_VERSION='2026.09.02.15';
 var APP_PUBLISHED_AT='02/09/2026 · 12:14 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
@@ -4266,12 +4266,31 @@ async function importJSONFile(input){
     if(status){status.textContent='Error al importar: '+(e&&e.message?e.message:'archivo no válido');status.className='status-msg status-err';}
   }finally{input.value='';}
 }
+function normalizeImportedBackup(data){
+  if(!data||typeof data!=='object')return data;
+  // Las copias automáticas de Supabase usan { data: { recurrence_exclusions, ... } };
+  // las exportaciones manuales usan las colecciones directamente en la raíz.
+  if(data.data&&typeof data.data==='object'&&!Array.isArray(data.data)){
+    var source=data.data;
+    return {
+      version:data.version||3,
+      transactions:source.transactions||[],
+      categories:source.categories||[],
+      accounts:source.accounts||[],
+      patrimony:source.patrimony||[],
+      budgets:source.budgets||[],
+      recurrenceExclusions:source.recurrenceExclusions||source.recurrence_exclusions||[],
+      transactionVoids:source.transactionVoids||source.transaction_voids||[]
+    };
+  }
+  return data;
+}
 async function importJSON(rawInput,statusEl){
   var raw=typeof rawInput==='string'?rawInput.trim():'';var s=statusEl||document.getElementById('importStatus');
   function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
   try{
     if(raw.length>10485760)throw new Error('la copia supera el tamaño máximo de 10 MB');
-    var d=JSON.parse(raw);
+    var d=normalizeImportedBackup(JSON.parse(raw));
     validateImportData(d);
     var uid=currentUser.id;
     s.textContent='guardando copia de seguridad previa...';s.className='status-msg';
