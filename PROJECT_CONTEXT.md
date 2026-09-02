@@ -1,6 +1,6 @@
 # FinTrack — contexto técnico y operativo
 
-> **Versión del documento:** 1.3  
+> **Versión del documento:** 1.4  
 > **Última actualización:** 2026-09-02  
 > **Repositorio:** `mgesm/fintrack` (rama `main`)  
 > **Producción:** https://mgesm.github.io/fintrack/  
@@ -143,6 +143,8 @@ Conceptos no negociables:
 | Desfase | `real - teórico`. Puede ser positivo o negativo. |
 
 Al ajustar un saldo real, el valor real **no debe sobrescribir** el teórico. Para cuadrar la contabilidad se crea una transacción vinculada de ajuste (`is_balance_adjustment=true`, `balance_adjustment_patrimony_id`) por la diferencia, como ingreso o gasto según el sentido. Esta transacción se conserva para cuadrar resultados, pero se excluye del cálculo del saldo teórico: si no se excluyera, se enmascararía el desfase y real/teórico pasarían artificialmente a coincidir.
+
+Para snapshots históricos que no tengan `theoretical_amount` persistido, el frontend lo reconstruye desde la transacción de ajuste vinculada: ajuste de gasto = `real + ajuste`; ajuste de ingreso = `real - ajuste`. Nunca debe usar el saldo real como sustituto automático del teórico en ese caso.
 
 El cálculo debe considerar la fecha del snapshot, movimientos hasta esa fecha, traspasos, anulaciones y ajustes posteriores. Un ajuste a 30 de agosto, por ejemplo, no debe hacer que el teórico de ese día incluya gastos posteriores ni convertirlo en el real introducido.
 
@@ -334,6 +336,7 @@ Las entradas son acumulativas. Toda entrada nueva debe incluir fecha, cambio, ar
 | 2026-09-02 | Se simplificó la cabecera de Inversión y se movieron los recientes encima del buscador, sin título “Últimos visitados”. | `index.html`, `PROJECT_CONTEXT.md`, `serviceworker.js`. | Tres scripts embebidos validados; publicado con versión `2026.09.02.3` y caché `v104`. |
 | 2026-09-02 | Se revirtió el último cambio visual de Inversión tras un bloqueo de entrada reportado por el usuario. | `index.html`, `serviceworker.js`, `PROJECT_CONTEXT.md`. | La pantalla pública vuelve a salir de carga hacia Acceso; publicado con versión `2026.09.02.4` y caché `v105`. |
 | 2026-09-02 | Se amplió el modo privado de cartera para enmascarar todas las cifras de posiciones abiertas. | `index.html`, `serviceworker.js`, `PROJECT_CONTEXT.md`. | Tres scripts embebidos validados; publicado con versión `2026.09.02.5` y caché `v106`. |
+| 2026-09-02 | Se corrigió la reconstrucción del saldo teórico para snapshots históricos, excluyendo definitivamente las actualizaciones de saldo del desfase. | `index.html`, `serviceworker.js`, `PROJECT_CONTEXT.md`. | Tres scripts embebidos validados; publicado con versión `2026.09.02.6` y caché `v107`. |
 
 ## 12. Lista de comprobación rápida por tipo de cambio
 
