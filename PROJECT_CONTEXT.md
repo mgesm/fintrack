@@ -1,6 +1,6 @@
 # FinTrack — contexto técnico y operativo
 
-> **Versión del documento:** 1.1  
+> **Versión del documento:** 1.2  
 > **Última actualización:** 2026-09-02  
 > **Repositorio:** `mgesm/fintrack` (rama `main`)  
 > **Producción:** https://mgesm.github.io/fintrack/  
@@ -194,7 +194,7 @@ La pestaña se está consolidando como un servicio de inversión interno, no com
 
 - El buscador vive en “Explorar mercados”. Mientras se escribe, muestra resultados filtrados, no exige un botón de búsqueda.
 - Los tres productos destacados de esa zona son los **tres últimos abiertos**, persistidos con `ft_invest_recent_assets_<userId>`, y no ejemplos fijos.
-- Los recientes se muestran sin rótulo propio, entre el título “Explorar mercados” y el campo de búsqueda.
+- Actualmente los recientes se muestran bajo el campo de búsqueda. El intento de moverlos encima y eliminar su rótulo se revirtió el 2026-09-02 por una regresión de inicio que requiere investigación antes de volver a aplicarlo.
 - Al seleccionar producto se abre una hoja/modal cerrable dentro de la pestaña; no debe cubrir indebidamente el menú lateral de escritorio.
 
 **Detalle de producto**
@@ -331,6 +331,7 @@ Las entradas son acumulativas. Toda entrada nueva debe incluir fecha, cambio, ar
 | 2026-09-02 | Se añadieron animaciones de entrada sutiles a Anual, Cuentas, Inicio y Categorías, respetando reducción de movimiento. | `index.html` (`animateTabEntrance` y estilos). | Publicado en los commits de frontend y service worker más recientes. |
 | 2026-09-02 | Se creó este contexto de continuidad y se estableció su actualización obligatoria tras cada cambio. | `PROJECT_CONTEXT.md`. | Verificado con `git diff --check` y publicado en GitHub. |
 | 2026-09-02 | Se simplificó la cabecera de Inversión y se movieron los recientes encima del buscador, sin título “Últimos visitados”. | `index.html`, `PROJECT_CONTEXT.md`, `serviceworker.js`. | Tres scripts embebidos validados; publicado con versión `2026.09.02.3` y caché `v104`. |
+| 2026-09-02 | Se revirtió el último cambio visual de Inversión tras un bloqueo de entrada reportado por el usuario. | `index.html`, `serviceworker.js`, `PROJECT_CONTEXT.md`. | La pantalla pública vuelve a salir de carga hacia Acceso; publicado con versión `2026.09.02.4` y caché `v105`. |
 
 ## 12. Lista de comprobación rápida por tipo de cambio
 
