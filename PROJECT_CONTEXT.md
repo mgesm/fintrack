@@ -355,6 +355,8 @@ Las entradas son acumulativas. Toda entrada nueva debe incluir fecha, cambio, ar
 
 | 2026-09-02 | La importación manual acepta tanto la exportación local como un archivo procedente de la copia automática de Supabase; normaliza el bloque `data` y las claves técnicas antes de validar. | `index.html`, `automatic-backup`. | Validado el formato de ambas variantes y renovada la caché. |
 
+| 2026-09-02 | Se corrigió la RPC de importación: `transactions.tags` llega como JSON y la columna usa `text[]`; ahora se transforma de forma explícita dentro de la operación atómica. | `replace_fintrack_data(jsonb)` en Supabase. | Logs identificaron el error de tipos y la conversión fue comprobada con etiquetas reales de ejemplo. |
+
 ## 12. Lista de comprobación rápida por tipo de cambio
 
 ### Interfaz
