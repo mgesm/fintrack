@@ -1379,7 +1379,7 @@ if('serviceWorker' in navigator){
 </div>
 
 <script>
-var APP_VERSION='2026.09.02.5';
+var APP_VERSION='2026.09.02.6';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
 var sb=window.supabase.createClient(SB_URL,SB_KEY);
@@ -2885,7 +2885,7 @@ function renderPatTab(el){
           // El teórico correcto es el que se calculó y guardó al hacer el ajuste
           // (excluye el propio ajuste). Recalcularlo aquí lo incluiría como punto
           // de partida y el desfase saldría siempre 0.
-          var th=isLockedAdjust(p)?null:Number(p.theoretical_amount!==null&&p.theoretical_amount!==undefined?p.theoretical_amount:accountCalcTheoreticalAsOf(a.id,pDate));
+          var th=isLockedAdjust(p)?null:snapshotTheoreticalAmount(p);
           var d=th===null?(p.amount-0):(p.amount-th);
           var desfaseStr=th===null?'—':((Math.abs(d)>0.01?(d>0?'+':'')+fmt(d):'sin desfase'));
           return '<div class="pat-hist-row">'
@@ -2933,6 +2933,18 @@ function lastDayOfMonthStr(yr,mo){var d=new Date(yr,mo,0);return d.getFullYear()
 function isLockedAdjust(p){var id=(p&&typeof p==='object')?p.id:p;return typeof id==='string'&&id.indexOf('anchor_')===0;}
 async function ensureRevolutAnchor(uid){}
 var _historyCache={};
+function snapshotTheoreticalAmount(snapshot){
+  if(!snapshot)return 0;
+  var stored=snapshot.theoretical_amount;
+  if(stored!==null&&stored!==undefined&&stored!==''&&Number.isFinite(Number(stored)))return Number(stored);
+  // Compatibilidad con ajustes históricos cuyo teórico no se llegó a persistir:
+  // el movimiento de ajuste jamás forma parte del teórico; solo revela el desfase.
+  var adjustment=transactions.find(function(t){return t&&t.is_balance_adjustment&&String(t.balance_adjustment_patrimony_id||'')===String(snapshot.id||'');});
+  var real=Number(snapshot.amount)||0;
+  if(!adjustment)return real;
+  var amount=Number(adjustment.amount)||0;
+  return adjustment.type==='expense'?real+amount:real-amount;
+}
 function accountHistory(accountId){
   if(_historyCache[accountId])return _historyCache[accountId];
   return _historyCache[accountId]=patrimony.filter(function(p){return p.account_id===accountId;}).sort(function(a,b){
@@ -2997,7 +3009,7 @@ function accountCalcBalanceAsOf(accountId,dateStr){
 function accountCalcTheoreticalAsOf(accountId,dateStr){
   var hist=accountHistory(accountId).filter(function(p){var d=p.reset_date||lastDayOfMonthStr(p.year,p.month);return d<=dateStr;});
   var reset=hist.length?hist[hist.length-1]:null;
-  var base=reset?Number(reset.theoretical_amount!==null&&reset.theoretical_amount!==undefined?reset.theoretical_amount:reset.amount):0;
+  var base=reset?snapshotTheoreticalAmount(reset):0;
   var baseDate=reset?(reset.reset_date||lastDayOfMonthStr(reset.year,reset.month)):'0000-01-01';
   var live=transactions.filter(function(t){return accountTouchesAccount(t,accountId)&&t.date>baseDate&&t.date<=dateStr;}).reduce(function(s,t){return s+accountTxDelta(t,accountId);},0);
   var voids=transactionVoids.reduce(function(s,v){return s+accountVoidDelta(v,accountId,baseDate,dateStr);},0);
