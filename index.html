@@ -1379,7 +1379,7 @@ if('serviceWorker' in navigator){
 </div>
 
 <script>
-var APP_VERSION='2026.09.02.13';
+var APP_VERSION='2026.09.02.14';
 var APP_PUBLISHED_AT='02/09/2026 · 12:14 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
@@ -3500,19 +3500,13 @@ function renderSettingsTab(el){
   }).join('');
 
   el.innerHTML='<div class="settings-wrap" style="display:flex;flex-direction:column;gap:20px">'
-    +'<div class="settings-section"><div class="settings-title">Cuenta</div><div class="settings-info">'+email+'</div><button class="settings-btn danger" onclick="signOut()">Cerrar sesión<span class="btn-arrow">›</span></button></div>'
-    
-    +'<div class="settings-section"><div class="settings-title">Apariencia</div><div class="settings-info" style="margin-bottom:8px">Tema claro u oscuro de la app</div><div class="theme-switch-row">'
+    +'<div class="settings-section"><div class="settings-title">Versión</div><div class="settings-info">FinTrack <strong>'+APP_VERSION+'</strong><br><span style="font-size:12px;color:var(--text3)">Último commit: <span id="appPublishedAt">consultando…</span></span></div><button class="settings-btn" onclick="forceSync()">↺ Sincronizar ahora</button><div class="status-msg" id="syncStatusMsg"></div></div>'
+    +'<div class="settings-section"><div class="settings-title">Apariencia</div><div class="theme-switch-row">'
     +themeOpts.map(function(o){return '<button class="theme-switch-btn'+(curTheme===o.v?' active':'')+'" onclick="setTheme(\''+o.v+'\')">'+o.label+'</button>';}).join('')
     +'</div></div>'
-    +'<div class="settings-section"><div class="settings-title">Tema de color</div><div class="settings-info">Color de acento de la app</div><div class="color-palette">'+accentSwatches+'</div></div>'
-    +'<div class="settings-section"><div class="settings-title">Presupuesto total mensual</div><div class="settings-info">Suma automática de los presupuestos de todas las categorías de '+capitalize(MONTHS[viewMonth])+': <strong>'+fmt(totalBudget())+'</strong></div></div>'
-    +'<div class="settings-section"><div class="settings-title">Copia de seguridad automática</div><div class="settings-info">'+(lastBackup?'Última copia: '+new Date(lastBackup).toLocaleDateString('es-ES'):'Sin copia reciente')+'<br>'+((autoBackupEnabled)?'Activa: descarga una copia local cada 7 días.':'Desactivada: las copias se descargan solo cuando tú las pides.')+'</div><button class="settings-btn" onclick="toggleAutoBackup()">'+(autoBackupEnabled?'✓ Copia automática activada':'Activar copia automática')+'</button><button class="settings-btn" onclick="downloadBackupNow()">↓ Descargar copia ahora</button><input id="importJSONFile" type="file" accept=".json,application/json" style="display:none" onchange="importJSONFile(this)"><button class="settings-btn" onclick="document.getElementById(&quot;importJSONFile&quot;).click()">↑ Importar JSON</button><div class="status-msg" id="importStatus"></div><button class="settings-btn" onclick="restoreLatestBackup()">↺ Restaurar última copia</button></div>'
     +'<div class="settings-section"><div class="settings-title">Exportar datos</div><button class="settings-btn" onclick="openExportModal()">↓ Exportar (PDF · Excel · CSV)<span class="btn-arrow">›</span></button><button class="settings-btn" onclick="exportJSON()">↓ Exportar JSON (copia)</button></div>'
-    +''
-    +'<div class="settings-section"><div class="settings-title">Estado de sincronización</div><div class="settings-info" id="syncStatusSummary">'+syncStatusSummary()+'</div><button class="settings-btn" onclick="forceSync()">↺ Sincronizar ahora</button><div class="status-msg" id="syncStatusMsg"></div></div>'
-    +'<div class="settings-section"><div class="settings-title">Versión</div><div class="settings-info">FinTrack <strong>'+APP_VERSION+'</strong><br><span style="font-size:12px;color:var(--text3)">Último commit: <span id="appPublishedAt">consultando…</span></span></div></div>'
-
+    +'<div class="settings-section"><div class="settings-title">Copia de Seguridad</div><div class="settings-info">Las copias se crean automáticamente cada cinco días y se conservan las tres últimas.'+(lastBackup?'<br>Última copia local: '+new Date(lastBackup).toLocaleDateString('es-ES'):'')+'</div><button class="settings-btn" onclick="downloadBackupNow()">↓ Descargar copia ahora</button><input id="importJSONFile" type="file" accept=".json,application/json" style="display:none" onchange="importJSONFile(this)"><button class="settings-btn" onclick="document.getElementById(&quot;importJSONFile&quot;).click()">↑ Importar JSON</button><div class="status-msg" id="importStatus"></div><button class="settings-btn" onclick="restoreLatestBackup()">↺ Restaurar última copia</button></div>'
+    +'<div class="settings-section"><div class="settings-title">Cuenta</div><div class="settings-info">'+email+'</div><button class="settings-btn danger" onclick="signOut()">Cerrar sesión<span class="btn-arrow">›</span></button></div>'
     +'<div class="settings-section"><div class="settings-title">Zona de peligro</div><button class="settings-btn danger" onclick="clearTxs()">⚠ Borrar todas las transacciones</button></div>'
     +'<div style="text-align:center;padding:16px 0;font-size:11px;font-family:var(--mono);color:var(--text3)">fintrack · '+email+'</div>'
     +'</div>';
@@ -3532,13 +3526,13 @@ async function signOut(){
   showAuth();
 }
 async function forceSync(){
-  var s=document.getElementById('syncStatusMsg');
-  if(isOffline){if(s){s.textContent='sin conexión · los cambios se guardarán al reconectar';s.className='status-msg status-err';}return;}
-  if(loadDataInFlight){if(s){s.textContent='la sincronización ya está en curso';s.className='status-msg';}return;}
-  if(s){s.textContent='sincronizando...';s.className='status-msg';}setSync('syncing');
+  var status=document.getElementById('syncStatusMsg');
+  if(isOffline){if(status){status.textContent='sin conexión · los cambios se guardarán al reconectar';status.className='status-msg status-err';}return;}
+  if(loadDataInFlight){if(status){status.textContent='la sincronización ya está en curso';status.className='status-msg';}return;}
+  if(status){status.textContent='sincronizando...';status.className='status-msg';}setSync('syncing');
   var ok=await loadData();
-  var summary=document.getElementById('syncStatusSummary');if(summary)summary.textContent=syncStatusSummary();
-  if(s){s.textContent=ok?'✓ sincronizado':'No se ha podido sincronizar · reintenta';s.className='status-msg '+(ok?'status-ok':'status-err');}
+  status=document.getElementById('syncStatusMsg')||status;
+  if(status){status.textContent=ok?'✓ sincronizado':'No se ha podido sincronizar · reintenta';status.className='status-msg '+(ok?'status-ok':'status-err');}
 }
 async function clearTxs(){
   if(!confirm('Se descargará una copia previa. ¿Borrar TODAS las transacciones, exclusiones y anulaciones? Esta acción no se puede deshacer.'))return;
