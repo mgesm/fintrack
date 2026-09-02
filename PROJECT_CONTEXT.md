@@ -258,7 +258,7 @@ Para acciones y ETF utiliza Twelve Data a través del secreto configurado en Sup
 
 #### `automatic-backup`
 
-El backup exporta por usuario, como mínimo, cuentas, categorías, transacciones, patrimonio, presupuestos, exclusiones de recurrencias, anulaciones y auditoría. Sube un JSON a bucket `fintrack-backups` con ruta de usuario y registra resultado en `backup_runs`. El criterio es no generar uno si ya existe un backup satisfactorio reciente (objetivo: cada diez días) y retener tres copias exitosas.
+El backup exporta por usuario, como mínimo, cuentas, categorías, transacciones, patrimonio, presupuestos, exclusiones de recurrencias, anulaciones y auditoría. Sube un JSON a bucket `fintrack-backups` con ruta de usuario y registra resultado en `backup_runs`. El criterio es no generar uno si ya existe un backup satisfactorio reciente (objetivo: cada cinco días) y retener tres copias exitosas.
 
 La programación debe ser **nativa de Supabase** (cron/pg_cron o mecanismo desplegado equivalente), no depender de una conversación con ChatGPT. Tras cambiar el cron, revisar token, zona horaria, permisos de Storage, ejecución real y retención. No asumir que la programación está activa solo porque el código de la función exista.
 
@@ -346,6 +346,8 @@ Las entradas son acumulativas. Toda entrada nueva debe incluir fecha, cambio, ar
 | 2026-09-02 | Se corrigió el encadenamiento entre ajustes: el saldo real del ajuste previo ancla el siguiente cálculo, pero su transacción de actualización queda excluida. | `index.html`, `serviceworker.js`, `PROJECT_CONTEXT.md`. | Tres scripts embebidos validados; publicado con versión `2026.09.02.9` y caché `v110`. |
 | 2026-09-02 | Se añadió fecha y hora de publicación a la sección Versión de Ajustes. | `index.html`, `serviceworker.js`, `PROJECT_CONTEXT.md`. | Tres scripts embebidos validados; publicado con versión `2026.09.02.10`, caché `v111` y hora `12:14 CEST`. |
 | 2026-09-02 | Se documentó que un ajuste incorpora todos los movimientos ordinarios de su propia fecha. | `PROJECT_CONTEXT.md`. | Regla de cálculo confirmada por el usuario. |
+
+| 2026-09-02 | La importación manual de copias se realiza seleccionando un archivo `.json`: sin área para pegar texto y dentro de la sección de copias de seguridad. Se valida tamaño, se lee el archivo y se conserva la importación atómica existente. | `index.html`, `replace_fintrack_data`. | JavaScript validado antes de publicar; caché renovada. |
 
 ## 12. Lista de comprobación rápida por tipo de cambio
 
