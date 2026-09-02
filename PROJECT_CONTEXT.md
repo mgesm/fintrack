@@ -1,6 +1,6 @@
 # FinTrack — contexto técnico y operativo
 
-> **Versión del documento:** 1.8  
+> **Versión del documento:** 1.9  
 > **Última actualización:** 2026-09-02  
 > **Repositorio:** `mgesm/fintrack` (rama `main`)  
 > **Producción:** https://mgesm.github.io/fintrack/  
@@ -147,6 +147,8 @@ Conceptos no negociables:
 Al ajustar un saldo real, el valor real **no debe sobrescribir** el teórico. Para cuadrar la contabilidad se crea una transacción vinculada de ajuste (`is_balance_adjustment=true`, `balance_adjustment_patrimony_id`) por la diferencia, como ingreso o gasto según el sentido. Esta transacción se conserva para cuadrar resultados, pero se excluye del cálculo del saldo teórico: si no se excluyera, se enmascararía el desfase y real/teórico pasarían artificialmente a coincidir.
 
 El movimiento de actualización se ignora completamente en el cálculo del teórico y del desfase: nunca se suma ni se resta como gasto/ingreso. Sin embargo, el saldo real de cada snapshot pasa a ser el punto de partida para los movimientos posteriores. Así, un desfase anterior no se arrastra al siguiente ajuste; cada snapshot compara el real con los movimientos ordinarios desde el ajuste previo.
+
+El cálculo de un ajuste se hace **al final de la fecha elegida**: incluye todos los ingresos, gastos y traspasos ordinarios registrados en ese mismo día. Por ejemplo, un saldo real a 1 de agosto se contrasta con todos los movimientos del 1 de agosto, no solo con los de días anteriores.
 
 El cálculo debe considerar la fecha del snapshot, movimientos hasta esa fecha, traspasos, anulaciones y ajustes posteriores. Un ajuste a 30 de agosto, por ejemplo, no debe hacer que el teórico de ese día incluya gastos posteriores ni convertirlo en el real introducido.
 
@@ -343,6 +345,7 @@ Las entradas son acumulativas. Toda entrada nueva debe incluir fecha, cambio, ar
 | 2026-09-02 | Se corrigió definitivamente el cálculo: ajustes de saldo excluidos por completo del teórico/desfase; los históricos sin teórico se resuelven solo con movimientos ordinarios. También se ocultaron Invertido y Rentabilidad con el modo privado. | `index.html`, `serviceworker.js`, `PROJECT_CONTEXT.md`. | Tres scripts embebidos validados; publicado con versión `2026.09.02.8` y caché `v109`. |
 | 2026-09-02 | Se corrigió el encadenamiento entre ajustes: el saldo real del ajuste previo ancla el siguiente cálculo, pero su transacción de actualización queda excluida. | `index.html`, `serviceworker.js`, `PROJECT_CONTEXT.md`. | Tres scripts embebidos validados; publicado con versión `2026.09.02.9` y caché `v110`. |
 | 2026-09-02 | Se añadió fecha y hora de publicación a la sección Versión de Ajustes. | `index.html`, `serviceworker.js`, `PROJECT_CONTEXT.md`. | Tres scripts embebidos validados; publicado con versión `2026.09.02.10`, caché `v111` y hora `12:14 CEST`. |
+| 2026-09-02 | Se documentó que un ajuste incorpora todos los movimientos ordinarios de su propia fecha. | `PROJECT_CONTEXT.md`. | Regla de cálculo confirmada por el usuario. |
 
 ## 12. Lista de comprobación rápida por tipo de cambio
 
