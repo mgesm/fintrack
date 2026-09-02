@@ -349,6 +349,8 @@ Las entradas son acumulativas. Toda entrada nueva debe incluir fecha, cambio, ar
 
 | 2026-09-02 | La importación manual de copias se realiza seleccionando un archivo `.json`: sin área para pegar texto y dentro de la sección de copias de seguridad. Se valida tamaño, se lee el archivo y se conserva la importación atómica existente. | `index.html`, `replace_fintrack_data`. | JavaScript validado antes de publicar; caché renovada. |
 
+| 2026-09-02 | Se colocó la restauración al final de las opciones de copia, con estilo neutro, y se cambió la lectura de JSON a `FileReader` para compatibilidad con la app instalada. | `index.html`, `serviceworker.js`. | JavaScript validado y caché renovada. |
+
 ## 12. Lista de comprobación rápida por tipo de cambio
 
 ### Interfaz
