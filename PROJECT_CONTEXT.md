@@ -1,6 +1,6 @@
 # FinTrack — contexto técnico y operativo
 
-> **Versión del documento:** 1.2  
+> **Versión del documento:** 1.3  
 > **Última actualización:** 2026-09-02  
 > **Repositorio:** `mgesm/fintrack` (rama `main`)  
 > **Producción:** https://mgesm.github.io/fintrack/  
@@ -186,6 +186,7 @@ La pestaña se está consolidando como un servicio de inversión interno, no com
 **Cartera y privacidad visual**
 
 - La cabecera de valor de cartera permite ocultar/mostrar el importe. La preferencia se guarda en `ft_invest_portfolio_hidden_<userId>`.
+- Al activar esa privacidad se enmascaran todos los datos numéricos de las posiciones abiertas en el panel de cartera: valor total, invertido, rentabilidad, número de posiciones, unidades y coste por posición. Los nombres y símbolos se mantienen visibles.
 - No deben aparecer posiciones ni gráficos de ejemplo si el usuario no tiene operaciones reales.
 - Debajo de los tres contenedores de resumen se listan los productos de cartera; más abajo se listan las operaciones.
 - Las operaciones pueden eliminarse y su borrado revierte el traspaso asociado.
@@ -332,6 +333,7 @@ Las entradas son acumulativas. Toda entrada nueva debe incluir fecha, cambio, ar
 | 2026-09-02 | Se creó este contexto de continuidad y se estableció su actualización obligatoria tras cada cambio. | `PROJECT_CONTEXT.md`. | Verificado con `git diff --check` y publicado en GitHub. |
 | 2026-09-02 | Se simplificó la cabecera de Inversión y se movieron los recientes encima del buscador, sin título “Últimos visitados”. | `index.html`, `PROJECT_CONTEXT.md`, `serviceworker.js`. | Tres scripts embebidos validados; publicado con versión `2026.09.02.3` y caché `v104`. |
 | 2026-09-02 | Se revirtió el último cambio visual de Inversión tras un bloqueo de entrada reportado por el usuario. | `index.html`, `serviceworker.js`, `PROJECT_CONTEXT.md`. | La pantalla pública vuelve a salir de carga hacia Acceso; publicado con versión `2026.09.02.4` y caché `v105`. |
+| 2026-09-02 | Se amplió el modo privado de cartera para enmascarar todas las cifras de posiciones abiertas. | `index.html`, `serviceworker.js`, `PROJECT_CONTEXT.md`. | Tres scripts embebidos validados; publicado con versión `2026.09.02.5` y caché `v106`. |
 
 ## 12. Lista de comprobación rápida por tipo de cambio
 
