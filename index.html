@@ -1379,7 +1379,7 @@ if('serviceWorker' in navigator){
 </div>
 
 <script>
-var APP_VERSION='2026.09.02.1';
+var APP_VERSION='2026.09.02.2';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
 var sb=window.supabase.createClient(SB_URL,SB_KEY);
@@ -2165,7 +2165,7 @@ function render(){
     tbEl.innerHTML='<div class="budget-total-bar"><div class="btb-top"><span class="btb-label">Presupuesto mensual</span><span class="btb-value" style="color:'+col+'">'+fmt(tExp)+' / '+fmt(tb)+'</span></div><div class="btb-bar-bg"><div class="btb-bar-fill" style="background:'+col+';width:'+pct+'%"></div></div></div>';
   } else tbEl.innerHTML='';
   renderBalanceAdjustmentNote(txs,'balanceAdjustmentNote');
-  if(!IS_DESKTOP){renderDonut(exps,tExp);renderLegend(exps);renderHeatmap(exps);renderTab();setFlipHeight('homeFlipInner');}
+  if(!IS_DESKTOP){renderDonut(exps,tExp);renderLegend(exps);renderHeatmap(exps);renderTab();if(activeTab===0)animateTabEntrance(document.getElementById('mainChart'),'.summary,.flip-card,#totalBudgetBar');setFlipHeight('homeFlipInner');}
 }
 function renderBalanceAdjustmentNote(txs,id){
   var el=document.getElementById(id);if(!el)return;
@@ -2831,6 +2831,7 @@ function renderCatTab(el,prefix){
     });
   }
   el.innerHTML=html;
+  animateTabEntrance(el,'.section-title,.cat-flip-card,.cat-arch-card,.add-cat-form');
   var monthlyByCat={},monthlyByCatInc={};
   transactions.forEach(function(t){
     if(t.type!=='expense'&&t.type!=='income')return;
