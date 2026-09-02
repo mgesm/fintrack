@@ -1379,7 +1379,7 @@ if('serviceWorker' in navigator){
 </div>
 
 <script>
-var APP_VERSION='2026.09.02.7';
+var APP_VERSION='2026.09.02.8';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
 var sb=window.supabase.createClient(SB_URL,SB_KEY);
@@ -2885,7 +2885,7 @@ function renderPatTab(el){
           // El teórico correcto es el que se calculó y guardó al hacer el ajuste
           // (excluye el propio ajuste). Recalcularlo aquí lo incluiría como punto
           // de partida y el desfase saldría siempre 0.
-          var th=isLockedAdjust(p)?null:snapshotTheoreticalAmount(p);
+          var th=isLockedAdjust(p)?null:snapshotTheoreticalAmount(p,a.id);
           var d=th===null?(p.amount-0):(p.amount-th);
           var desfaseStr=th===null?'—':((Math.abs(d)>0.01?(d>0?'+':'')+fmt(d):'sin desfase'));
           return '<div class="pat-hist-row">'
@@ -2933,19 +2933,21 @@ function lastDayOfMonthStr(yr,mo){var d=new Date(yr,mo,0);return d.getFullYear()
 function isLockedAdjust(p){var id=(p&&typeof p==='object')?p.id:p;return typeof id==='string'&&id.indexOf('anchor_')===0;}
 async function ensureRevolutAnchor(uid){}
 var _historyCache={};
-function snapshotTheoreticalAmount(snapshot){
+function snapshotTheoreticalAmount(snapshot,accountId){
   if(!snapshot)return 0;
-  // El ajuste vinculado es la fuente de verdad: ni los snapshots legados ni
-  // su gasto/ingreso de conciliación pueden modificar el saldo teórico.
-  var adjustment=transactions.find(function(t){return t&&t.is_balance_adjustment&&String(t.balance_adjustment_patrimony_id||'')===String(snapshot.id||'');});
-  var real=Number(snapshot.amount)||0;
-  if(adjustment){
-    var amount=Number(adjustment.amount)||0;
-    return adjustment.type==='expense'?real+amount:real-amount;
-  }
   var stored=snapshot.theoretical_amount;
   if(stored!==null&&stored!==undefined&&stored!==''&&Number.isFinite(Number(stored)))return Number(stored);
-  return real;
+  // Compatibilidad con snapshots antiguos sin teórico guardado: se recalcula
+  // exclusivamente desde movimientos ordinarios anteriores. Los ajustes de
+  // saldo se ignoran por completo y nunca sirven como base ni como movimiento.
+  var history=accountHistory(accountId).filter(function(p){return p.id!==snapshot.id;});
+  var snapDate=snapshot.reset_date||lastDayOfMonthStr(snapshot.year,snapshot.month);
+  var previous=history.filter(function(p){var d=p.reset_date||lastDayOfMonthStr(p.year,p.month);return d<snapDate;}).pop();
+  var base=previous?snapshotTheoreticalAmount(previous,accountId):0;
+  var baseDate=previous?(previous.reset_date||lastDayOfMonthStr(previous.year,previous.month)):'0000-01-01';
+  var live=transactions.filter(function(t){return !t.is_balance_adjustment&&accountTouchesAccount(t,accountId)&&t.date>baseDate&&t.date<=snapDate;}).reduce(function(sum,t){return sum+accountTxDelta(t,accountId);},0);
+  var voids=transactionVoids.reduce(function(sum,v){return sum+accountVoidDelta(v,accountId,baseDate,snapDate);},0);
+  return base+live+voids;
 }
 function accountHistory(accountId){
   if(_historyCache[accountId])return _historyCache[accountId];
@@ -3011,7 +3013,7 @@ function accountCalcBalanceAsOf(accountId,dateStr){
 function accountCalcTheoreticalAsOf(accountId,dateStr){
   var hist=accountHistory(accountId).filter(function(p){var d=p.reset_date||lastDayOfMonthStr(p.year,p.month);return d<=dateStr;});
   var reset=hist.length?hist[hist.length-1]:null;
-  var base=reset?snapshotTheoreticalAmount(reset):0;
+  var base=reset?snapshotTheoreticalAmount(reset,accountId):0;
   var baseDate=reset?(reset.reset_date||lastDayOfMonthStr(reset.year,reset.month)):'0000-01-01';
   var live=transactions.filter(function(t){return accountTouchesAccount(t,accountId)&&t.date>baseDate&&t.date<=dateStr;}).reduce(function(s,t){return s+accountTxDelta(t,accountId);},0);
   var voids=transactionVoids.reduce(function(s,v){return s+accountVoidDelta(v,accountId,baseDate,dateStr);},0);
@@ -3467,7 +3469,7 @@ function investmentPositionList(){
 function refreshInvestmentMarketValue(){
   var wrap=document.querySelector('.invest-wrap'),positions=investmentPositionList();if(!wrap)return;var totalEl=wrap.querySelector('.portfolio-card>strong'),stats=wrap.querySelectorAll('.invest-stats strong');if(!positions.length){if(totalEl)totalEl.textContent=portfolioValueText('—');return;}
   if(totalEl)totalEl.textContent=portfolioValueHidden()?'••••••':'Actualizando…';if(stats[2])stats[2].textContent=portfolioValueText(String(positions.length));
-  Promise.all(positions.map(function(p){return sb.functions.invoke('market-data',{body:{action:'quote',symbol:p.symbol}}).then(function(r){var q=r.data&&r.data.data,price=Number(q&&(q.close||q.price));return Number.isFinite(price)?{p:p,value:p.units*price}:null;}).catch(function(){return null;});})).then(function(rows){if(!document.contains(wrap))return;var valid=rows.filter(Boolean),value=valid.reduce(function(s,r){return s+r.value;},0),cost=positions.reduce(function(s,p){return s+p.cost;},0),pct=cost?(value-cost)/cost*100:0;if(totalEl)totalEl.textContent=portfolioValueText(valid.length?fmt(value):fmt(cost));if(stats[0])stats[0].textContent=fmt(cost);if(stats[1])stats[1].textContent=valid.length?(pct>=0?'+':'')+pct.toLocaleString('es-ES',{maximumFractionDigits:2})+' %':'—';});
+  Promise.all(positions.map(function(p){return sb.functions.invoke('market-data',{body:{action:'quote',symbol:p.symbol}}).then(function(r){var q=r.data&&r.data.data,price=Number(q&&(q.close||q.price));return Number.isFinite(price)?{p:p,value:p.units*price}:null;}).catch(function(){return null;});})).then(function(rows){if(!document.contains(wrap))return;var valid=rows.filter(Boolean),value=valid.reduce(function(s,r){return s+r.value;},0),cost=positions.reduce(function(s,p){return s+p.cost;},0),pct=cost?(value-cost)/cost*100:0;if(totalEl)totalEl.textContent=portfolioValueText(valid.length?fmt(value):fmt(cost));if(stats[0])stats[0].textContent=portfolioValueText(fmt(cost));if(stats[1])stats[1].textContent=portfolioValueHidden()?'••••••':(valid.length?(pct>=0?'+':'')+pct.toLocaleString('es-ES',{maximumFractionDigits:2})+' %':'—');});
 }
 function renderInvestmentOperations(wrap){
   if(!wrap)return;var rows=investmentOperations.slice().sort(function(a,b){return String(b.operation_date).localeCompare(String(a.operation_date));}),html='<section class="invest-operations"><div class="invest-operations-head"><h3>Operaciones</h3><small>'+rows.length+' '+(rows.length===1?'movimiento':'movimientos')+'</small></div>';
