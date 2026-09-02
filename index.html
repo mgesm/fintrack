@@ -1089,7 +1089,7 @@ if('serviceWorker' in navigator){
   });
 }
 </script>
-</head>
+<style id="ft-tab-entry-style">@keyframes ft-tab-enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}</style></head>
 <body>
 <div class="mesh-bg"><div class="mesh-orb m1"></div><div class="mesh-orb m2"></div><div class="mesh-orb m3"></div></div>
 <div class="offline-banner" id="offlineBanner" role="status" aria-live="polite">&#9888; sin conexión — modo offline</div>
@@ -1379,7 +1379,7 @@ if('serviceWorker' in navigator){
 </div>
 
 <script>
-var APP_VERSION='2026.09.01.21';
+var APP_VERSION='2026.09.02.1';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
 var sb=window.supabase.createClient(SB_URL,SB_KEY);
@@ -2850,6 +2850,17 @@ function renderCatTab(el,prefix){
 }
 
 // PATRIMONY TAB
+function animateTabEntrance(el,selector){
+  if(!el||(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches))return;
+  var nodes=Array.prototype.slice.call(el.querySelectorAll(selector));
+  nodes.forEach(function(node,index){
+    node.style.animation='none';
+    node.style.opacity='0';
+    node.style.transform='translateY(8px)';
+    void node.offsetWidth;
+    node.style.animation='ft-tab-enter .32s cubic-bezier(.2,.75,.25,1) '+Math.min(index,5)*.035+'s both';
+  });
+}
 function toggleAccCard(id){var h=document.getElementById('histtable_'+id);if(!h)return;var open=h.style.display!=='none';h.style.display=open?'none':'block';var card=document.getElementById('acccard_'+id);if(card)card.classList.toggle('expanded',!open);}
 function defAccKey(){return 'ft_default_account'+(currentUser?'_'+currentUser.id:'');}
 function getDefaultAccountId(){try{var v=localStorage.getItem(defAccKey());return (v&&accounts.some(function(a){return a.id===v;}))?v:'';}catch(e){return '';}}
@@ -2915,6 +2926,7 @@ function renderPatTab(el){
     +'<div class="section-title" style="margin-top:12px">Nueva cuenta</div>'
     +'<div class="add-cat-form"><div class="form-row"><input type="text" class="add-input" id="newAccInput" placeholder="Nombre de la cuenta..."><button class="add-btn" onclick="addAccount()">Añadir</button></div></div>'
     +'<div class="status-msg" id="patStatus"></div>';
+  animateTabEntrance(el,'.pat-total-card,.pat-account,.section-title,.add-cat-form');
 }
 function lastDayOfMonthStr(yr,mo){var d=new Date(yr,mo,0);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
 function isLockedAdjust(p){var id=(p&&typeof p==='object')?p.id:p;return typeof id==='string'&&id.indexOf('anchor_')===0;}
@@ -3351,6 +3363,7 @@ function renderAnnualTab(el){
     +'<div class="chart-card"><div class="chart-card-title">Evolución del patrimonio</div><canvas id="lineChartCanvas"></canvas><div class="chart-legend">'+lineLegend+'</div></div>'
     +statsHtml
     +'</div>';
+  animateTabEntrance(el,'.chart-year-nav,.compare-grid,.chart-card,.stat-title,.stat-grid');
   drawBarChart(document.getElementById('barChartCanvas'),incData,expData,savData);
   var lineLabels=MONTHS_S.slice();
   var series=accounts.map(function(a){var hasHistory=accountHistory(a.id).length>0;return {label:capitalize(a.name),color:a.color,data:Array.from({length:12},function(_,m){return hasHistory?accountCalcBalanceAsOf(a.id,lastDayOfMonthStr(chartYear,m+1)):null;})};});
