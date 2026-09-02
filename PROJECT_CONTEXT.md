@@ -1,6 +1,6 @@
 # FinTrack — contexto técnico y operativo
 
-> **Versión del documento:** 1.7  
+> **Versión del documento:** 1.8  
 > **Última actualización:** 2026-09-02  
 > **Repositorio:** `mgesm/fintrack` (rama `main`)  
 > **Producción:** https://mgesm.github.io/fintrack/  
@@ -63,6 +63,8 @@ El HTML contiene funciones de renderizado por pestaña, consultas Supabase, esta
 `serviceworker.js` registra una caché versionada. La navegación utiliza red primero con respaldo de caché; los activos estáticos se sirven preferentemente desde caché. Esto permite instalación y cierta continuidad offline, pero es la principal causa de que una versión antigua siga visible.
 
 **Regla de publicación obligatoria:** cualquier cambio de `index.html` que deba verse inmediatamente requiere incrementar tanto la versión visible de la app como el identificador de caché del service worker y publicar ambos archivos. Después hay que probar una recarga completa o cerrar y reabrir la PWA. El cache name vigente conocido al redactar este documento es `fintrack-cache-v103` y la versión de aplicación es `2026.09.02.2`; deben tratarse como valores que se incrementan, no como constantes eternas.
+
+La sección Versión de Ajustes muestra además `APP_PUBLISHED_AT`: fecha y hora de publicación en España. Debe actualizarse en cada despliegue junto con `APP_VERSION` y la caché.
 
 ### 2.4 Autenticación y sincronización
 
@@ -340,6 +342,7 @@ Las entradas son acumulativas. Toda entrada nueva debe incluir fecha, cambio, ar
 | 2026-09-02 | Se publicó una reconstrucción desde ajuste vinculado, posteriormente descartada por no cumplir la regla financiera acordada. | `index.html`, `serviceworker.js`, `PROJECT_CONTEXT.md`. | Sustituida inmediatamente por la versión `2026.09.02.8`. |
 | 2026-09-02 | Se corrigió definitivamente el cálculo: ajustes de saldo excluidos por completo del teórico/desfase; los históricos sin teórico se resuelven solo con movimientos ordinarios. También se ocultaron Invertido y Rentabilidad con el modo privado. | `index.html`, `serviceworker.js`, `PROJECT_CONTEXT.md`. | Tres scripts embebidos validados; publicado con versión `2026.09.02.8` y caché `v109`. |
 | 2026-09-02 | Se corrigió el encadenamiento entre ajustes: el saldo real del ajuste previo ancla el siguiente cálculo, pero su transacción de actualización queda excluida. | `index.html`, `serviceworker.js`, `PROJECT_CONTEXT.md`. | Tres scripts embebidos validados; publicado con versión `2026.09.02.9` y caché `v110`. |
+| 2026-09-02 | Se añadió fecha y hora de publicación a la sección Versión de Ajustes. | `index.html`, `serviceworker.js`, `PROJECT_CONTEXT.md`. | Tres scripts embebidos validados; publicado con versión `2026.09.02.10`, caché `v111` y hora `12:14 CEST`. |
 
 ## 12. Lista de comprobación rápida por tipo de cambio
 
