@@ -1379,7 +1379,7 @@ if('serviceWorker' in navigator){
 </div>
 
 <script>
-var APP_VERSION='2026.09.02.8';
+var APP_VERSION='2026.09.02.9';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
 var sb=window.supabase.createClient(SB_URL,SB_KEY);
@@ -2933,21 +2933,24 @@ function lastDayOfMonthStr(yr,mo){var d=new Date(yr,mo,0);return d.getFullYear()
 function isLockedAdjust(p){var id=(p&&typeof p==='object')?p.id:p;return typeof id==='string'&&id.indexOf('anchor_')===0;}
 async function ensureRevolutAnchor(uid){}
 var _historyCache={};
+function accountTheoreticalFromLastRealReset(accountId,dateStr){
+  // Un ajuste fija el saldo real de partida para el periodo posterior. Su
+  // transacción asociada se ignora por completo: no modifica este cálculo.
+  var reset=accountHistory(accountId).filter(function(p){
+    var d=p.reset_date||lastDayOfMonthStr(p.year,p.month);
+    return d<dateStr;
+  }).pop();
+  var base=reset?Number(reset.amount):0;
+  var baseDate=reset?(reset.reset_date||lastDayOfMonthStr(reset.year,reset.month)):'0000-01-01';
+  var live=transactions.filter(function(t){
+    return !t.is_balance_adjustment&&accountTouchesAccount(t,accountId)&&t.date>baseDate&&t.date<=dateStr;
+  }).reduce(function(sum,t){return sum+accountTxDelta(t,accountId);},0);
+  var voids=transactionVoids.reduce(function(sum,v){return sum+accountVoidDelta(v,accountId,baseDate,dateStr);},0);
+  return base+live+voids;
+}
 function snapshotTheoreticalAmount(snapshot,accountId){
   if(!snapshot)return 0;
-  var stored=snapshot.theoretical_amount;
-  if(stored!==null&&stored!==undefined&&stored!==''&&Number.isFinite(Number(stored)))return Number(stored);
-  // Compatibilidad con snapshots antiguos sin teórico guardado: se recalcula
-  // exclusivamente desde movimientos ordinarios anteriores. Los ajustes de
-  // saldo se ignoran por completo y nunca sirven como base ni como movimiento.
-  var history=accountHistory(accountId).filter(function(p){return p.id!==snapshot.id;});
-  var snapDate=snapshot.reset_date||lastDayOfMonthStr(snapshot.year,snapshot.month);
-  var previous=history.filter(function(p){var d=p.reset_date||lastDayOfMonthStr(p.year,p.month);return d<snapDate;}).pop();
-  var base=previous?snapshotTheoreticalAmount(previous,accountId):0;
-  var baseDate=previous?(previous.reset_date||lastDayOfMonthStr(previous.year,previous.month)):'0000-01-01';
-  var live=transactions.filter(function(t){return !t.is_balance_adjustment&&accountTouchesAccount(t,accountId)&&t.date>baseDate&&t.date<=snapDate;}).reduce(function(sum,t){return sum+accountTxDelta(t,accountId);},0);
-  var voids=transactionVoids.reduce(function(sum,v){return sum+accountVoidDelta(v,accountId,baseDate,snapDate);},0);
-  return base+live+voids;
+  return accountTheoreticalFromLastRealReset(accountId,snapshot.reset_date||lastDayOfMonthStr(snapshot.year,snapshot.month));
 }
 function accountHistory(accountId){
   if(_historyCache[accountId])return _historyCache[accountId];
@@ -3011,13 +3014,7 @@ function accountCalcBalanceAsOf(accountId,dateStr){
   return base+live+voids;
 }
 function accountCalcTheoreticalAsOf(accountId,dateStr){
-  var hist=accountHistory(accountId).filter(function(p){var d=p.reset_date||lastDayOfMonthStr(p.year,p.month);return d<=dateStr;});
-  var reset=hist.length?hist[hist.length-1]:null;
-  var base=reset?snapshotTheoreticalAmount(reset,accountId):0;
-  var baseDate=reset?(reset.reset_date||lastDayOfMonthStr(reset.year,reset.month)):'0000-01-01';
-  var live=transactions.filter(function(t){return accountTouchesAccount(t,accountId)&&t.date>baseDate&&t.date<=dateStr;}).reduce(function(s,t){return s+accountTxDelta(t,accountId);},0);
-  var voids=transactionVoids.reduce(function(s,v){return s+accountVoidDelta(v,accountId,baseDate,dateStr);},0);
-  return base+live+voids;
+  return accountTheoreticalFromLastRealReset(accountId,dateStr);
 }
 function accountRealBalance(accountId,yr,mo){
   var cutoff=(mo===12)?(yr+1)+'-01-01':yr+'-'+pad(mo+1)+'-01';
@@ -3044,9 +3041,9 @@ async function applyBalanceAdjustment(accountId){
   var theoretical=accountCalcTheoreticalAsOf(accountId,date);
   var diff=real-theoretical;
   setSync('syncing');var s=document.getElementById('patStatus');if(s){s.textContent='guardando...';s.className='status-msg';}
-  // El ajuste se convierte en el nuevo punto de partida: en su misma fecha
-  // el saldo real y el teórico coinciden. El desfase previo queda registrado
-  // aparte como movimiento de conciliación.
+  // El snapshot guarda el saldo real observado y su desfase frente al teórico.
+  // En fechas posteriores pasa a ser el nuevo punto de partida, pero el
+  // movimiento de actualización nunca entra en el saldo teórico.
   var item={id:'p'+accountId+Date.now()+Math.random().toString(36).slice(2,6),account_id:accountId,year:yr,month:mo,amount:real,theoretical_amount:theoretical,reset_date:date,user_id:currentUser.id};
   var adjustment=null;
   if(Math.abs(diff)>0.005){
