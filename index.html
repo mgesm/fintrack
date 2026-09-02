@@ -3507,9 +3507,8 @@ function renderSettingsTab(el){
     +'</div></div>'
     +'<div class="settings-section"><div class="settings-title">Tema de color</div><div class="settings-info">Color de acento de la app</div><div class="color-palette">'+accentSwatches+'</div></div>'
     +'<div class="settings-section"><div class="settings-title">Presupuesto total mensual</div><div class="settings-info">Suma automática de los presupuestos de todas las categorías de '+capitalize(MONTHS[viewMonth])+': <strong>'+fmt(totalBudget())+'</strong></div></div>'
-    +'<div class="settings-section"><div class="settings-title">Copia de seguridad automática</div><div class="settings-info">'+(lastBackup?'Última copia: '+new Date(lastBackup).toLocaleDateString('es-ES'):'Sin copia reciente')+'<br>'+((autoBackupEnabled)?'Activa: descarga una copia local cada 7 días.':'Desactivada: las copias se descargan solo cuando tú las pides.')+'</div><button class="settings-btn" onclick="toggleAutoBackup()">'+(autoBackupEnabled?'✓ Copia automática activada':'Activar copia automática')+'</button><button class="settings-btn" onclick="downloadBackupNow()">↓ Descargar copia ahora</button><button class="settings-btn danger" onclick="restoreLatestBackup()">↺ Restaurar última copia</button></div>'
+    +'<div class="settings-section"><div class="settings-title">Copia de seguridad automática</div><div class="settings-info">'+(lastBackup?'Última copia: '+new Date(lastBackup).toLocaleDateString('es-ES'):'Sin copia reciente')+'<br>'+((autoBackupEnabled)?'Activa: descarga una copia local cada 7 días.':'Desactivada: las copias se descargan solo cuando tú las pides.')+'</div><button class="settings-btn" onclick="toggleAutoBackup()">'+(autoBackupEnabled?'✓ Copia automática activada':'Activar copia automática')+'</button><button class="settings-btn" onclick="downloadBackupNow()">↓ Descargar copia ahora</button><button class="settings-btn" onclick="document.getElementById('importBackupFile').click()">↑ Importar JSON</button><input id="importBackupFile" type="file" accept="application/json,.json" hidden onchange="importJSONFile(this)"><button class="settings-btn danger" onclick="restoreLatestBackup()">↺ Restaurar última copia</button><div class="status-msg" id="importStatus"></div></div>'
     +'<div class="settings-section"><div class="settings-title">Exportar datos</div><button class="settings-btn" onclick="openExportModal()">↓ Exportar (PDF · Excel · CSV)<span class="btn-arrow">›</span></button><button class="settings-btn" onclick="exportJSON()">↓ Exportar JSON (copia)</button></div>'
-    +'<div class="settings-section"><div class="settings-title">Importar copia</div><textarea id="importArea" style="width:100%;background:var(--bg3);border:1px solid var(--card-border);color:var(--text2);border-radius:var(--radius-sm);padding:8px 10px;font-size:12px;font-family:var(--mono);resize:vertical;outline:none;min-height:80px;max-height:240px" placeholder=\'{"transactions":[...],"categories":[...]}\'></textarea><button class="settings-btn" onclick="importJSON()">↑ Importar JSON</button><div class="status-msg" id="importStatus"></div></div>'
     +'<div class="settings-section"><div class="settings-title">Estado de sincronización</div><div class="settings-info" id="syncStatusSummary">'+syncStatusSummary()+'</div><button class="settings-btn" onclick="forceSync()">↺ Sincronizar ahora</button><div class="status-msg" id="syncStatusMsg"></div></div>'
     +'<div class="settings-section"><div class="settings-title">Versión</div><div class="settings-info">FinTrack <strong>'+APP_VERSION+'</strong><br><span style="font-size:12px;color:var(--text3)">Último commit: <span id="appPublishedAt">consultando…</span></span></div></div>'
 
@@ -4253,8 +4252,9 @@ function validateImportData(d){
     checkDupIds(d.transactionVoids,'anulación');
   }
 }
-async function importJSON(){
-  var raw=document.getElementById('importArea').value.trim();var s=document.getElementById('importStatus');
+function importJSONFile(input){var file=input.files&&input.files[0];if(!file)return;var reader=new FileReader();reader.onload=function(){importJSON(String(reader.result||''));};reader.readAsText(file);input.value='';}
+async function importJSON(rawInput){
+  var raw=String(rawInput||'').trim();var s=document.getElementById('importStatus');
   function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
   try{
     if(raw.length>10485760)throw new Error('la copia supera el tamaño máximo de 10 MB');
