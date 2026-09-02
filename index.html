@@ -1379,7 +1379,7 @@ if('serviceWorker' in navigator){
 </div>
 
 <script>
-var APP_VERSION='2026.09.02.6';
+var APP_VERSION='2026.09.02.7';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
 var sb=window.supabase.createClient(SB_URL,SB_KEY);
@@ -2935,15 +2935,17 @@ async function ensureRevolutAnchor(uid){}
 var _historyCache={};
 function snapshotTheoreticalAmount(snapshot){
   if(!snapshot)return 0;
-  var stored=snapshot.theoretical_amount;
-  if(stored!==null&&stored!==undefined&&stored!==''&&Number.isFinite(Number(stored)))return Number(stored);
-  // Compatibilidad con ajustes históricos cuyo teórico no se llegó a persistir:
-  // el movimiento de ajuste jamás forma parte del teórico; solo revela el desfase.
+  // El ajuste vinculado es la fuente de verdad: ni los snapshots legados ni
+  // su gasto/ingreso de conciliación pueden modificar el saldo teórico.
   var adjustment=transactions.find(function(t){return t&&t.is_balance_adjustment&&String(t.balance_adjustment_patrimony_id||'')===String(snapshot.id||'');});
   var real=Number(snapshot.amount)||0;
-  if(!adjustment)return real;
-  var amount=Number(adjustment.amount)||0;
-  return adjustment.type==='expense'?real+amount:real-amount;
+  if(adjustment){
+    var amount=Number(adjustment.amount)||0;
+    return adjustment.type==='expense'?real+amount:real-amount;
+  }
+  var stored=snapshot.theoretical_amount;
+  if(stored!==null&&stored!==undefined&&stored!==''&&Number.isFinite(Number(stored)))return Number(stored);
+  return real;
 }
 function accountHistory(accountId){
   if(_historyCache[accountId])return _historyCache[accountId];
