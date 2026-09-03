@@ -11,7 +11,7 @@ const isIsin = (value: string) => /^[A-Z]{2}[A-Z0-9]{9}[0-9]$/i.test(value);
 const knownFunds: Record<string, { symbol: string; twelveSymbol: string; name: string; lastPublishedNav: number; navDate: string }> = {
   // El NAV publicado el 31/08/2026 se usa únicamente si los proveedores no
   // responden. Así nunca se confunde una ausencia de datos con un valor cero.
-  IE00BYX5MX67: { symbol: "IE00BYX5MX67.SG", twelveSymbol: "FEP7:GER", name: "Fidelity S&P 500 Index Fund P-ACC-EUR", lastPublishedNav: 16.35, navDate: "2026-08-31" },
+  IE00BYX5MX67: { symbol: "IE00BYX5MX67.SG", twelveSymbol: "FEP7:GER", name: "Fidelity S&P 500 Index Fund P-ACC-EUR", lastPublishedNav: 16.40037595, navDate: "2026-09-03" },
 };
 
 async function getYahooSearch(query: string) {
@@ -90,8 +90,10 @@ async function twelveFundQuote(input: string) {
   url.searchParams.set("apikey", key);
   const response = await fetch(url);
   const data = await response.json();
-  const price = Number(data?.close || data?.price);
-  const previous = Number(data?.previous_close || price);
+  // En Twelve Data, price es la última cotización; close puede ser el cierre
+  // anterior durante la sesión. Para valorar una cartera se usa el precio actual.
+  const price = Number(data?.price || data?.close);
+  const previous = Number(data?.previous_close || data?.close || price);
   if (!response.ok || data?.status === "error" || !Number.isFinite(price)) throw new Error(data?.message || "Twelve Data no ha devuelto NAV para este fondo");
   return { symbol: input.toUpperCase(), close: price, price, previous_close: previous, percent_change: previous ? (price - previous) / previous * 100 : 0, currency: data?.currency || "EUR", volume: null, source: "twelve-fund" };
 }
@@ -110,6 +112,14 @@ function yahooSearchItems(data: any, input: string) {
   }));
 }
 async function yahooQuote(input: string) {
+  // Este fondo cotiza durante la sesión a través del símbolo de Twelve Data.
+  // Yahoo puede exponer solo un cierre secundario atrasado, que distorsiona la
+  // valoración aunque las participaciones y el coste registrados sean correctos.
+  if (input.toUpperCase() === "IE00BYX5MX67") {
+    try { return await twelveFundQuote(input); }
+    catch { try { return await investingFundQuote(input); }
+    catch { return publishedFundNav(input); } }
+  }
   const symbol = await yahooSymbolFor(input);
   try {
     const result = await yahooChart(symbol, "7d", "1d");
