@@ -1379,7 +1379,7 @@ if('serviceWorker' in navigator){
 </div>
 
 <script>
-var APP_VERSION='2026.09.02.15';
+var APP_VERSION='2026.09.03.1';
 var APP_PUBLISHED_AT='02/09/2026 · 12:14 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
@@ -2874,6 +2874,8 @@ function renderPatTab(el){
   var totalPat=accounts.reduce(function(s,a){return s+accountCalcBalance(a.id,yr,mo);},0);
   var accRows=accounts.map(function(a){
     var calc=accountCalcBalance(a.id,yr,mo);
+    var isPrivateInvestmentBalance=!!a.is_investment&&portfolioValueHidden();
+    var calcText=isPrivateInvestmentBalance?'••••••':fmt(calc);
     var reset=accountLatestReset(a.id,yr,mo);
     var resetHtml=reset?'Última actualización: '+new Date((reset.reset_date||(reset.year+'-'+pad(reset.month)+'-01'))+'T12:00:00').toLocaleDateString('es-ES')+' → '+fmt(reset.amount):'Sin ajustes registrados, calculado desde el inicio';
     var hist=accountHistory(a.id);
@@ -2906,7 +2908,7 @@ function renderPatTab(el){
       +'<div class="pat-acc-color" style="background:'+a.color+'"></div>'
       +'<span class="pat-acc-name">'+capEsc(a.name)+(defAccId===a.id?'<span class="pat-acc-default-tag">predeterminada</span>':'')+'</span>'
       +'<button class="pat-acc-star'+(defAccId===a.id?' on':'')+'" data-action="set-default-acc" data-id="'+a.id+'" title="Usar como cuenta de gastos por defecto">'+(defAccId===a.id?'★':'☆')+'</button>'
-      +'<span class="pat-acc-theoretical">'+fmt(calc)+'</span>'
+      +'<span class="pat-acc-theoretical">'+calcText+'</span>'
       +'<button class="del-btn-sm" data-action="del-acc" data-id="'+a.id+'">×</button>'
       +'</div>'
       +'<div class="pat-acc-calc">'+resetHtml+'</div>'
