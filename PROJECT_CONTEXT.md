@@ -166,6 +166,9 @@ Modelo acordado:
 - Al vender se realiza el flujo inverso hacia una cuenta de destino elegida.
 - Al eliminar una operación se elimina de forma segura también el traspaso vinculado, de modo que no quedan saldos artificiales.
 - El usuario puede abrir el detalle directamente pulsando una posición de su cartera.
+- Cada posición calcula sobre operaciones reales su precio medio, capital neto aportado, plusvalía/pérdida realizada y no realizada, y rentabilidad anualizada. La rentabilidad anualizada usa flujos fechados (XIRR) y no debe presentarse si no hay una serie de flujos válida.
+- El bloque de valor de activos incorpora una evolución comparativa: una línea de aportaciones netas y otra de valoración de mercado. Se construye con compras/ventas fechadas y los cierres históricos devueltos por `market-data`; no se deben inventar puntos si el proveedor no devuelve una cotización.
+- La privacidad de cartera oculta todas estas cifras y el saldo de la cuenta de inversión; además, dicha cuenta queda excluida del total visible de Cuentas mientras el modo privado esté activo.
 
 ## 5. Comportamiento de cada módulo
 
@@ -249,7 +252,7 @@ Antes de crear una migración, revisar el historial desplegado en Supabase: el d
 | Función | Finalidad y contrato |
 |---|---|
 | `market-data` | Búsqueda, cotización e histórico de acciones/ETF/fondos mediante acciones `search`, `quote`, `history`. Verifica JWT y aplica CORS para `https://mgesm.github.io`. Usa el secreto `TWELVE_DATA_API_KEY`; no exponerlo en cliente. |
-| `automatic-backup` | Copia de seguridad nativa periódica. Requiere `POST` y cabecera `x-backup-cron-token`, compara su hash con `backup_scheduler_secret`, recorre usuarios, exporta datos y guarda JSON en Storage. Conserva solo los tres últimos backups correctos por usuario. |
+| `automatic-backup` | Copia de seguridad nativa periódica y copia de seguridad previa a importaciones. Requiere `POST` y cabecera `x-backup-cron-token` para cron; las copias manuales usan el JWT del usuario. Exporta los datos y guarda JSON en Storage. Conserva solo los tres últimos backups correctos por usuario. |
 | `monthly-report` | Genera y envía el resumen mensual PDF. Requiere el mismo mecanismo de token. Ejecutada desde cron, comprueba la hora `Europe/Madrid` antes de enviar y registra ejecuciones para evitar duplicados. |
 
 #### `market-data`
@@ -258,7 +261,11 @@ Para acciones y ETF utiliza Twelve Data a través del secreto configurado en Sup
 
 #### `automatic-backup`
 
-El backup exporta por usuario, como mínimo, cuentas, categorías, transacciones, patrimonio, presupuestos, exclusiones de recurrencias, anulaciones y auditoría. Sube un JSON a bucket `fintrack-backups` con ruta de usuario y registra resultado en `backup_runs`. El criterio es no generar uno si ya existe un backup satisfactorio reciente (objetivo: cada cinco días) y retener tres copias exitosas.
+El backup exporta por usuario, como mínimo, cuentas, categorías, transacciones, patrimonio, presupuestos, exclusiones de recurrencias, anulaciones, operaciones de inversión y auditoría. Sube un JSON a bucket `fintrack-backups` con ruta de usuario y registra resultado en `backup_runs`. El criterio es no generar uno si ya existe un backup satisfactorio reciente (objetivo: cada cinco días) y retener tres copias exitosas.
+
+Antes de restaurar la última copia, `restore-backup` devuelve una vista previa con fecha y recuentos. Al restaurar, la función crea primero una copia de seguridad del estado actual y solo después sustituye los datos. Antes de importar un JSON, el cliente crea una copia de seguridad equivalente y la RPC `replace_fintrack_data(jsonb)` restaura de forma atómica las colecciones, incluidas `accounts.is_investment` e `investment_operations`. Conservar esta secuencia: **vista previa → confirmación → backup previo → sustitución atómica → recarga**.
+
+La caché local de datos se guarda cifrada con AES-GCM mediante una clave no exportable de Web Crypto almacenada en IndexedDB. Esto evita dejar el contenido financiero legible en `localStorage`, pero no sustituye una política contra XSS ni cifra los datos ya sincronizados en Supabase. La caché es una ayuda offline, no una copia de seguridad.
 
 La programación debe ser **nativa de Supabase** (cron/pg_cron o mecanismo desplegado equivalente), no depender de una conversación con ChatGPT. Tras cambiar el cron, revisar token, zona horaria, permisos de Storage, ejecución real y retención. No asumir que la programación está activa solo porque el código de la función exista.
 
@@ -361,7 +368,25 @@ Las entradas son acumulativas. Toda entrada nueva debe incluir fecha, cambio, ar
 
 | 2026-09-03 | Cuando la cartera está oculta, la cuenta de inversión se excluye del total de Cuentas, no solo se enmascara su importe individual. | `index.html`, `serviceworker.js`. | JavaScript validado y caché renovada. |
 
-## 12. Lista de comprobación rápida por tipo de cambio
+| 2026-09-03 | Se añadieron métricas de posición reales (precio medio, capital neto, plusvalía realizada/no realizada y rentabilidad anualizada) y la evolución comparativa de aportaciones netas frente a valoración de la cartera. | `index.html`, `market-data`. | Tres scripts embebidos validados; no se generan datos ficticios si falta histórico. |
+| 2026-09-03 | Se reforzó la continuidad de copias: vista previa antes de restaurar, copia automática previa a restaurar/importar, y restauración/importación que incluye operaciones y cuenta de inversión. | `automatic-backup`, `restore-backup`, `replace_fintrack_data(jsonb)`, `index.html`. | Edge Functions desplegadas; migración `restore_investment_operations_and_investment_account_flag` aplicada. |
+| 2026-09-03 | Se cifró la caché local con Web Crypto/IndexedDB y se añadieron confirmaciones con frase explícita para borrar cuentas, categorías y todos los movimientos. | `index.html`. | Tres scripts embebidos validados. |
+| 2026-09-03 | Se unificaron tokens de movimiento, elevación y foco para tarjetas, filas y botones; se respetan preferencias de reducción de movimiento. | `index.html`, `serviceworker.js`. | Publicado con versión `2026.09.03.6` y caché `v127`. |
+
+## 12. Ideas futuras priorizadas (no implementadas todavía)
+
+Esta lista conserva las decisiones de producto pendientes. Antes de implementar una idea, actualizar su estado y añadir una entrada de changelog. Un nuevo chat debe consultar primero esta sección y no presentar como existente una función que siga aquí.
+
+| Área | Idea futura | Criterio de entrega |
+|---|---|---|
+| Planificación | Previsión de tesorería a 30/60/90 días, calendario financiero y objetivos de ahorro. | Distinguir previsión de gasto ejecutado y explicar las hipótesis. |
+| Presupuestos | Sugerencias basadas en meses anteriores y avisos de riesgo antes de superar el presupuesto. | Nunca alterar presupuestos sin confirmación del usuario. |
+| Inversión | Distribución por activo/sector/divisa, dividendos, alertas de precio y rebalanceo. | Basado en datos de mercado verificables y con fuentes/fallbacks visibles. |
+| Búsqueda | Búsqueda global de movimientos, categorías, cuentas y productos con filtros guardables. | Resultados rápidos, accesibles y sin exponer importes en modo privado. |
+| Rendimiento | Sincronización incremental, pruebas de regresión de cálculos y modularización progresiva del HTML único. | Mantener compatibilidad de PWA y rutas de datos existentes. |
+| Seguridad | Revisión mensual de RLS, Edge Functions, secretos, Storage, backups, dependencias y recuperación. | Registrar hallazgos, corregir primero riesgos altos y comprobar restauración real. |
+
+## 13. Lista de comprobación rápida por tipo de cambio
 
 ### Interfaz
 
