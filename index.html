@@ -1379,7 +1379,7 @@ if('serviceWorker' in navigator){
 </div>
 
 <script>
-var APP_VERSION='2026.09.03.1';
+var APP_VERSION='2026.09.03.2';
 var APP_PUBLISHED_AT='02/09/2026 · 12:14 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
@@ -2871,7 +2871,7 @@ function openTransferFrom(accountId){openModal();setType('transfer');document.ge
 function renderPatTab(el){
   var yr=viewYear,mo=viewMonth+1;
   var defAccId=getDefaultAccountId();
-  var totalPat=accounts.reduce(function(s,a){return s+accountCalcBalance(a.id,yr,mo);},0);
+  var totalPat=accounts.reduce(function(sum,a){return sum+((portfolioValueHidden()&&a.is_investment)?0:accountCalcBalance(a.id,yr,mo));},0);
   var accRows=accounts.map(function(a){
     var calc=accountCalcBalance(a.id,yr,mo);
     var isPrivateInvestmentBalance=!!a.is_investment&&portfolioValueHidden();
