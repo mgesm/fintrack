@@ -357,6 +357,8 @@ Las entradas son acumulativas. Toda entrada nueva debe incluir fecha, cambio, ar
 
 | 2026-09-02 | Se corrigió la RPC de importación: `transactions.tags` llega como JSON y la columna usa `text[]`; ahora se transforma de forma explícita dentro de la operación atómica. | `replace_fintrack_data(jsonb)` en Supabase. | Logs identificaron el error de tipos y la conversión fue comprobada con etiquetas reales de ejemplo. |
 
+| 2026-09-03 | La privacidad de cartera también enmascara el saldo mostrado de cualquier cuenta marcada como cuenta de inversión. | `index.html`, `serviceworker.js`. | JavaScript validado y caché renovada. |
+
 ## 12. Lista de comprobación rápida por tipo de cambio
 
 ### Interfaz
