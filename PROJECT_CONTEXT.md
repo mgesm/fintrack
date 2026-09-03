@@ -1,6 +1,6 @@
 # FinTrack — contexto técnico y operativo
 
-> **Versión del documento:** 2.0  
+> **Versión del documento:** 2.1  
 > **Última actualización:** 2026-09-03  
 > **Repositorio:** `mgesm/fintrack` (rama `main`)  
 > **Producción:** https://mgesm.github.io/fintrack/  
@@ -380,6 +380,8 @@ Las entradas son acumulativas. Toda entrada nueva debe incluir fecha, cambio, ar
 
 | 2026-09-03 | Se corrigió la valoración del fondo IE00BYX5MX67: el cliente prioriza `price` sobre un `close` potencialmente atrasado y el último NAV de respaldo se actualizó a 16,40037595 €. Con 122,3398784573215 participaciones y 2.000 € de coste, el resultado es 2.006,42 € y +0,32 %. | `index.html`, `market-data`, `serviceworker.js`. | Operaciones verificadas sin cambios; versión `2026.09.03.9`, caché `v130`. |
 | 2026-09-03 | Se sincronizó el código versionado de copias con la función desplegada: intervalo de cinco días, copia manual autenticada e inclusión de operaciones de inversión. | `automatic-backup/index.ts`, `PROJECT_CONTEXT.md`. | Contraste con la función desplegada v3. |
+
+| 2026-09-03 | El gráfico de evolución ya se inicia con el precio real de la primera operación y añade la cotización actual como punto vivo, incluso sin histórico mensual disponible. No se rellenan fechas intermedias sin precio de mercado. | `index.html`, `serviceworker.js`. | Validado con compra del mismo día: punto inicial de coste y punto actual de cotización; versión `2026.09.03.10`, caché `v131`. |
 
 ## 12. Decisiones descartadas (no volver a proponer sin petición expresa)
 
