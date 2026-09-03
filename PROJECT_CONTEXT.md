@@ -375,7 +375,7 @@ Las entradas son acumulativas. Toda entrada nueva debe incluir fecha, cambio, ar
 
 | 2026-09-03 | Se creó un registro vinculante de funcionalidades y alternativas descartadas, que debe actualizarse cada vez que Miguel rechace una propuesta. | `PROJECT_CONTEXT.md`. | Documentadas las decisiones previas recuperables. |
 
-| 2026-09-03 | Se revirtió una regresión de cotización: la cadena de fuentes de NAV de fondos volvió exactamente al comportamiento que mostraba correctamente valor total y rentabilidad. La rentabilidad visible de posición se define como acumulada, no anualizada. | `market-data`, `index.html`. | Edge Function v10 confirmada idéntica a la versión de fuente anterior. |
+| 2026-09-03 | Se corrigió la selección del NAV de IE00BYX5MX67: se prioriza el campo explícito de cotización de la ficha del fondo y se normalizan separadores decimales; se excluyen campos genéricos que pueden no ser el NAV. La rentabilidad visible de posición se define como acumulada, no anualizada. | `market-data`, `index.html`. | Edge Function v11 desplegada. |
 
 ## 12. Decisiones descartadas (no volver a proponer sin petición expresa)
 
