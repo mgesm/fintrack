@@ -376,6 +376,7 @@ Las entradas son acumulativas. Toda entrada nueva debe incluir fecha, cambio, ar
 | 2026-09-03 | Se creó un registro vinculante de funcionalidades y alternativas descartadas, que debe actualizarse cada vez que Miguel rechace una propuesta. | `PROJECT_CONTEXT.md`. | Documentadas las decisiones previas recuperables. |
 
 | 2026-09-03 | Se revirtió la última tanda de cambios de Inversión salvo el gráfico de evolución: se restauraron la ficha de producto y la cadena de cotización/valoración anteriores. | `index.html`, `market-data`, `serviceworker.js`. | Frontend `2026.09.03.8`, caché `v129`, Edge Function v12. |
+| 2026-09-03 | Se comprobó que la regresión de cartera no procede de las operaciones guardadas; para este fondo se prioriza su símbolo de mercado en Twelve Data frente a un cierre secundario atrasado de Yahoo. | `investment_operations`, `market-data`. | Edge Function v13 desplegada. |
 
 ## 12. Decisiones descartadas (no volver a proponer sin petición expresa)
 
