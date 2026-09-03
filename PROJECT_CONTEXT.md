@@ -166,7 +166,7 @@ Modelo acordado:
 - Al vender se realiza el flujo inverso hacia una cuenta de destino elegida.
 - Al eliminar una operación se elimina de forma segura también el traspaso vinculado, de modo que no quedan saldos artificiales.
 - El usuario puede abrir el detalle directamente pulsando una posición de su cartera.
-- Cada posición calcula sobre operaciones reales su precio medio, capital neto aportado, plusvalía/pérdida realizada y no realizada. La rentabilidad visible es la acumulada de la posición abierta: plusvalía no realizada / coste pendiente × 100. No anualizarla mediante XIRR, porque no coincide con el porcentaje que muestra el broker.
+- La ficha de producto conserva las métricas anteriores a la última tanda de cartera (último cierre, variación diaria, volumen y posición). No añadir de nuevo precio medio, plusvalía ni rentabilidad por posición sin una petición expresa; el gráfico de evolución de aportaciones netas frente a valoración sí se mantiene.
 - El bloque de valor de activos incorpora una evolución comparativa: una línea de aportaciones netas y otra de valoración de mercado. Se construye con compras/ventas fechadas y los cierres históricos devueltos por `market-data`; no se deben inventar puntos si el proveedor no devuelve una cotización.
 - La privacidad de cartera oculta todas estas cifras y el saldo de la cuenta de inversión; además, dicha cuenta queda excluida del total visible de Cuentas mientras el modo privado esté activo.
 
@@ -375,7 +375,7 @@ Las entradas son acumulativas. Toda entrada nueva debe incluir fecha, cambio, ar
 
 | 2026-09-03 | Se creó un registro vinculante de funcionalidades y alternativas descartadas, que debe actualizarse cada vez que Miguel rechace una propuesta. | `PROJECT_CONTEXT.md`. | Documentadas las decisiones previas recuperables. |
 
-| 2026-09-03 | Se corrigió la selección del NAV de IE00BYX5MX67: se prioriza el campo explícito de cotización de la ficha del fondo y se normalizan separadores decimales; se excluyen campos genéricos que pueden no ser el NAV. La rentabilidad visible de posición se define como acumulada, no anualizada. | `market-data`, `index.html`. | Edge Function v11 desplegada. |
+| 2026-09-03 | Se revirtió la última tanda de cambios de Inversión salvo el gráfico de evolución: se restauraron la ficha de producto y la cadena de cotización/valoración anteriores. | `index.html`, `market-data`, `serviceworker.js`. | Frontend `2026.09.03.8`, caché `v129`, Edge Function v12. |
 
 ## 12. Decisiones descartadas (no volver a proponer sin petición expresa)
 
@@ -388,6 +388,7 @@ Este registro es vinculante para futuras sesiones. Cada vez que Miguel rechace u
 | 2026-08-31 | Mantener un botón «Operación» independiente dentro de Inversión. | No usarlo: la operativa se inicia desde el producto mediante comprar/vender. |
 | 2026-08-31 | Mostrar posiciones o gráficos de ejemplo sin datos reales. | Prohibido: mostrar estado vacío hasta que existan datos reales. |
 | 2026-09-02 | Color de acento configurable, apartado de presupuesto mensual, estado de sincronización y botón para activar copias automáticas en Ajustes. | No mostrarlos en Ajustes; las copias se ejecutan automáticamente cada cinco días. |
+| 2026-09-03 | Métricas de precio medio, plusvalía y rentabilidad por posición añadidas en la última tanda de Inversión. | Retiradas; conservar únicamente el gráfico de evolución hasta una nueva petición expresa. |
 
 ## 13. Ideas futuras priorizadas (no implementadas todavía)
 
