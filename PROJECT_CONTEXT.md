@@ -1,7 +1,7 @@
 # FinTrack — contexto técnico y operativo
 
-> **Versión del documento:** 1.9  
-> **Última actualización:** 2026-09-02  
+> **Versión del documento:** 2.0  
+> **Última actualización:** 2026-09-03  
 > **Repositorio:** `mgesm/fintrack` (rama `main`)  
 > **Producción:** https://mgesm.github.io/fintrack/  
 > **Supabase:** proyecto `sswktibdpxqrumsqsegi`
@@ -377,6 +377,9 @@ Las entradas son acumulativas. Toda entrada nueva debe incluir fecha, cambio, ar
 
 | 2026-09-03 | Se revirtió la última tanda de cambios de Inversión salvo el gráfico de evolución: se restauraron la ficha de producto y la cadena de cotización/valoración anteriores. | `index.html`, `market-data`, `serviceworker.js`. | Frontend `2026.09.03.8`, caché `v129`, Edge Function v12. |
 | 2026-09-03 | Se comprobó que la regresión de cartera no procede de las operaciones guardadas; para este fondo se prioriza su símbolo de mercado en Twelve Data frente a un cierre secundario atrasado de Yahoo. | `investment_operations`, `market-data`. | Edge Function v13 desplegada. |
+
+| 2026-09-03 | Se corrigió la valoración del fondo IE00BYX5MX67: el cliente prioriza `price` sobre un `close` potencialmente atrasado y el último NAV de respaldo se actualizó a 16,40037595 €. Con 122,3398784573215 participaciones y 2.000 € de coste, el resultado es 2.006,42 € y +0,32 %. | `index.html`, `market-data`, `serviceworker.js`. | Operaciones verificadas sin cambios; versión `2026.09.03.9`, caché `v130`. |
+| 2026-09-03 | Se sincronizó el código versionado de copias con la función desplegada: intervalo de cinco días, copia manual autenticada e inclusión de operaciones de inversión. | `automatic-backup/index.ts`, `PROJECT_CONTEXT.md`. | Contraste con la función desplegada v3. |
 
 ## 12. Decisiones descartadas (no volver a proponer sin petición expresa)
 
