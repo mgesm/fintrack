@@ -1379,7 +1379,7 @@ if('serviceWorker' in navigator){
 </div>
 
 <script>
-var APP_VERSION='2026.09.03.4';
+var APP_VERSION='2026.09.03.5';
 var APP_PUBLISHED_AT='02/09/2026 · 12:14 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
@@ -2116,7 +2116,7 @@ function toggleAutoBackup(){
 function downloadBackupNow(){
   if(!currentUser)return;
   var now=new Date();
-  var json=JSON.stringify({version:3,transactions:transactions,categories:categories,accounts:accounts,patrimony:patrimony,budgets:budgets,recurrenceExclusions:recurrenceExclusions,transactionVoids:transactionVoids},null,2);
+  var json=JSON.stringify({version:4,transactions:transactions,categories:categories,accounts:accounts,patrimony:patrimony,budgets:budgets,recurrenceExclusions:recurrenceExclusions,transactionVoids:transactionVoids,investmentOperations:investmentOperations},null,2);
   var blob=new Blob([json],{type:'application/json'});
   var a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='fintrack_autobackup_'+now.toISOString().slice(0,10)+'.json';a.click();
@@ -3533,7 +3533,10 @@ function renderSettingsTab(el){
     +'</div>';
   setTimeout(loadLatestCommitTime,0);
 }
-async function restoreLatestBackup(){if(!confirm('Se sustituirán tus datos actuales por la última copia automática disponible. Esta acción no se puede deshacer.'))return;setSync('syncing');var r=await sb.functions.invoke('restore-backup',{body:{}});if(r.error||!r.data?.ok){alert((r.data&&r.data.error)||r.error?.message||'No se pudo restaurar la copia');setSync('err');return;}await loadData();showSuccessToast('Copia restaurada correctamente');}
+function backupPreviewCounts(data){return {cuentas:(data.accounts||[]).length,categorías:(data.categories||[]).length,transacciones:(data.transactions||[]).length,presupuestos:(data.budgets||[]).length,ajustes:(data.patrimony||[]).length,operaciones_de_inversión:(data.investmentOperations||[]).length};}
+function confirmCriticalAction(options){return new Promise(function(resolve){var root=document.createElement('div');root.className='critical-confirm-bg';var countHtml=Object.keys(options.counts||{}).filter(function(k){return Number(options.counts[k])>0;}).map(function(k){return '<span><b>'+Number(options.counts[k]).toLocaleString('es-ES')+'</b> '+htmlEscape(k.replace(/_/g,' '))+'</span>';}).join('');root.innerHTML='<div class="critical-confirm-card" role="dialog" aria-modal="true" aria-labelledby="criticalConfirmTitle"><div class="critical-confirm-handle"></div><div class="critical-confirm-kicker">Confirmación de seguridad</div><h3 id="criticalConfirmTitle">'+htmlEscape(options.title)+'</h3><p>'+htmlEscape(options.description)+'</p>'+(countHtml?'<div class="critical-confirm-counts">'+countHtml+'</div>':'')+'<label class="critical-confirm-input"><span>Escribe <b>'+htmlEscape(options.phrase)+'</b> para continuar</span><input autocomplete="off" autocapitalize="characters"></label><div class="critical-confirm-actions"><button type="button" class="critical-confirm-cancel">Cancelar</button><button type="button" class="critical-confirm-approve" disabled>'+htmlEscape(options.approveLabel)+'</button></div></div>';document.body.appendChild(root);var input=root.querySelector('input'),approve=root.querySelector('.critical-confirm-approve');function close(value){root.remove();resolve(value);}input.oninput=function(){approve.disabled=input.value.trim().toUpperCase()!==options.phrase;};root.querySelector('.critical-confirm-cancel').onclick=function(){close(false);};approve.onclick=function(){close(true);};root.onclick=function(event){if(event.target===root)close(false);};setTimeout(function(){input.focus();},60);});}
+async function createSafetyBackup(reason){var result=await sb.functions.invoke('automatic-backup',{body:{reason:reason||'manual'}});if(result.error||!result.data||!result.data.ok)throw new Error((result.data&&result.data.error)||result.error&&result.error.message||'No se pudo crear la copia previa');return result.data.backup;}
+async function restoreLatestBackup(){setSync('syncing');var preview=await sb.functions.invoke('restore-backup',{body:{action:'preview'}});if(preview.error||!preview.data||!preview.data.ok){alert((preview.data&&preview.data.error)||preview.error&&preview.error.message||'No se pudo preparar la vista previa');setSync('err');return;}setSync('ok');var p=preview.data.preview,accepted=await confirmCriticalAction({title:'Restaurar última copia',description:'Se sustituirán los datos actuales por la copia del '+new Date(p.created_at).toLocaleString('es-ES')+'. Antes se guardará automáticamente una copia de tu estado actual.',counts:p.counts,phrase:'RESTAURAR',approveLabel:'Restaurar copia'});if(!accepted)return;setSync('syncing');var r=await sb.functions.invoke('restore-backup',{body:{action:'restore'}});if(r.error||!r.data||!r.data.ok){alert((r.data&&r.data.error)||r.error&&r.error.message||'No se pudo restaurar la copia');setSync('err');return;}await loadData();showSuccessToast('Copia restaurada correctamente');}
 async function loadLatestCommitTime(){var el=document.getElementById('appPublishedAt');if(!el)return;try{var r=await fetch('https://api.github.com/repos/mgesm/fintrack/commits/main',{headers:{Accept:'application/vnd.github+json'}});var d=await r.json(),date=d&&d.commit&&d.commit.committer&&d.commit.committer.date;if(!date)throw 0;el.textContent=new Date(date).toLocaleString('es-ES',{timeZone:'Europe/Madrid',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',timeZoneName:'short'});}catch(e){el.textContent=APP_PUBLISHED_AT;}}
 async function signOut(){
   var cKey='ft_cache_'+(currentUser?currentUser.id:'');
@@ -3957,7 +3960,7 @@ async function deleteSubcat(catId,sub){var cat=categories.find(function(c){retur
 async function saveCatColor(catId,color){var cat=categories.find(function(c){return c.id===catId;});if(!cat)return;var prev=cat.color;cat.color=color;setSync('syncing');if(isOffline){if(queueOp({type:'update',table:'categories',id:catId,data:{color:color}})){saveLocalCache();setSync('err');refreshTab();}else cat.color=prev;return;}var r=await sb.from('categories').update({color:color}).eq('id',catId);if(!r.error){saveLocalCache();setSync('ok');refreshTab();}else{setSync('err');cat.color=prev;}}
 
 // EXPORT
-function exportJSON(){var json=JSON.stringify({version:3,transactions:transactions,categories:categories,accounts:accounts,patrimony:patrimony,budgets:budgets,recurrenceExclusions:recurrenceExclusions,transactionVoids:transactionVoids},null,2);var blob=new Blob([json],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fintrack_backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();}
+function exportJSON(){var json=JSON.stringify({version:4,transactions:transactions,categories:categories,accounts:accounts,patrimony:patrimony,budgets:budgets,recurrenceExclusions:recurrenceExclusions,transactionVoids:transactionVoids,investmentOperations:investmentOperations},null,2);var blob=new Blob([json],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fintrack_backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();}
 // ── export period selection ───────────────────────────────────────
 function todayStr(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
 function currentMonthRange(){var from=viewYear+'-'+pad(viewMonth+1)+'-01';var to=lastDayOfMonthStr(viewYear,viewMonth+1);return {from:from,to:to,label:capitalize(MONTHS[viewMonth])+' '+viewYear};}
@@ -4301,7 +4304,8 @@ function normalizeImportedBackup(data){
       patrimony:source.patrimony||[],
       budgets:source.budgets||[],
       recurrenceExclusions:source.recurrenceExclusions||source.recurrence_exclusions||[],
-      transactionVoids:source.transactionVoids||source.transaction_voids||[]
+      transactionVoids:source.transactionVoids||source.transaction_voids||[],
+      investmentOperations:source.investmentOperations||source.investment_operations||[]
     };
   }
   return data;
@@ -4313,9 +4317,10 @@ async function importJSON(rawInput,statusEl){
     if(raw.length>10485760)throw new Error('la copia supera el tamaño máximo de 10 MB');
     var d=normalizeImportedBackup(JSON.parse(raw));
     validateImportData(d);
-    var uid=currentUser.id;
-    s.textContent='guardando copia de seguridad previa...';s.className='status-msg';
-    try{exportJSON();}catch(e){}
+    var accepted=await confirmCriticalAction({title:'Importar copia de seguridad',description:'Se mostrarán los datos del archivo y se sustituirán tus datos actuales. Antes se creará una copia de seguridad real de tu estado actual.',counts:backupPreviewCounts(d),phrase:'IMPORTAR',approveLabel:'Importar copia'});
+    if(!accepted)return;
+    s.textContent='creando copia de seguridad previa...';s.className='status-msg';
+    await createSafetyBackup('before_import');
     s.textContent='importando datos de forma segura...';
     var atomicImport=await sb.rpc('replace_fintrack_data',{payload:d});
     if(atomicImport.error)throw new Error('importación: '+atomicImport.error.message);
