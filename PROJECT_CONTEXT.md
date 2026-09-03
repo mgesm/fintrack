@@ -373,7 +373,21 @@ Las entradas son acumulativas. Toda entrada nueva debe incluir fecha, cambio, ar
 | 2026-09-03 | Se cifró la caché local con Web Crypto/IndexedDB y se añadieron confirmaciones con frase explícita para borrar cuentas, categorías y todos los movimientos. | `index.html`. | Tres scripts embebidos validados. |
 | 2026-09-03 | Se unificaron tokens de movimiento, elevación y foco para tarjetas, filas y botones; se respetan preferencias de reducción de movimiento. | `index.html`, `serviceworker.js`. | Publicado con versión `2026.09.03.6` y caché `v127`. |
 
-## 12. Ideas futuras priorizadas (no implementadas todavía)
+| 2026-09-03 | Se creó un registro vinculante de funcionalidades y alternativas descartadas, que debe actualizarse cada vez que Miguel rechace una propuesta. | `PROJECT_CONTEXT.md`. | Documentadas las decisiones previas recuperables. |
+
+## 12. Decisiones descartadas (no volver a proponer sin petición expresa)
+
+Este registro es vinculante para futuras sesiones. Cada vez que Miguel rechace una funcionalidad o una alternativa de diseño propuesta, añadir aquí una entrada concreta con fecha, alcance y motivo si lo indicó. No volver a sugerirla por iniciativa propia; solo reconsiderarla si Miguel la pide expresamente o modifica su decisión.
+
+| Fecha | Propuesta o alternativa descartada | Decisión vigente |
+|---|---|---|
+| 2026-08-30 | Mantener el selector de mes y el botón Anual en las pestañas Anual y Ajustes. | No deben aparecer en esas dos pestañas. |
+| 2026-08-30 | Mantener el punto de sincronización visible en las pestañas. | Eliminado de todas las pestañas; la sincronización queda en Ajustes. |
+| 2026-08-31 | Mantener un botón «Operación» independiente dentro de Inversión. | No usarlo: la operativa se inicia desde el producto mediante comprar/vender. |
+| 2026-08-31 | Mostrar posiciones o gráficos de ejemplo sin datos reales. | Prohibido: mostrar estado vacío hasta que existan datos reales. |
+| 2026-09-02 | Color de acento configurable, apartado de presupuesto mensual, estado de sincronización y botón para activar copias automáticas en Ajustes. | No mostrarlos en Ajustes; las copias se ejecutan automáticamente cada cinco días. |
+
+## 13. Ideas futuras priorizadas (no implementadas todavía)
 
 Esta lista conserva las decisiones de producto pendientes. Antes de implementar una idea, actualizar su estado y añadir una entrada de changelog. Un nuevo chat debe consultar primero esta sección y no presentar como existente una función que siga aquí.
 
@@ -386,7 +400,7 @@ Esta lista conserva las decisiones de producto pendientes. Antes de implementar 
 | Rendimiento | Sincronización incremental, pruebas de regresión de cálculos y modularización progresiva del HTML único. | Mantener compatibilidad de PWA y rutas de datos existentes. |
 | Seguridad | Revisión mensual de RLS, Edge Functions, secretos, Storage, backups, dependencias y recuperación. | Registrar hallazgos, corregir primero riesgos altos y comprobar restauración real. |
 
-## 13. Lista de comprobación rápida por tipo de cambio
+## 14. Lista de comprobación rápida por tipo de cambio
 
 ### Interfaz
 
