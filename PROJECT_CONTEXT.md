@@ -1,6 +1,6 @@
 # FinTrack — contexto técnico y operativo
 
-> **Versión del documento:** 2.2  
+> **Versión del documento:** 2.3  
 > **Última actualización:** 2026-09-03  
 > **Repositorio:** `mgesm/fintrack` (rama `main`)  
 > **Producción:** https://mgesm.github.io/fintrack/  
@@ -384,6 +384,8 @@ Las entradas son acumulativas. Toda entrada nueva debe incluir fecha, cambio, ar
 | 2026-09-03 | El gráfico de evolución ya se inicia con el precio real de la primera operación y añade la cotización actual como punto vivo, incluso sin histórico mensual disponible. No se rellenan fechas intermedias sin precio de mercado. | `index.html`, `serviceworker.js`. | Validado con compra del mismo día: punto inicial de coste y punto actual de cotización; versión `2026.09.03.10`, caché `v131`. |
 
 | 2026-09-03 | Se hizo explícito el punto vivo final de la evolución: siempre usa la última fecha de la serie, no una ventana temporal durante la carga. | `index.html`, `serviceworker.js`. | Mantiene la cotización actual aun con latencia del proveedor; versión `2026.09.03.11`, caché `v132`. |
+
+| 2026-09-03 | Se eliminó por completo el gráfico de evolución de cartera y sus consultas históricas. La cabecera conserva únicamente el valor numérico y los indicadores de cartera. | `index.html`, `serviceworker.js`. | Cálculo de valoración intacto; versión `2026.09.03.12`, caché `v133`. |
 
 ## 12. Decisiones descartadas (no volver a proponer sin petición expresa)
 
