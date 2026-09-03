@@ -359,6 +359,8 @@ Las entradas son acumulativas. Toda entrada nueva debe incluir fecha, cambio, ar
 
 | 2026-09-03 | La privacidad de cartera también enmascara el saldo mostrado de cualquier cuenta marcada como cuenta de inversión. | `index.html`, `serviceworker.js`. | JavaScript validado y caché renovada. |
 
+| 2026-09-03 | Cuando la cartera está oculta, la cuenta de inversión se excluye del total de Cuentas, no solo se enmascara su importe individual. | `index.html`, `serviceworker.js`. | JavaScript validado y caché renovada. |
+
 ## 12. Lista de comprobación rápida por tipo de cambio
 
 ### Interfaz
