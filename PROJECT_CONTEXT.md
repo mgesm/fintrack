@@ -166,7 +166,7 @@ Modelo acordado:
 - Al vender se realiza el flujo inverso hacia una cuenta de destino elegida.
 - Al eliminar una operación se elimina de forma segura también el traspaso vinculado, de modo que no quedan saldos artificiales.
 - El usuario puede abrir el detalle directamente pulsando una posición de su cartera.
-- Cada posición calcula sobre operaciones reales su precio medio, capital neto aportado, plusvalía/pérdida realizada y no realizada, y rentabilidad anualizada. La rentabilidad anualizada usa flujos fechados (XIRR) y no debe presentarse si no hay una serie de flujos válida.
+- Cada posición calcula sobre operaciones reales su precio medio, capital neto aportado, plusvalía/pérdida realizada y no realizada. La rentabilidad visible es la acumulada de la posición abierta: plusvalía no realizada / coste pendiente × 100. No anualizarla mediante XIRR, porque no coincide con el porcentaje que muestra el broker.
 - El bloque de valor de activos incorpora una evolución comparativa: una línea de aportaciones netas y otra de valoración de mercado. Se construye con compras/ventas fechadas y los cierres históricos devueltos por `market-data`; no se deben inventar puntos si el proveedor no devuelve una cotización.
 - La privacidad de cartera oculta todas estas cifras y el saldo de la cuenta de inversión; además, dicha cuenta queda excluida del total visible de Cuentas mientras el modo privado esté activo.
 
@@ -374,6 +374,8 @@ Las entradas son acumulativas. Toda entrada nueva debe incluir fecha, cambio, ar
 | 2026-09-03 | Se unificaron tokens de movimiento, elevación y foco para tarjetas, filas y botones; se respetan preferencias de reducción de movimiento. | `index.html`, `serviceworker.js`. | Publicado con versión `2026.09.03.6` y caché `v127`. |
 
 | 2026-09-03 | Se creó un registro vinculante de funcionalidades y alternativas descartadas, que debe actualizarse cada vez que Miguel rechace una propuesta. | `PROJECT_CONTEXT.md`. | Documentadas las decisiones previas recuperables. |
+
+| 2026-09-03 | Se revirtió una regresión de cotización: la cadena de fuentes de NAV de fondos volvió exactamente al comportamiento que mostraba correctamente valor total y rentabilidad. La rentabilidad visible de posición se define como acumulada, no anualizada. | `market-data`, `index.html`. | Edge Function v10 confirmada idéntica a la versión de fuente anterior. |
 
 ## 12. Decisiones descartadas (no volver a proponer sin petición expresa)
 
