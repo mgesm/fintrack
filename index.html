@@ -1379,7 +1379,7 @@ if('serviceWorker' in navigator){
 </div>
 
 <script>
-var APP_VERSION='2026.09.03.3';
+var APP_VERSION='2026.09.03.4';
 var APP_PUBLISHED_AT='02/09/2026 · 12:14 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
@@ -1939,6 +1939,15 @@ function showAuth(){
 
 var loadDataInFlight=false,loadDataPromise=null,loadGeneration=0;
 function isActiveLoad(uid,generation){return !!(currentUser&&currentUser.id===uid&&loadGeneration===generation);}
+var secureCacheKeyPromise=null,secureCacheDbPromise=null;
+function secureCacheStorageKey(uid){return 'ft_cache_secure_'+uid;}
+function cacheBytesToB64(bytes){var out='';for(var i=0;i<bytes.length;i+=0x8000)out+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));return btoa(out);}
+function cacheB64ToBytes(value){var bin=atob(value),bytes=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);return bytes;}
+function secureCacheDatabase(){if(secureCacheDbPromise)return secureCacheDbPromise;secureCacheDbPromise=new Promise(function(resolve,reject){if(!window.indexedDB)return reject(new Error('IndexedDB no disponible'));var req=indexedDB.open('fintrack-secure-cache',1);req.onupgradeneeded=function(){if(!req.result.objectStoreNames.contains('keys'))req.result.createObjectStore('keys');};req.onsuccess=function(){resolve(req.result);};req.onerror=function(){reject(req.error||new Error('No se pudo abrir el almacén seguro'));};});return secureCacheDbPromise;}
+async function secureCacheKey(){if(secureCacheKeyPromise)return secureCacheKeyPromise;secureCacheKeyPromise=(async function(){if(!window.crypto||!crypto.subtle)throw new Error('Cifrado local no disponible');var db=await secureCacheDatabase();var stored=await new Promise(function(resolve,reject){var r=db.transaction('keys','readonly').objectStore('keys').get('device-key');r.onsuccess=function(){resolve(r.result);};r.onerror=function(){reject(r.error);};});if(stored)return stored;var key=await crypto.subtle.generateKey({name:'AES-GCM',length:256},false,['encrypt','decrypt']);await new Promise(function(resolve,reject){var r=db.transaction('keys','readwrite').objectStore('keys').put(key,'device-key');r.onsuccess=function(){resolve();};r.onerror=function(){reject(r.error);};});return key;})();return secureCacheKeyPromise;}
+async function saveSecureLocalCache(uid,payload){var key=await secureCacheKey(),iv=crypto.getRandomValues(new Uint8Array(12)),raw=new TextEncoder().encode(JSON.stringify(payload)),cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},key,raw);localStorage.setItem(secureCacheStorageKey(uid),JSON.stringify({version:1,iv:cacheBytesToB64(iv),data:cacheBytesToB64(new Uint8Array(cipher))}));localStorage.removeItem('ft_cache_'+uid);}
+async function readSecureLocalCache(uid){var stored=localStorage.getItem(secureCacheStorageKey(uid));if(stored){try{var envelope=JSON.parse(stored),key=await secureCacheKey(),plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:cacheB64ToBytes(envelope.iv)},key,cacheB64ToBytes(envelope.data));return JSON.parse(new TextDecoder().decode(plain));}catch(e){localStorage.removeItem(secureCacheStorageKey(uid));return null;}}var legacy=localStorage.getItem('ft_cache_'+uid);if(!legacy)return null;try{var parsed=JSON.parse(legacy);await saveSecureLocalCache(uid,parsed);return parsed;}catch(e){localStorage.removeItem('ft_cache_'+uid);return null;}}
+function currentCachePayload(){return {transactions:transactions,categories:categories,accounts:accounts,patrimony:patrimony,budgets:budgets,recurrenceExclusions:recurrenceExclusions,transactionVoids:transactionVoids,investmentOperations:investmentOperations};}
 async function loadData(){
   if(!currentUser)return false;
   if(loadDataInFlight)return false;
@@ -1946,8 +1955,8 @@ async function loadData(){
   loadDataInFlight=true;
   setSync(isOffline?'err':'syncing');
   try{
-    var cc=localStorage.getItem('ft_cache_'+currentUser.id);
-    if(cc){var cd=JSON.parse(cc);transactions=cd.transactions||[];categories=cd.categories||[];accounts=cd.accounts||[];patrimony=cd.patrimony||[];budgets=cd.budgets||[];recurrenceExclusions=cd.recurrenceExclusions||[];transactionVoids=cd.transactionVoids||[];investmentOperations=cd.investmentOperations||[];}
+    var cd=await readSecureLocalCache(currentUser.id);
+    if(cd){transactions=cd.transactions||[];categories=cd.categories||[];accounts=cd.accounts||[];patrimony=cd.patrimony||[];budgets=cd.budgets||[];recurrenceExclusions=cd.recurrenceExclusions||[];transactionVoids=cd.transactionVoids||[];investmentOperations=cd.investmentOperations||[];}
   }catch(e){}
   try{
     if(isOffline)return false;
@@ -1996,10 +2005,9 @@ async function loadData(){
 var txVersion=0;
 function saveLocalCache(){
   txVersion++;_donutSig='';_barSig={};_lineSig={};
-  // Also clear drawn flags
   document.querySelectorAll('canvas[data-drawn]').forEach(function(cv){cv.removeAttribute('data-drawn');});
   if(!currentUser)return;
-  try{localStorage.setItem('ft_cache_'+currentUser.id,JSON.stringify({transactions:transactions,categories:categories,accounts:accounts,patrimony:patrimony,budgets:budgets,recurrenceExclusions:recurrenceExclusions,transactionVoids:transactionVoids,investmentOperations:investmentOperations}));}catch(e){setSync('err');showSuccessToast('No se pudo actualizar la copia local');}
+  saveSecureLocalCache(currentUser.id,currentCachePayload()).catch(function(error){console.warn('No se pudo cifrar la caché local',error);});
 }
 function addInterval(d,interval,anchorDay){
   var nd=new Date(d.getTime());
@@ -3533,7 +3541,7 @@ async function signOut(){
   if(offlineQueue.length&&!confirm('Hay '+offlineQueue.length+' cambio(s) pendientes. Aceptar: cerrar sesión y conservarlos para cuando vuelvas a entrar. Cancelar: seguir en la app.'))return;
   // La cola se conserva por usuario; la caché visible se elimina antes de
   // esperar a la red para no dejar datos financieros en este dispositivo.
-  if(cKey!=='ft_cache_')localStorage.removeItem(cKey);
+  if(cKey!=='ft_cache_'){localStorage.removeItem(cKey);localStorage.removeItem(secureCacheStorageKey(currentUser.id));}
   transactions=[];categories=[];accounts=[];patrimony=[];budgets=[];recurrenceExclusions=[];transactionVoids=[];_monthTxCache={};_yearTxCache={};txVersion++;
   try{await sb.auth.signOut();}catch(e){}
   showAuth();
