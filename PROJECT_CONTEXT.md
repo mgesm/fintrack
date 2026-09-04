@@ -1,7 +1,7 @@
 # FinTrack — contexto técnico y operativo
 
-> **Versión del documento:** 2.3  
-> **Última actualización:** 2026-09-03  
+> **Versión del documento:** 2.4  
+> **Última actualización:** 2026-09-04  
 > **Repositorio:** `mgesm/fintrack` (rama `main`)  
 > **Producción:** https://mgesm.github.io/fintrack/  
 > **Supabase:** proyecto `sswktibdpxqrumsqsegi`
@@ -62,7 +62,7 @@ El HTML contiene funciones de renderizado por pestaña, consultas Supabase, esta
 
 `serviceworker.js` registra una caché versionada. La navegación utiliza red primero con respaldo de caché; los activos estáticos se sirven preferentemente desde caché. Esto permite instalación y cierta continuidad offline, pero es la principal causa de que una versión antigua siga visible.
 
-**Regla de publicación obligatoria:** cualquier cambio de `index.html` que deba verse inmediatamente requiere incrementar tanto la versión visible de la app como el identificador de caché del service worker y publicar ambos archivos. Después hay que probar una recarga completa o cerrar y reabrir la PWA. El cache name vigente conocido al redactar este documento es `fintrack-cache-v103` y la versión de aplicación es `2026.09.02.2`; deben tratarse como valores que se incrementan, no como constantes eternas.
+**Regla de publicación obligatoria:** cualquier cambio de `index.html` que deba verse inmediatamente requiere incrementar tanto la versión visible de la app como el identificador de caché del service worker y publicar ambos archivos. Después hay que probar una recarga completa o cerrar y reabrir la PWA. El cache name vigente conocido al redactar este documento es `fintrack-cache-v133` y la versión de aplicación es `2026.09.03.12`; deben tratarse como valores que se incrementan, no como constantes eternas.
 
 La sección Versión de Ajustes muestra además `APP_PUBLISHED_AT`: fecha y hora de publicación en España. Debe actualizarse en cada despliegue junto con `APP_VERSION` y la caché.
 
@@ -166,8 +166,8 @@ Modelo acordado:
 - Al vender se realiza el flujo inverso hacia una cuenta de destino elegida.
 - Al eliminar una operación se elimina de forma segura también el traspaso vinculado, de modo que no quedan saldos artificiales.
 - El usuario puede abrir el detalle directamente pulsando una posición de su cartera.
-- La ficha de producto conserva las métricas anteriores a la última tanda de cartera (último cierre, variación diaria, volumen y posición). No añadir de nuevo precio medio, plusvalía ni rentabilidad por posición sin una petición expresa; el gráfico de evolución de aportaciones netas frente a valoración sí se mantiene.
-- El bloque de valor de activos incorpora una evolución comparativa: una línea de aportaciones netas y otra de valoración de mercado. Se construye con compras/ventas fechadas y los cierres históricos devueltos por `market-data`; no se deben inventar puntos si el proveedor no devuelve una cotización.
+- La ficha de producto conserva las métricas anteriores a la última tanda de cartera (último cierre, variación diaria, volumen y posición). No añadir de nuevo precio medio, plusvalía ni rentabilidad por posición sin una petición expresa.
+- La cartera no muestra gráfico de evolución ni descarga histórico agregado: se limita al valor actual y a sus indicadores numéricos. Las gráficas individuales de la ficha de cada producto sí se conservan.
 - La privacidad de cartera oculta todas estas cifras y el saldo de la cuenta de inversión; además, dicha cuenta queda excluida del total visible de Cuentas mientras el modo privado esté activo.
 
 ## 5. Comportamiento de cada módulo
@@ -197,6 +197,7 @@ La pestaña se está consolidando como un servicio de inversión interno, no com
 - La cabecera de valor de cartera permite ocultar/mostrar el importe. La preferencia se guarda en `ft_invest_portfolio_hidden_<userId>`.
 - Al activar esa privacidad se enmascaran todos los datos numéricos de las posiciones abiertas en el panel de cartera: valor total, invertido, rentabilidad, número de posiciones, unidades y coste por posición. Los nombres y símbolos se mantienen visibles.
 - No deben aparecer posiciones ni gráficos de ejemplo si el usuario no tiene operaciones reales.
+- No hay gráfico de evolución de cartera: se muestra únicamente la valoración numérica y sus indicadores. Las gráficas de cada producto permanecen en su ficha.
 - Debajo de los tres contenedores de resumen se listan los productos de cartera; más abajo se listan las operaciones.
 - Las operaciones pueden eliminarse y su borrado revierte el traspaso asociado.
 
@@ -220,7 +221,7 @@ La pestaña se está consolidando como un servicio de inversión interno, no com
 
 **Fondos**
 
-Los fondos necesitan especial cuidado porque suelen identificarse por ISIN y publicar valor liquidativo diario, no intradía. El ISIN debe poder buscarse directamente. El fondo `IE00BYX5MX67` tiene un resolver específico y cadenas de respaldo, pero la fuente puede no devolver NAV de forma fiable. Un valor estático de último NAV publicado es solo último recurso y debe presentarse como tal, con fecha; no como cotización en tiempo real. La solución definitiva requiere una fuente de NAV de fondos con licencia y cobertura fiable.
+Los fondos necesitan especial cuidado porque suelen identificarse por ISIN y publicar valor liquidativo diario, no intradía. El ISIN debe poder buscarse directamente. El fondo `IE00BYX5MX67` tiene un resolver específico: prioriza el `price` actual de Twelve Data; después usa proveedores alternativos y, como último recurso, el NAV publicado de 16,40037595 € con fecha 2026-09-03. Un valor estático es solo respaldo y debe presentarse como tal, no como cotización en tiempo real. La solución definitiva requiere una fuente de NAV de fondos con licencia y cobertura fiable.
 
 ## 6. Supabase
 
@@ -304,7 +305,7 @@ Al modificar una exportación hay que comprobar:
 
 ## 9. Procedimiento seguro de desarrollo y publicación
 
-1. Crear copia de seguridad si el cambio es grande, siguiendo la convención existente y sin sobrescribir backups previos.
+1. Crear copia de seguridad si el cambio es grande, siguiendo la convención existente. Solo sobrescribir el snapshot del repositorio cuando el usuario lo solicite expresamente.
 2. Consultar `PROJECT_CONTEXT.md`, `index.html`, migraciones relevantes y Edge Functions afectadas.
 3. Obtener la última versión remota de GitHub antes de modificar. El árbol local contiene cambios históricos y puede no ser la fuente más reciente.
 4. Implementar el cambio mínimo coherente, preservando datos y RLS.
@@ -387,6 +388,8 @@ Las entradas son acumulativas. Toda entrada nueva debe incluir fecha, cambio, ar
 
 | 2026-09-03 | Se eliminó por completo el gráfico de evolución de cartera y sus consultas históricas. La cabecera conserva únicamente el valor numérico y los indicadores de cartera. | `index.html`, `serviceworker.js`. | Cálculo de valoración intacto; versión `2026.09.03.12`, caché `v133`. |
 
+| 2026-09-04 | Se consolidó el contexto vigente: valoración de `IE00BYX5MX67` con precio actual y respaldo NAV, eliminación definitiva del gráfico de cartera y renovación del snapshot del repositorio. | `PROJECT_CONTEXT.md`, `backup/`. | Contraste con el árbol remoto de `main`; publicado. |
+
 ## 12. Decisiones descartadas (no volver a proponer sin petición expresa)
 
 Este registro es vinculante para futuras sesiones. Cada vez que Miguel rechace una funcionalidad o una alternativa de diseño propuesta, añadir aquí una entrada concreta con fecha, alcance y motivo si lo indicó. No volver a sugerirla por iniciativa propia; solo reconsiderarla si Miguel la pide expresamente o modifica su decisión.
@@ -398,7 +401,8 @@ Este registro es vinculante para futuras sesiones. Cada vez que Miguel rechace u
 | 2026-08-31 | Mantener un botón «Operación» independiente dentro de Inversión. | No usarlo: la operativa se inicia desde el producto mediante comprar/vender. |
 | 2026-08-31 | Mostrar posiciones o gráficos de ejemplo sin datos reales. | Prohibido: mostrar estado vacío hasta que existan datos reales. |
 | 2026-09-02 | Color de acento configurable, apartado de presupuesto mensual, estado de sincronización y botón para activar copias automáticas en Ajustes. | No mostrarlos en Ajustes; las copias se ejecutan automáticamente cada cinco días. |
-| 2026-09-03 | Métricas de precio medio, plusvalía y rentabilidad por posición añadidas en la última tanda de Inversión. | Retiradas; conservar únicamente el gráfico de evolución hasta una nueva petición expresa. |
+| 2026-09-03 | Métricas de precio medio, plusvalía y rentabilidad por posición añadidas en la última tanda de Inversión. | Retiradas; no reintroducirlas sin petición expresa. |
+| 2026-09-03 | Mantener o reintroducir el gráfico de evolución de cartera. | Eliminado por petición expresa; la cartera conserva solo el valor numérico y sus indicadores. |
 
 ## 13. Ideas futuras priorizadas (no implementadas todavía)
 
