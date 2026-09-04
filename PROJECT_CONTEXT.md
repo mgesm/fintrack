@@ -1,6 +1,6 @@
 # FinTrack — contexto técnico y operativo
 
-> **Versión del documento:** 2.5  
+> **Versión del documento:** 2.6  
 > **Última actualización:** 2026-09-04  
 > **Repositorio:** `mgesm/fintrack` (rama `main`)  
 > **Producción:** https://mgesm.github.io/fintrack/  
@@ -390,6 +390,8 @@ Las entradas son acumulativas. Toda entrada nueva debe incluir fecha, cambio, ar
 
 | 2026-09-04 | Se implementó el conjunto de mejoras integrales: validación sintáctica automatizada con script Node.js, desacoplamiento y soporte multiusuario/autenticado en `monthly-report`, caché de cotizaciones con TTL de 10 min en Inversión, selector de ámbito para búsqueda global entre todos los movimientos o el mes actual, feedback interactivo de carga de precio en modal de compra/venta y monitorización del estado de copias en la nube en Ajustes. | `index.html`, `serviceworker.js`, `monthly-report/index.ts`, `automatic-backup/index.ts`, `scripts/validate-syntax.js`, `PROJECT_CONTEXT.md`. | Cuatro bloques de scripts embebidos validados sin errores con `node scripts/validate-syntax.js`; versión `2026.09.04.1`, caché `v134`. |
 
+| 2026-09-04 | Se implementaron tres mejoras clave: 1) Barra de distribución de cartera (Asset Allocation) en Inversión por tipo de activo con cálculo dinámico en tiempo real y compatibilidad con modo privado; 2) Indexación en memoria de transacciones (_txByMonthStr, _txByYearStr, _txByAccount) eliminando sobrecoste de objetos Date y acelerando drásticamente cálculos de saldos, estadísticas anuales y exportaciones; 3) Botón en Ajustes para limpiar la caché local cifrada y resincronizar con Supabase protegiendo la cola offline; 4) Registro vinculante de descartados y preservación de calculadora/teclado rápido. | `index.html`, `serviceworker.js`, `PROJECT_CONTEXT.md`. | Cuatro bloques de scripts embebidos validados con `node scripts/validate-syntax.js` (0 errores); versión `2026.09.04.2`, caché `v135`. |
+
 ## 12. Decisiones descartadas (no volver a proponer sin petición expresa)
 
 Este registro es vinculante para futuras sesiones. Cada vez que Miguel rechace una funcionalidad o una alternativa de diseño propuesta, añadir aquí una entrada concreta con fecha, alcance y motivo si lo indicó. No volver a sugerirla por iniciativa propia; solo reconsiderarla si Miguel la pide expresamente o modifica su decisión.
@@ -403,6 +405,11 @@ Este registro es vinculante para futuras sesiones. Cada vez que Miguel rechace u
 | 2026-09-02 | Color de acento configurable, apartado de presupuesto mensual, estado de sincronización y botón para activar copias automáticas en Ajustes. | No mostrarlos en Ajustes; las copias se ejecutan automáticamente cada cinco días. |
 | 2026-09-03 | Métricas de precio medio, plusvalía y rentabilidad por posición añadidas en la última tanda de Inversión. | Retiradas; no reintroducirlas sin petición expresa. |
 | 2026-09-03 | Mantener o reintroducir el gráfico de evolución de cartera. | Eliminado por petición expresa; la cartera conserva solo el valor numérico y sus indicadores. |
+| 2026-09-04 | Gestión u operaciones de dividendos en Inversión. | Descartado por petición expresa. |
+| 2026-09-04 | Detección o avisos de movimientos duplicados al registrar transacciones. | Descartado por petición expresa. |
+| 2026-09-04 | Módulo o función de objetivos/metas de ahorro. | Descartado por petición expresa. |
+| 2026-09-04 | Swipe actions hacia la derecha para editar o interactuar con transacciones. | Descartado por petición expresa. |
+| 2026-09-04 | Bloqueo biométrico nativo (WebAuthn / Face ID / Touch ID). | Descartado: probado previamente y no compatible con la PWA instalada en iOS. |
 
 ## 13. Ideas futuras priorizadas (no implementadas todavía)
 
@@ -410,10 +417,11 @@ Esta lista conserva las decisiones de producto pendientes. Antes de implementar 
 
 | Área | Idea futura | Criterio de entrega |
 |---|---|---|
-| Planificación | Previsión de tesorería a 30/60/90 días, calendario financiero y objetivos de ahorro. | Distinguir previsión de gasto ejecutado y explicar las hipótesis. |
+| Planificación | Previsión de tesorería a 30/60/90 días y calendario financiero. | Distinguir previsión de gasto ejecutado y explicar las hipótesis. |
 | Presupuestos | Sugerencias basadas en meses anteriores y avisos de riesgo antes de superar el presupuesto. | Nunca alterar presupuestos sin confirmación del usuario. |
-| Inversión | Distribución por activo/sector/divisa, dividendos, alertas de precio y rebalanceo. | Basado en datos de mercado verificables y con fuentes/fallbacks visibles. |
+| Inversión | Distribución sectorial o por divisa, alertas de precio y rebalanceo de cartera. | Basado en datos de mercado verificables y con fuentes/fallbacks visibles. |
 | Búsqueda | Búsqueda global de movimientos, categorías, cuentas y productos con filtros guardables. | Resultados rápidos, accesibles y sin exponer importes en modo privado. |
+| Entrada rápida | Teclado numérico / calculadora rápida al introducir importes de transacciones. | No entorpecer el teclado nativo y facilitar sumas o restas rápidas opcionales. |
 | Rendimiento | Sincronización incremental, pruebas de regresión de cálculos y modularización progresiva del HTML único. | Mantener compatibilidad de PWA y rutas de datos existentes. |
 | Seguridad | Revisión mensual de RLS, Edge Functions, secretos, Storage, backups, dependencias y recuperación. | Registrar hallazgos, corregir primero riesgos altos y comprobar restauración real. |
 
