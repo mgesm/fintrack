@@ -1,6 +1,6 @@
 # FinTrack — contexto técnico y operativo
 
-> **Versión del documento:** 2.8  
+> **Versión del documento:** 2.9  
 > **Última actualización:** 2026-09-04  
 > **Repositorio:** `mgesm/fintrack` (rama `main`)  
 > **Producción:** https://mgesm.github.io/fintrack/  
@@ -211,7 +211,7 @@ La pestaña se está consolidando como un servicio de inversión interno, no com
 **Detalle de producto**
 
 - Muestra nombre, símbolo/ISIN, icono, precio/NAV, variación diaria, estadísticas y botones Comprar/Vender.
-- Los logotipos corporativos usan dominios de logo cuando existen (`ASSET_LOGO_DOMAINS`/Clearbit) y deben verse sin fondo, halo o recuadro blanco. Mantener fallback de iniciales cuando no haya logo fiable.
+- Los logotipos corporativos usan `assets.parqet.com/logos/symbol/{SYMBOL}` como fuente primaria (sin fondo, sin halo) y `t2.gstatic.com/faviconV2` como fallback para gestoras de fondos (`ASSET_LOGO_DOMAINS`). Fallback final: inicial del ticker. Clearbit está caído desde 2025-12 y ya no se usa.
 - El gráfico representa la serie en orden cronológico: antiguo a la izquierda, reciente a la derecha.
 - Rangos: `1D`, `1M`, `6M`, `YTD`, `1A`, `5A`.
 - El valor superior derecho de la gráfica cambia según el rango seleccionado. La variación diaria visible en la ficha sigue siendo siempre diaria.
@@ -395,6 +395,8 @@ Las entradas son acumulativas. Toda entrada nueva debe incluir fecha, cambio, ar
 | 2026-09-04 | Remediación integral y exhaustiva de todos los hallazgos identificados por los 10 agentes auditores: 1) Edge Functions: restauración de utilidades en `monthly-report` (`euro`, `json`, `sha256`, `base64`, `median`, `exportPdf`), corrección de extracción de fechas históricas de Yahoo en `market-data` (`slice(0,16)` vs `slice(0,10)`), paginación por lotes en `automatic-backup` para eliminar el límite de 1.000 filas de PostgREST; 2) Migración SQL `20260904122000_update_replace_fintrack_data_for_investments.sql`: inclusión de `investment_operations` y `accounts.is_investment` en backup/restore atómico `replace_fintrack_data` y permisos RLS en `transaction_voids`; 3) Frontend & Motor Financiero: token `--brand-green` ajustado a `#248A3D` en tema claro para cumplir contraste WCAG 4.5:1, tap targets de 44px con pseudo-elementos táctiles en controles pequeños, corrección de corrupción de entidades HTML en `hlText`, búsqueda insensible a diacríticos (`normStr`) y con precedencia de ámbito completo sobre modo anual, solución al desplazamiento de día ancla en recurrencias (`root.recur_anchor_date`), importe dinámico en presupuestos recurrentes, rescate de eliminaciones recurrentes por clave compuesta `(user_id, recur_series_id, skipped_date)`, fallback a cola offline en borrado si la RPC de anulación falla, blindaje contra colisiones 23505 y mutex concurrente `isProcessingOfflineQueue` en la cola offline, aislamiento total multiusuario de colas y operaciones en memoria al cerrar sesión, renombramiento y borrado offline de categorías, enmascaramiento estricto en modo privado de operaciones, movimientos y patrimonios de inversión, exportación PDF con numeración de páginas (`Pág. X de Y`), desglose de cuentas en transferencias y exclusión de ajustes de saldo en gráficos circulares, optimización O(N) en resumen mensual de exportación Excel, purga de código muerto en importación JSON y redondeo/cuenta por defecto en `dtQuickAdd`. | `index.html`, `serviceworker.js`, `supabase/functions/monthly-report/index.ts`, `supabase/functions/market-data/index.ts`, `supabase/functions/automatic-backup/index.ts`, `supabase/migrations/20260904122000_update_replace_fintrack_data_for_investments.sql`, `PROJECT_CONTEXT.md`. | Validación sintáctica con `node scripts/validate-syntax.js` (0 errores); batería de tests y simulaciones de motor financiero superada (13/13 tests); versión `2026.09.04.3`, caché `v136`. |
 
 | 2026-09-04 | Se eliminó el encabezado redundante de la pestaña de Inversión (`.invest-head`: «Mercados y cartera», «Inversión», «Sincronizado»), maximizando el espacio vertical disponible y alineando el diseño directamente con la tarjeta de valor de cartera (`.portfolio-card`), homogéneo con las demás pestañas. | `index.html`, `serviceworker.js`, `PROJECT_CONTEXT.md`. | Validación sintáctica exitosa con `node scripts/validate-syntax.js`; versión `2026.09.04.4`, caché `v137`. |
+
+| 2026-09-04 | Se restauraron los logos corporativos en la ficha de producto de Inversión: se sustituyó la API Clearbit (caída en diciembre 2025) por `assets.parqet.com/logos/symbol/{SYMBOL}` como fuente primaria (SVG limpio sin fondo para todas las acciones y ETFs con ticker), y `t2.gstatic.com/faviconV2` como fuente secundaria para gestoras de fondos cuyos tickers no estén en Parqet (Vanguard, iShares, BlackRock, Amundi, Fidelity…). `ASSET_LOGO_DOMAINS` ahora contiene únicamente los dominios de gestoras de respaldo; todos los tickers estándar van directamente a Parqet. El fallback final es la primera letra del símbolo. | `index.html`, `serviceworker.js`. | `node scripts/validate-syntax.js` (0 errores); versión `2026.09.04.5`, caché `v138`. |
 
 ## 12. Decisiones descartadas (no volver a proponer sin petición expresa)
 
