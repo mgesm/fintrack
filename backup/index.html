@@ -284,14 +284,14 @@ body{display:flex;flex-direction:column;width:100%;max-width:430px;margin:0 auto
 .magic-sent small{font-size:13px;color:rgba(255,255,255,0.35);margin-top:10px;display:block;}
 
 /* HEADER */
-.header{display:flex;align-items:center;justify-content:space-between;padding:calc(12px + var(--safe-top)) 20px 11px;background:var(--bg);background:color-mix(in srgb,var(--bg) 72%,transparent);-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);position:sticky;top:0;z-index:50;border-bottom:0.5px solid var(--separator2);}
-.logo{font-family:var(--logo-font);font-size:24px;font-weight:800;color:var(--text);letter-spacing:-1.2px;}
-.logo::after{content:".";color:var(--brand-green);}
-.logo span{color:var(--brand-green);}
-.header-right{display:flex;align-items:center;gap:10px;}
-.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--text4);transition:background 0.3s;flex-shrink:0;}
-.sync-dot.syncing{background:var(--amber);animation:pulse 1s infinite;}
-.sync-dot.ok{background:var(--green);}.sync-dot.err{background:var(--red);}
+.header{display:flex;align-items:center;gap:10px;padding:calc(10px + var(--safe-top)) 16px 10px;background:var(--bg);background:color-mix(in srgb,var(--bg) 72%,transparent);-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);position:sticky;top:0;z-index:50;border-bottom:0.5px solid var(--separator2);}
+.app-mark{height:28px;display:flex;align-items:center;font-family:var(--logo-font);font-size:23px;font-weight:800;letter-spacing:-1.4px;color:var(--text);}
+.app-mark .mark-accent{color:var(--brand-green);}
+.header-actions{display:flex;justify-content:flex-end;align-items:center;}
+.header-gear{width:36px;height:36px;border:0;border-radius:50%;background:var(--bg3);color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.header-gear:active{background:var(--bg4);transform:scale(.94);}
+.period-toolbar{display:flex;justify-content:flex-end;align-items:center;gap:8px;padding-top:1px;margin-left:auto;}
+.header.period-hidden .period-toolbar{display:none;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
 .month-nav{display:flex;align-items:center;gap:4px;}
 .home-annual-toggle{background:var(--bg3);border:none;color:var(--text3);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;-webkit-tap-highlight-color:transparent;margin-right:2px;}
@@ -300,6 +300,12 @@ body{display:flex;flex-direction:column;width:100%;max-width:430px;margin:0 auto
 .nav-btn{background:var(--bg3);border:none;color:var(--text3);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;-webkit-tap-highlight-color:transparent;}
 .nav-btn:active{background:var(--bg4);transform:scale(0.94);}
 .month-label{font-size:14px;font-weight:500;color:var(--text);min-width:106px;text-align:center;letter-spacing:-0.2px;}
+
+/* INVESTMENTS */
+.invest-wrap{padding:12px 16px 28px;width:100%;}.invest-title{font-size:28px;font-weight:800;letter-spacing:-1px;margin:4px 0 14px;}.portfolio-card,.invest-stats>div,.positions{background:var(--bg2);border:1px solid var(--card-border);box-shadow:var(--shadow-sm);}.portfolio-card{border-radius:var(--radius);padding:20px 18px 14px;}.portfolio-card>span,.invest-stats small,.position small{color:var(--text3);font-size:13px;display:block;}.portfolio-card>strong{display:block;font-family:var(--mono);font-size:30px;letter-spacing:-1.2px;margin-top:8px;}.portfolio-card>b,.positive,.position-value b{color:var(--green);font-size:15px;}.portfolio-chart{color:var(--green);margin-top:14px;}.portfolio-chart svg{height:96px;width:100%;}.portfolio-chart small{display:block;color:var(--text3);font-size:10px;white-space:nowrap;}.invest-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 22px;}.invest-stats>div{border-radius:20px;padding:12px 10px;overflow:hidden;}.invest-stats strong{font-size:14px;white-space:nowrap;display:block;margin-top:4px;}.invest-wrap h3{font-size:18px;margin:0 0 9px;}.positions{border-radius:var(--radius-sm);overflow:hidden;}.position{display:grid;grid-template-columns:34px minmax(0,1fr) 30px auto;gap:9px;align-items:center;padding:13px 12px;border-bottom:1px solid var(--separator2);}.position:last-child{border:0}.position i{width:32px;height:32px;background:color-mix(in srgb,var(--brand-green) 15%,transparent);border-radius:10px;color:var(--brand-green);display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:800;}.position>div:nth-child(2){min-width:0}.position>div:nth-child(2)>strong{font-size:13px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.position-spark{color:var(--green);font-size:25px;transform:rotate(-16deg)}.position-value{text-align:right;white-space:nowrap}.position-value strong,.position-value b{display:block;font-size:13px;}.invest-operation{width:100%;border:0;border-radius:20px;background:var(--accent);color:#fff;font-family:var(--font);font-size:16px;font-weight:700;padding:15px;margin-top:16px;box-shadow:0 6px 16px rgba(52,199,89,.25);}
+
+/* INVESTMENT ASSET SHEET */
+.invest-search{width:100%;border:0;border-radius:18px;background:var(--bg3);color:var(--text);font:500 15px var(--font);padding:13px 15px;margin:0;outline:0}.search-results{margin:7px 0 14px;background:var(--bg2);border:1px solid var(--card-border);border-radius:20px;box-shadow:var(--shadow-sm);overflow:hidden}.search-result{width:100%;border:0;border-bottom:1px solid var(--separator2);background:transparent;color:var(--text);padding:11px 13px;display:flex;align-items:center;gap:10px;text-align:left;font-family:var(--font)}.search-result:last-child{border-bottom:0}.search-result i{background:color-mix(in srgb,var(--brand-green) 14%,transparent);color:var(--brand-green);font-style:normal;font-weight:800;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:9px}.search-result strong{font-size:14px;display:block}.search-result small{display:block;color:var(--text3);font-size:12px;margin-top:2px}.search-status{padding:12px 14px;color:var(--text3);font-size:13px}.invest-empty{padding:28px 18px;text-align:center;color:var(--text3)}.invest-empty i{display:flex;width:42px;height:42px;margin:0 auto 10px;border-radius:14px;background:color-mix(in srgb,var(--brand-green) 14%,transparent);color:var(--brand-green);align-items:center;justify-content:center;font-size:20px;font-style:normal}.invest-empty strong{display:block;color:var(--text);font-size:15px;margin-bottom:5px}.invest-empty small{font-size:13px;line-height:1.4}.asset-sheet{position:absolute;inset:0;background:var(--bg);z-index:8;padding:14px 16px 26px;overflow:auto}.asset-sheet-close{border:0;background:var(--bg3);border-radius:50%;width:34px;height:34px;color:var(--text);font-size:22px;float:right}.asset-sheet h2{font-size:25px;margin:10px 0 2px}.asset-type{color:var(--text3);font-size:14px}.asset-price{font:800 30px var(--mono);margin:20px 0 3px}.asset-change{color:var(--green);font-weight:700}.asset-sheet-chart{color:var(--green);margin:18px 0 10px;background:var(--bg2);border-radius:24px;padding:16px}.asset-sheet-chart svg{width:100%;height:150px}.asset-range{display:flex;justify-content:space-between;gap:4px;margin:0 2px 18px}.asset-range button{border:0;background:transparent;color:var(--text3);border-radius:10px;padding:6px 8px;font:600 12px var(--font)}.asset-range button.active{background:var(--bg3);color:var(--text)}.asset-data{display:grid;grid-template-columns:1fr 1fr;gap:8px}.asset-data div{padding:13px;background:var(--bg2);border-radius:18px}.asset-data small{display:block;color:var(--text3);font-size:12px}.asset-data strong{font-size:15px;margin-top:4px;display:block}.asset-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}.asset-actions button{border:0;border-radius:18px;padding:14px;font:700 16px var(--font)}.asset-actions .buy{background:var(--accent);color:white}.asset-actions .sell{background:var(--bg3);color:var(--red)}
 
 /* SUMMARY CARDS */
 .summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:8px 16px;}
@@ -1046,7 +1052,16 @@ html[data-theme="dark"] .dt-nav-item.active{background:rgba(52,199,89,0.14);}
 html[data-theme="light"] .dt-user{border-top-color:rgba(0,0,0,0.06);}
 html[data-theme="dark"] .dt-user{border-top-color:rgba(255,255,255,0.08);}
 
+/* Investment workspace refresh */
+.invest-wrap{max-width:760px;margin:auto;padding:14px 16px 34px;position:relative}.invest-head{display:flex;justify-content:space-between;align-items:flex-end;margin:2px 0 18px}.invest-kicker{font:700 11px var(--mono);letter-spacing:.09em;color:var(--brand-green);text-transform:uppercase;margin-bottom:5px}.invest-title{font-size:30px;margin:0}.invest-head-note{font-size:12px;color:var(--text3);padding-bottom:4px}.portfolio-card{border-radius:24px;padding:20px 18px 17px;background:linear-gradient(138deg,color-mix(in srgb,var(--brand-green) 17%,var(--bg2)),var(--bg2) 62%);position:relative;overflow:hidden}.portfolio-card:after{content:'';position:absolute;width:155px;height:155px;border:1px solid color-mix(in srgb,var(--brand-green) 22%,transparent);border-radius:50%;right:-75px;top:-95px}.portfolio-card .portfolio-empty{color:var(--text3);font-size:13px;margin-top:8px}.invest-stats{margin-bottom:22px}.invest-stats>div{border-radius:17px}.invest-section-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 10px}.invest-section-head h3{margin:0}.invest-section-head small{font-size:12px;color:var(--text3)}.invest-explore{margin:24px 0 20px}.invest-explore-label{font-size:12px;color:var(--text3);margin-bottom:9px}.invest-chips{display:flex;gap:8px;overflow:auto;padding:1px 1px 5px}.invest-chip{border:1px solid var(--card-border);background:var(--bg2);color:var(--text);border-radius:14px;padding:9px 12px;white-space:nowrap;font:700 13px var(--font);text-align:left}.invest-chip span{display:block;color:var(--text3);font-size:10px;font-weight:500;margin-top:2px}.invest-search{border:1px solid var(--card-border);background:var(--bg2);box-shadow:var(--shadow-sm);padding:14px 15px;margin-bottom:1px}.positions{border-radius:20px}.invest-empty{padding:32px 18px}.asset-sheet{padding:14px 16px 92px;z-index:2;border-radius:24px;box-shadow:0 18px 55px rgba(0,0,0,.22)}.asset-sheet-top{display:flex;align-items:center;justify-content:space-between}.asset-sheet-close{border-radius:12px;width:38px;height:34px}.asset-sheet-label{font:700 11px var(--mono);letter-spacing:.08em;color:var(--text3);text-transform:uppercase}.asset-identity{display:flex;align-items:center;gap:11px;margin:18px 0 2px}.asset-logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(140deg,color-mix(in srgb,var(--brand-green) 24%,var(--bg2)),var(--bg3));display:grid;place-items:center;color:var(--brand-green);font-weight:800;font-size:17px}.asset-sheet h2{font-size:23px;margin:0}.asset-type{font-size:13px;margin-top:3px}.asset-price-row{display:flex;align-items:end;justify-content:space-between;margin:22px 0 5px}.asset-price{margin:0}.asset-change{padding:6px 9px;border-radius:999px;background:color-mix(in srgb,var(--green) 13%,transparent)}.asset-change.negative{background:color-mix(in srgb,var(--red) 12%,transparent);color:var(--red)}.asset-sheet-chart{border:1px solid var(--card-border);background:linear-gradient(145deg,var(--bg2),color-mix(in srgb,var(--brand-green) 6%,var(--bg2)));min-height:180px}.asset-sheet-chart svg{display:block!important;height:142px!important}.asset-chart-caption{display:flex;justify-content:space-between;color:var(--text3);font-size:11px;margin-bottom:5px}.asset-range{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;padding:3px;background:var(--bg3);border-radius:13px}.asset-range button.active{background:var(--bg2);box-shadow:var(--shadow-sm)}.asset-data div{border:1px solid var(--card-border);border-radius:17px}.asset-actions{position:absolute;bottom:0;left:0;right:0;margin:0;padding:12px 16px max(15px,env(safe-area-inset-bottom));background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(12px);border-top:1px solid var(--card-border)}.asset-actions button{border-radius:16px}
 </style>
+<style>.asset-sheet-chart{position:relative;touch-action:none;user-select:none}.asset-sheet-chart.is-inspecting{cursor:crosshair}.asset-chart-tooltip{position:absolute;z-index:2;pointer-events:none;transform:translate(-50%,-100%);padding:7px 9px;background:var(--text);color:var(--bg);border-radius:10px;box-shadow:var(--shadow-sm);font:700 12px var(--mono);white-space:nowrap;opacity:0;transition:opacity .12s}.asset-chart-tooltip small{display:block;opacity:.68;font:500 10px var(--font);margin-top:2px}</style>
+<style>.investment-trade-modal{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.42);display:flex;align-items:flex-end;justify-content:center;padding:16px}.investment-trade-card{width:min(500px,100%);background:var(--bg);border:1px solid var(--card-border);border-radius:26px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.32)}.investment-trade-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:18px}.investment-trade-head h3{margin:3px 0 0;font-size:21px}.investment-trade-kicker{font-size:12px;color:var(--text3)}.investment-trade-close{border:0;background:var(--bg3);color:var(--text);border-radius:11px;width:36px;height:34px;font-size:20px}.investment-trade-mode{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;background:var(--bg3);border-radius:14px;margin-bottom:14px}.investment-trade-mode button{border:0;background:transparent;border-radius:10px;padding:9px;color:var(--text3);font:700 13px var(--font)}.investment-trade-mode button.active{background:var(--bg2);color:var(--text);box-shadow:var(--shadow-sm)}.investment-trade-field{display:block;margin:11px 0}.investment-trade-field span{display:block;font-size:12px;color:var(--text3);margin:0 0 6px}.investment-trade-field input,.investment-trade-field select{width:100%;background:var(--bg2);border:1px solid var(--card-border);border-radius:13px;padding:12px;color:var(--text);font:600 15px var(--font)}.investment-trade-summary{font:700 13px var(--mono);padding:11px 0;color:var(--text2)}.investment-trade-submit{width:100%;border:0;border-radius:15px;background:var(--accent);color:white;padding:14px;font:800 15px var(--font)}.investment-trade-submit.sell{background:var(--red)}@keyframes tradeSheetIn{from{transform:translateY(28px);opacity:0}to{transform:translateY(0);opacity:1}}.investment-trade-modal{background:rgba(0,0,0,.32);backdrop-filter:blur(4px);padding:0;align-items:flex-end}.investment-trade-card{max-width:430px;border-radius:34px 34px 0 0;padding:8px 20px calc(32px + var(--safe-bottom));background:var(--bg2);box-shadow:0 -20px 60px rgba(0,0,0,.18);animation:tradeSheetIn .32s cubic-bezier(.32,.72,0,1) both}.investment-trade-card:before{content:'';display:block;width:36px;height:4px;margin:4px auto 18px;border-radius:99px;background:var(--bg4)}.investment-trade-field input,.investment-trade-field select{background:var(--bg3);border-radius:18px;padding:12px 14px;font-size:16px}.investment-trade-field input:focus,.investment-trade-field select:focus{outline:0;box-shadow:0 0 0 3px rgba(52,199,89,.25)}.investment-trade-mode{border-radius:18px;padding:3px}.investment-trade-mode button{border-radius:12px}.investment-trade-submit{border-radius:18px}</style>
+<style>.asset-logo img,.search-result i img,.position i img{width:100%;height:100%;object-fit:contain;display:block}.asset-logo .logo-fallback,.search-result i .logo-fallback,.position i .logo-fallback{display:none;width:100%;height:100%;place-items:center}.asset-logo.logo-fallback-only .logo-fallback,.search-result i.logo-fallback-only .logo-fallback,.position i.logo-fallback-only .logo-fallback{display:grid}</style>
+<style>.asset-logo:not(.logo-fallback-only),.search-result i:not(.logo-fallback-only),.position i:not(.logo-fallback-only){background:transparent!important;box-shadow:none!important;border-radius:0!important}.asset-logo:not(.logo-fallback-only) img,.search-result i:not(.logo-fallback-only) img,.position i:not(.logo-fallback-only) img{filter:none!important}</style>
+<style>.invest-operations{margin:17px 0 3px;border:1px solid var(--card-border);border-radius:20px;overflow:hidden;background:var(--bg2);box-shadow:var(--shadow-sm)}.invest-operations-head{display:flex;justify-content:space-between;align-items:center;padding:13px 14px 10px}.invest-operations-head h3{font-size:15px!important;margin:0!important}.invest-operations-head small{font-size:11px;color:var(--text3)}.invest-operation-row{display:grid;grid-template-columns:32px minmax(0,1fr) auto 28px;gap:9px;align-items:center;padding:10px 12px;border-top:1px solid var(--separator2);transition:background .18s ease}.invest-operation-row:hover{background:color-mix(in srgb,var(--brand-green) 6%,var(--bg2))}.invest-operation-side{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;font-weight:800;background:color-mix(in srgb,var(--brand-green) 14%,transparent);color:var(--brand-green)}.invest-operation-side.sell{background:color-mix(in srgb,var(--red) 12%,transparent);color:var(--red)}.invest-operation-main{min-width:0}.invest-operation-main strong{display:block;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.invest-operation-main small{display:block;color:var(--text3);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}.invest-operation-value{text-align:right;font:700 12px var(--mono);white-space:nowrap}.invest-operation-value small{display:block;color:var(--text3);font:500 10px var(--font);margin-top:2px}.invest-operation-delete{width:27px;height:27px;border:0;border-radius:9px;background:transparent;color:var(--text3);font-size:18px}.invest-operation-delete:hover{background:color-mix(in srgb,var(--red) 12%,transparent);color:var(--red)}</style>
+<style>.positions .position{cursor:pointer;grid-template-columns:34px minmax(0,1fr) 30px auto 16px}.positions .position:after{content:'›';color:var(--text3);font-size:20px;line-height:1;opacity:.65}</style>
+<style>@keyframes invest-rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.invest-wrap>*{animation:invest-rise .38s cubic-bezier(.2,.8,.2,1) both}.invest-wrap>.portfolio-card{animation-delay:.04s}.invest-wrap>.invest-stats{animation-delay:.08s}.invest-wrap>.invest-explore{animation-delay:.12s}.invest-wrap>.invest-section-head,.invest-wrap>.positions{animation-delay:.16s}.portfolio-card,.invest-stats>div,.invest-chip,.position,.search-result,.asset-actions button,.asset-range button{transition:transform .18s ease,box-shadow .18s ease,background .18s ease,border-color .18s ease,filter .18s ease}.portfolio-card:hover{transform:translateY(-2px);box-shadow:0 15px 30px rgba(20,70,42,.13)}.invest-stats>div:hover{transform:translateY(-2px);box-shadow:var(--shadow-sm);border-color:color-mix(in srgb,var(--brand-green) 30%,var(--card-border))}.invest-chip:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--brand-green) 46%,var(--card-border));box-shadow:0 8px 16px rgba(20,70,42,.1)}.invest-chip:active,.asset-actions button:active,.asset-range button:active{transform:scale(.96)}.search-result:hover{background:color-mix(in srgb,var(--brand-green) 7%,var(--bg2));padding-left:16px}.position:hover{background:color-mix(in srgb,var(--brand-green) 6%,var(--bg2));transform:translateX(3px)}.asset-sheet{animation:invest-rise .28s cubic-bezier(.2,.8,.2,1)}.asset-sheet-chart{transition:box-shadow .2s ease,border-color .2s ease}.asset-sheet-chart:hover{border-color:color-mix(in srgb,var(--brand-green) 36%,var(--card-border));box-shadow:0 10px 22px rgba(20,70,42,.08)}.asset-actions .buy:hover{filter:brightness(1.05);box-shadow:0 8px 18px rgba(52,199,89,.25)}.asset-actions .sell:hover{background:color-mix(in srgb,var(--red) 12%,var(--bg3))}@media(max-width:767px){.portfolio-card:active,.invest-stats>div:active,.invest-chip:active,.position:active{transform:scale(.985);transition-duration:.08s}}@media(prefers-reduced-motion:reduce){.invest-wrap>*,.asset-sheet{animation:none!important}.portfolio-card,.invest-stats>div,.invest-chip,.position,.search-result,.asset-actions button,.asset-range button{transition:none!important}}</style>
 <script>(function(){var saved=localStorage.getItem('ft_theme');if(saved==='light'||saved==='dark')document.documentElement.setAttribute('data-theme',saved);})();</script>
 
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=7">
@@ -1074,6 +1089,19 @@ if('serviceWorker' in navigator){
   });
 }
 </script>
+<style id="ft-tab-entry-style">@keyframes ft-tab-enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}</style><style id="ft-experience-system">
+:root{--motion-fast:160ms;--motion-base:260ms;--motion-spring:cubic-bezier(.22,1,.36,1);--interactive-border:color-mix(in srgb,var(--brand-green) 28%,var(--card-border));}
+#tabContent>*,#dtTabInner>*{animation:ftViewIn var(--motion-base) var(--motion-spring) both;}
+@keyframes ftViewIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+button:not(:disabled),.position,.search-result,.portfolio-card,.invest-stats>div,.positions,.settings-section,.pat-account,.cat-row,.tx-row{transition:transform var(--motion-fast) var(--motion-spring),box-shadow var(--motion-base) ease,border-color var(--motion-fast) ease,background-color var(--motion-fast) ease;}
+button:not(:disabled):active{transform:scale(.975);}
+@media(hover:hover){.position:hover,.search-result:hover,.pat-account:hover,.cat-row:hover,.tx-row:hover{transform:translateY(-1px);border-color:var(--interactive-border);box-shadow:var(--shadow-sm)}.portfolio-card:hover,.invest-stats>div:hover,.positions:hover,.settings-section:hover{border-color:var(--interactive-border);}}
+.portfolio-evolution{margin-top:14px;min-height:112px;position:relative}.portfolio-evolution svg{display:block;width:100%;height:112px;overflow:visible}.portfolio-evolution-loading,.portfolio-evolution-empty,.portfolio-evolution-private{min-height:112px;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px;text-align:center;padding:12px}.portfolio-evolution-private{font-size:22px;letter-spacing:3px}.portfolio-evolution .portfolio-axis{font-size:9px;fill:var(--text3);font-family:var(--font)}
+
+.critical-confirm-bg{position:fixed;z-index:1200;inset:0;display:flex;align-items:flex-end;justify-content:center;padding:18px;background:rgba(0,0,0,.42);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);animation:ftConfirmFade var(--motion-fast) ease both}.critical-confirm-card{width:min(100%,440px);background:var(--bg-grouped);border:1px solid var(--card-border);border-radius:28px;padding:12px 18px 18px;box-shadow:0 24px 70px rgba(0,0,0,.32);animation:ftConfirmUp var(--motion-base) var(--motion-spring) both}.critical-confirm-handle{width:38px;height:4px;border-radius:99px;background:var(--text4);margin:0 auto 14px}.critical-confirm-kicker{font-size:11px;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:.08em}.critical-confirm-card h3{font-size:22px;letter-spacing:-.55px;margin:5px 0 7px}.critical-confirm-card p{font-size:14px;line-height:1.45;color:var(--text2)}.critical-confirm-counts{display:flex;flex-wrap:wrap;gap:7px;margin:13px 0}.critical-confirm-counts span{padding:6px 9px;border-radius:10px;background:var(--bg3);font-size:12px;color:var(--text2)}.critical-confirm-input{display:block;margin:14px 0}.critical-confirm-input span{display:block;font-size:12px;color:var(--text3);margin-bottom:7px}.critical-confirm-input input{width:100%;border:1px solid var(--separator);border-radius:14px;background:var(--bg3);color:var(--text);padding:12px;font:700 15px var(--font);outline:none}.critical-confirm-input input:focus{border-color:var(--brand-green);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand-green) 18%,transparent)}.critical-confirm-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.critical-confirm-actions button{border:0;border-radius:15px;padding:13px;font:700 14px var(--font)}.critical-confirm-cancel{background:var(--bg3);color:var(--text)}.critical-confirm-approve{background:var(--red);color:white}.critical-confirm-approve:disabled{opacity:.38;cursor:not-allowed}@keyframes ftConfirmFade{from{opacity:0}to{opacity:1}}@keyframes ftConfirmUp{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:none}}
+
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+</style>
 </head>
 <body>
 <div class="mesh-bg"><div class="mesh-orb m1"></div><div class="mesh-orb m2"></div><div class="mesh-orb m3"></div></div>
@@ -1167,8 +1195,8 @@ if('serviceWorker' in navigator){
   </div>
 </div>
 <div class="header" id="appHeader" style="display:none">
-  <div class="logo">fin<span>track</span></div>
-  <div class="header-right"><div class="sync-dot" id="syncDot"></div><button class="home-annual-toggle" id="homeAnnualBtn" onclick="toggleHomeAnnual()" title="Vista anual" aria-label="Cambiar vista anual"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="16" y1="3" x2="16" y2="7"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button><div class="month-nav"><button class="nav-btn" id="prevMonth" aria-label="Mes anterior">&#8249;</button><div class="month-label" id="monthLabel"></div><button class="nav-btn" id="nextMonth" aria-label="Mes siguiente">&#8250;</button></div></div>
+  <div class="app-mark" title="fintrack">f<span class="mark-accent">t.</span></div>
+  <div class="period-toolbar" id="periodToolbar"><button class="home-annual-toggle" id="homeAnnualBtn" onclick="toggleHomeAnnual()" title="Vista anual" aria-label="Cambiar vista anual"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="16" y1="3" x2="16" y2="7"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button><div class="month-nav"><button class="nav-btn" id="prevMonth" aria-label="Mes anterior">&#8249;</button><div class="month-label" id="monthLabel"></div><button class="nav-btn" id="nextMonth" aria-label="Mes siguiente">&#8250;</button></div><div class="header-actions"><button class="header-gear" onclick="openSettings()" title="Ajustes" aria-label="Abrir ajustes"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15A1.7 1.7 0 0 0 19.7 17l.1.1-2.1 2.1-.1-.1a1.7 1.7 0 0 0-2-.3 1.7 1.7 0 0 0-1 1.6v.2h-3v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-2 .3l-.1.1-2.1-2.1.1-.1a1.7 1.7 0 0 0 .3-2 1.7 1.7 0 0 0-1.6-1H5v-3h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-2l-.1-.1 2.1-2.1.1.1a1.7 1.7 0 0 0 2 .3 1.7 1.7 0 0 0 1-1.6V4h3v.2a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 2-.3l.1-.1 2.1 2.1-.1.1a1.7 1.7 0 0 0-.3 2 1.7 1.7 0 0 0 1.6 1h.2v3H21a1.7 1.7 0 0 0-1.6 1.4Z"/></svg></button></div></div>
 </div>
 <div id="mainChart" style="display:none">
   <div class="summary">
@@ -1234,17 +1262,8 @@ if('serviceWorker' in navigator){
     <span class="bnav-label">Anual</span>
   </button>
   <button class="bnav-btn" id="bn4" onclick="switchTab(4)">
-    <div class="bnav-icon-wrap">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="6" cy="6" r="2" stroke="currentColor" stroke-width="1.8"/>
-        <circle cx="12" cy="12" r="2" stroke="currentColor" stroke-width="1.8"/>
-        <circle cx="18" cy="18" r="2" stroke="currentColor" stroke-width="1.8"/>
-        <path d="M2 6H4M8 6H22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-        <path d="M2 12H10M14 12H22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-        <path d="M2 18H16M20 18H22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-      </svg>
-    </div>
-    <span class="bnav-label">Ajustes</span>
+    <div class="bnav-icon-wrap"><svg viewBox="0 0 24 24" fill="none"><path d="M4 18V10M10 18V6M16 18v-4M22 18H2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 8l5-4 5 4 7-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <span class="bnav-label">Inversión</span>
   </button>
 </div>
 <div class="tab-content" id="tabContent" style="display:none"></div>
@@ -1351,8 +1370,7 @@ if('serviceWorker' in navigator){
         <span>Anual</span>
       </button>
       <button class="dt-nav-item" data-tab="4" onclick="switchTab(4)">
-        <svg viewBox="0 0 24 24" fill="none"><circle cx="6" cy="6" r="2" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="2" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="18" r="2" stroke="currentColor" stroke-width="1.8"/><path d="M2 6H4M8 6H22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M2 12H10M14 12H22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M2 18H16M20 18H22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        <span>Ajustes</span>
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 18V10M10 18V6M16 18v-4M22 18H2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 8l5-4 5 4 7-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Inversión</span>
       </button>
     </nav>
     <button class="dt-add-btn" onclick="openModal()">
@@ -1362,7 +1380,7 @@ if('serviceWorker' in navigator){
     <div class="dt-user">
       <div class="dt-user-avatar" id="dtAvatar">?</div>
       <div class="dt-user-email" id="dtEmail"></div>
-      <div class="dt-sync" id="dtSync"></div>
+      <button class="dt-signout-btn" onclick="openSettings()" title="Ajustes">&#9881;</button>
       <button class="dt-signout-btn" onclick="signOut()" title="Cerrar sesión">&#x2192;</button>
     </div>
   </div>
@@ -1374,7 +1392,8 @@ if('serviceWorker' in navigator){
 </div>
 
 <script>
-var APP_VERSION='2026.08.03.2';
+var APP_VERSION='2026.09.03.12';
+var APP_PUBLISHED_AT='03/09/2026 22:31 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
 var sb=window.supabase.createClient(SB_URL,SB_KEY);
@@ -1382,10 +1401,10 @@ var PALETTE=['#3dba8a','#e05c4a','#4a90d9','#d4920f','#d45c8a','#8b7ed8','#6aab3
 var MONTHS=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 var MONTHS_S=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 var ACCENT_COLORS=['#34C759','#007AFF','#FF3B30','#FF9500','#FF2D55','#AF52DE','#FF9F0A','#5AC8FA','#64D2FF','#30D158','#FFD60A','#BF5AF2','#0A84FF','#FF453A','#FF6961','#FECE38'];
-var currentUser=null,transactions=[],categories=[],accounts=[],patrimony=[],budgets=[],recurrenceExclusions=[],transactionVoids=[];
+var currentUser=null,transactions=[],categories=[],accounts=[],patrimony=[],budgets=[],recurrenceExclusions=[],transactionVoids=[],investmentOperations=[];
 var _donutSig='',_barSig={},_lineSig={}; // render cache signatures
 var viewYear=new Date().getFullYear(),viewMonth=new Date().getMonth();
-var activeTab=0,txType='expense',editingTxId=null;
+var activeTab=0,txType='expense',editingTxId=null,assetDetailState=null;
 var donutChart=null,activeCatId=null,chartYear=new Date().getFullYear();
 var barChart=null,lineChart=null,authMode='login';
 var txTags=[],isRecurring=false;
@@ -1393,6 +1412,7 @@ var TX_PAGE_SIZE=50,txLimit=50,txLimitSig='',filtersOpen=false;
 var searchQuery='',filterType='all',filterCat='',sortOrder='date-desc',filterDateFrom='',filterDateTo='';
 var homeAnnualMode=false;
 var isOffline=navigator.onLine===false,offlineQueue=[];
+var syncState=isOffline?'offline':'syncing';
 var DEFAULT_CATS=[
   {id:'c1',name:'alimentación',color:'#34C759',icon:'🛒',subcats:['supermercado','mercado','alimentación online'],position:0},
   {id:'c2',name:'transporte',color:'#007AFF',icon:'🚗',subcats:['gasolina','taxi/uber','transporte público','parking'],position:1},
@@ -1570,7 +1590,27 @@ function totalBudget(year,month){
   var yr=(year!==undefined)?year:viewYear,mo=(month!==undefined)?month:viewMonth;
   return categories.reduce(function(s,c){return isIncomeCat(c.id)?s:s+budgetForCat(c.id,yr,mo);},0);
 }
-function setSync(s){var d=document.getElementById('syncDot');if(d)d.className='sync-dot '+s;var live=document.getElementById('ariaLive');if(live)live.textContent=s==='ok'?'Sincronización completada':s==='syncing'?'Sincronizando':s==='err'?'Hay cambios pendientes o un problema de sincronización':'';}
+function setSync(s){
+  syncState=s;
+  if(s==='ok'&&currentUser)try{localStorage.setItem('ft_last_sync_'+currentUser.id,new Date().toISOString());}catch(e){}
+  var live=document.getElementById('ariaLive');
+  if(live)live.textContent=s==='ok'?'Sincronización completada':s==='syncing'?'Sincronizando':s==='err'?'Hay cambios pendientes o un problema de sincronización':'';
+  var summary=document.getElementById('syncStatusSummary');
+  if(summary)summary.textContent=syncStatusSummary();
+}
+function syncStatusSummary(){
+  if(isOffline)return 'Sin conexión · los cambios se guardarán al reconectar.';
+  if(offlineQueue.length)return offlineQueue.length+' cambio'+(offlineQueue.length===1?'':'s')+' pendiente'+(offlineQueue.length===1?'':'s')+' de sincronizar.';
+  if(syncState==='syncing')return 'Sincronizando tus datos…';
+  if(syncState==='err')return 'No se pudo completar la última sincronización. Inténtalo de nuevo.';
+  var last=currentUser?localStorage.getItem('ft_last_sync_'+currentUser.id):null;
+  return last?'Sincronizado · '+new Date(last).toLocaleString('es-ES',{dateStyle:'medium',timeStyle:'short'}):'Sincronizado correctamente.';
+}
+function openSettings(){switchTab(5);}
+function updatePeriodToolbar(){
+  var header=document.getElementById('appHeader');
+  if(header)header.classList.toggle('period-hidden',activeTab===3||activeTab===5);
+}
 function setAccent(color){
   var el=document.documentElement;
   el.style.setProperty('--accent',color);
@@ -1584,8 +1624,8 @@ function setTheme(mode){
   if(typeof refreshTab==='function'&&currentUser)refreshTab();
 }
 
-window.addEventListener('online',function(){isOffline=false;document.getElementById('offlineBanner').classList.remove('show');loadData();});
-window.addEventListener('offline',function(){isOffline=true;document.getElementById('offlineBanner').classList.add('show');});
+window.addEventListener('online',function(){isOffline=false;document.getElementById('offlineBanner').classList.remove('show');setSync('syncing');loadData();});
+window.addEventListener('offline',function(){isOffline=true;document.getElementById('offlineBanner').classList.add('show');setSync('err');});
 async function processOfflineQueue(){
   if(!currentUser||!offlineQueue.length)return;
   setSync('syncing');
@@ -1797,18 +1837,17 @@ async function bioUnlock(){
 }
 function uiStateKey(){return 'ft_uistate'+(currentUser?'_'+currentUser.id:'');}
 function saveUiState(){
-  try{localStorage.setItem(uiStateKey(),JSON.stringify({vy:viewYear,vm:viewMonth,ts:Date.now()}));}catch(e){}
+  try{localStorage.setItem(uiStateKey(),JSON.stringify({vy:viewYear,vm:viewMonth,tab:activeTab,asset:assetDetailState,ts:Date.now()}));}catch(e){}
 }
 function restoreUiState(){
-  // Every time this code runs, the app is loading from zero (a real reload happened —
-  // whether from inactivity, a force-close, a crash, or a normal fresh open). There is
-  // no reliable way to distinguish those cases from JS, so always land on Inicio.
-  activeTab=0;
+  activeTab=0;assetDetailState=null;
   try{
     var raw=localStorage.getItem(uiStateKey());if(!raw)return;
     var s=JSON.parse(raw);
     if(typeof s.vy==='number'&&s.vy>=1970&&s.vy<=3000)viewYear=s.vy;
     if(typeof s.vm==='number'&&s.vm>=0&&s.vm<=11)viewMonth=s.vm;
+    if(typeof s.tab==='number'&&s.tab>=0&&s.tab<=5)activeTab=s.tab;
+    if(s.asset&&typeof s.asset.symbol==='string')assetDetailState=s.asset;
   }catch(e){}
 }
 document.addEventListener('visibilitychange',function(){
@@ -1876,7 +1915,7 @@ function showApp(){
     document.getElementById('dtLayout').style.display='flex';
     ['appHeader','mainChart','bottomNav','tabContent'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});
     document.getElementById('fabBtn').classList.add('fab-hidden');
-    if(currentUser){var em=currentUser.email||'';var av=document.getElementById('dtAvatar');if(av)av.textContent=em[0]?em[0].toUpperCase():'?';var de=document.getElementById('dtEmail');if(de)de.textContent=activeTab===4?em:maskEmail(em);}
+    if(currentUser){var em=currentUser.email||'';var av=document.getElementById('dtAvatar');if(av)av.textContent=em[0]?em[0].toUpperCase():'?';var de=document.getElementById('dtEmail');if(de)de.textContent=activeTab===5?em:maskEmail(em);}
   } else {
     document.getElementById('dtLayout').style.display='none';
     document.getElementById('appHeader').style.display='flex';
@@ -1885,6 +1924,7 @@ function showApp(){
     document.getElementById('tabContent').style.display='flex';
     document.getElementById('fabBtn').classList.toggle('fab-hidden',activeTab!==0);
     for(var _bi=0;_bi<5;_bi++){var _bn=document.getElementById('bn'+_bi);if(_bn)_bn.classList.toggle('active',_bi===activeTab);}
+    updatePeriodToolbar();
     setTimeout(function(){movePill(activeTab);},100);
   }
   if(!loadingAlready)loadData();
@@ -1912,6 +1952,15 @@ function showAuth(){
 
 var loadDataInFlight=false,loadDataPromise=null,loadGeneration=0;
 function isActiveLoad(uid,generation){return !!(currentUser&&currentUser.id===uid&&loadGeneration===generation);}
+var secureCacheKeyPromise=null,secureCacheDbPromise=null;
+function secureCacheStorageKey(uid){return 'ft_cache_secure_'+uid;}
+function cacheBytesToB64(bytes){var out='';for(var i=0;i<bytes.length;i+=0x8000)out+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));return btoa(out);}
+function cacheB64ToBytes(value){var bin=atob(value),bytes=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);return bytes;}
+function secureCacheDatabase(){if(secureCacheDbPromise)return secureCacheDbPromise;secureCacheDbPromise=new Promise(function(resolve,reject){if(!window.indexedDB)return reject(new Error('IndexedDB no disponible'));var req=indexedDB.open('fintrack-secure-cache',1);req.onupgradeneeded=function(){if(!req.result.objectStoreNames.contains('keys'))req.result.createObjectStore('keys');};req.onsuccess=function(){resolve(req.result);};req.onerror=function(){reject(req.error||new Error('No se pudo abrir el almacén seguro'));};});return secureCacheDbPromise;}
+async function secureCacheKey(){if(secureCacheKeyPromise)return secureCacheKeyPromise;secureCacheKeyPromise=(async function(){if(!window.crypto||!crypto.subtle)throw new Error('Cifrado local no disponible');var db=await secureCacheDatabase();var stored=await new Promise(function(resolve,reject){var r=db.transaction('keys','readonly').objectStore('keys').get('device-key');r.onsuccess=function(){resolve(r.result);};r.onerror=function(){reject(r.error);};});if(stored)return stored;var key=await crypto.subtle.generateKey({name:'AES-GCM',length:256},false,['encrypt','decrypt']);await new Promise(function(resolve,reject){var r=db.transaction('keys','readwrite').objectStore('keys').put(key,'device-key');r.onsuccess=function(){resolve();};r.onerror=function(){reject(r.error);};});return key;})();return secureCacheKeyPromise;}
+async function saveSecureLocalCache(uid,payload){var key=await secureCacheKey(),iv=crypto.getRandomValues(new Uint8Array(12)),raw=new TextEncoder().encode(JSON.stringify(payload)),cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},key,raw);localStorage.setItem(secureCacheStorageKey(uid),JSON.stringify({version:1,iv:cacheBytesToB64(iv),data:cacheBytesToB64(new Uint8Array(cipher))}));localStorage.removeItem('ft_cache_'+uid);}
+async function readSecureLocalCache(uid){var stored=localStorage.getItem(secureCacheStorageKey(uid));if(stored){try{var envelope=JSON.parse(stored),key=await secureCacheKey(),plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:cacheB64ToBytes(envelope.iv)},key,cacheB64ToBytes(envelope.data));return JSON.parse(new TextDecoder().decode(plain));}catch(e){localStorage.removeItem(secureCacheStorageKey(uid));return null;}}var legacy=localStorage.getItem('ft_cache_'+uid);if(!legacy)return null;try{var parsed=JSON.parse(legacy);await saveSecureLocalCache(uid,parsed);return parsed;}catch(e){localStorage.removeItem('ft_cache_'+uid);return null;}}
+function currentCachePayload(){return {transactions:transactions,categories:categories,accounts:accounts,patrimony:patrimony,budgets:budgets,recurrenceExclusions:recurrenceExclusions,transactionVoids:transactionVoids,investmentOperations:investmentOperations};}
 async function loadData(){
   if(!currentUser)return false;
   if(loadDataInFlight)return false;
@@ -1919,8 +1968,8 @@ async function loadData(){
   loadDataInFlight=true;
   setSync(isOffline?'err':'syncing');
   try{
-    var cc=localStorage.getItem('ft_cache_'+currentUser.id);
-    if(cc){var cd=JSON.parse(cc);transactions=cd.transactions||[];categories=cd.categories||[];accounts=cd.accounts||[];patrimony=cd.patrimony||[];budgets=cd.budgets||[];recurrenceExclusions=cd.recurrenceExclusions||[];transactionVoids=cd.transactionVoids||[];}
+    var cd=await readSecureLocalCache(currentUser.id);
+    if(cd){transactions=cd.transactions||[];categories=cd.categories||[];accounts=cd.accounts||[];patrimony=cd.patrimony||[];budgets=cd.budgets||[];recurrenceExclusions=cd.recurrenceExclusions||[];transactionVoids=cd.transactionVoids||[];investmentOperations=cd.investmentOperations||[];}
   }catch(e){}
   try{
     if(isOffline)return false;
@@ -1934,13 +1983,14 @@ async function loadData(){
       sb.from('patrimony').select('*').eq('user_id',uid).order('year').order('month'),
       sb.from('budgets').select('*').eq('user_id',uid),
       sb.from('recurrence_exclusions').select('*').eq('user_id',uid),
-      sb.from('transaction_voids').select('*').eq('user_id',uid)
+      sb.from('transaction_voids').select('*').eq('user_id',uid),
+      sb.from('investment_operations').select('*').eq('user_id',uid).order('operation_date',{ascending:false})
     ]),LOAD_REMOTE_TIMEOUT_MS,'La sincronización inicial ha tardado demasiado');
     if(!isActiveLoad(uid,generation))return false;
     var failedRead=res.find(function(x){return x&&x.error;});
     if(failedRead)throw failedRead.error;
     categories=res[0].data||[];transactions=res[1].data||[];accounts=res[2].data||[];
-    patrimony=res[3].data||[];budgets=res[4].data||[];recurrenceExclusions=res[5].data||[];transactionVoids=res[6].data||[];
+    patrimony=res[3].data||[];budgets=res[4].data||[];recurrenceExclusions=res[5].data||[];transactionVoids=res[6].data||[];investmentOperations=res[7].data||[];
     // Repara movimientos de actualización que falten en ajustes antiguos o
     // que quedaron a medias por una caída de red.
     try{var repaired=await withLoadTimeout(sb.rpc('repair_fintrack_balance_adjustments'),5000,'reparación de ajustes');if(!repaired.error&&repaired.data&&repaired.data.length)transactions=transactions.concat(repaired.data);}catch(repairError){}
@@ -1968,10 +2018,9 @@ async function loadData(){
 var txVersion=0;
 function saveLocalCache(){
   txVersion++;_donutSig='';_barSig={};_lineSig={};
-  // Also clear drawn flags
   document.querySelectorAll('canvas[data-drawn]').forEach(function(cv){cv.removeAttribute('data-drawn');});
   if(!currentUser)return;
-  try{localStorage.setItem('ft_cache_'+currentUser.id,JSON.stringify({transactions:transactions,categories:categories,accounts:accounts,patrimony:patrimony,budgets:budgets,recurrenceExclusions:recurrenceExclusions,transactionVoids:transactionVoids}));}catch(e){setSync('err');showSuccessToast('No se pudo actualizar la copia local');}
+  saveSecureLocalCache(currentUser.id,currentCachePayload()).catch(function(error){console.warn('No se pudo cifrar la caché local',error);});
 }
 function addInterval(d,interval,anchorDay){
   var nd=new Date(d.getTime());
@@ -1988,6 +2037,7 @@ async function processRecurring(){
   if(isOffline)return;
   var uid=currentUser.id;
   var recurring=transactions.filter(function(t){return t.recurring&&typeof t.date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(t.date);});
+  var created=0,failures=[];
   var today=new Date();today.setHours(23,59,59,999);
   var processed={};
   for(var i=0;i<recurring.length;i++){
@@ -2028,12 +2078,38 @@ async function processRecurring(){
       });
       if(!dup&&!isRecurrenceExcluded(seriesKey,newDate)){
         var newTx={id:'tx'+Date.now()+Math.random().toString(36).slice(2,6),type:root.type,amount:root.amount,category:root.category,subcategory:root.subcategory||null,note:root.note||null,date:newDate,recurring:true,recur_interval:interval,recur_end_date:root.recur_end_date||null,tags:root.tags||[],account_id:root.account_id||null,to_account_id:null,recur_series_id:root.recur_series_id||null,recur_anchor_date:root.recur_anchor_date||root.date,user_id:uid};
-        var r=await sb.rpc('create_fintrack_recurring_occurrence',{payload:newTx});
-        if(!r.error&&r.data){var already=transactions.some(function(x){return x.id===r.data.id;});if(!already)transactions.unshift(r.data);}
+        try{
+          var r=await sb.rpc('create_fintrack_recurring_occurrence',{payload:newTx});
+          // Un fallo de red puede llegar después de que Supabase haya guardado la
+          // cuota. Antes de reintentarlo comprobamos la serie y la fecha para no
+          // duplicarla; si no existe, usamos una inserción normal como recuperación.
+          if(r.error||!r.data){
+            var existing=await sb.from('transactions').select('*').eq('user_id',uid).eq('recur_series_id',newTx.recur_series_id).eq('date',newDate).limit(1);
+            if(existing.error)throw existing.error;
+            if(existing.data&&existing.data.length)r={data:existing.data[0]};
+            else{
+              var fallback=await sb.from('transactions').insert(newTx).select();
+              if(fallback.error)throw fallback.error;
+              r={data:fallback.data&&fallback.data[0]};
+            }
+          }
+          if(!r.data)throw new Error('La recurrencia no devolvió una transacción');
+          var already=transactions.some(function(x){return x.id===r.data.id;});
+          if(!already){transactions.unshift(r.data);created++;}
+        }catch(recurrenceError){
+          failures.push(newDate+' · '+(root.note||catById(root.category).name||'gasto recurrente'));
+          console.error('No se pudo generar una recurrencia',recurrenceError);
+        }
       }
       next=addInterval(next,interval,anchorDay);
     }
   }
+  if(failures.length){
+    setSync('err');
+    showSuccessToast('No se pudieron registrar '+failures.length+' recurrencia(s). Reintenta sincronizar.');
+    throw new Error('Recurrencias pendientes: '+failures.join(', '));
+  }
+  return created;
 }
 function scheduleAutoBackup(){
   if(!currentUser)return;
@@ -2053,7 +2129,7 @@ function toggleAutoBackup(){
 function downloadBackupNow(){
   if(!currentUser)return;
   var now=new Date();
-  var json=JSON.stringify({version:3,transactions:transactions,categories:categories,accounts:accounts,patrimony:patrimony,budgets:budgets,recurrenceExclusions:recurrenceExclusions,transactionVoids:transactionVoids},null,2);
+  var json=JSON.stringify({version:4,transactions:transactions,categories:categories,accounts:accounts,patrimony:patrimony,budgets:budgets,recurrenceExclusions:recurrenceExclusions,transactionVoids:transactionVoids,investmentOperations:investmentOperations},null,2);
   var blob=new Blob([json],{type:'application/json'});
   var a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='fintrack_autobackup_'+now.toISOString().slice(0,10)+'.json';a.click();
@@ -2111,7 +2187,7 @@ function render(){
     tbEl.innerHTML='<div class="budget-total-bar"><div class="btb-top"><span class="btb-label">Presupuesto mensual</span><span class="btb-value" style="color:'+col+'">'+fmt(tExp)+' / '+fmt(tb)+'</span></div><div class="btb-bar-bg"><div class="btb-bar-fill" style="background:'+col+';width:'+pct+'%"></div></div></div>';
   } else tbEl.innerHTML='';
   renderBalanceAdjustmentNote(txs,'balanceAdjustmentNote');
-  if(!IS_DESKTOP){renderDonut(exps,tExp);renderLegend(exps);renderHeatmap(exps);renderTab();setFlipHeight('homeFlipInner');}
+  if(!IS_DESKTOP){renderDonut(exps,tExp);renderLegend(exps);renderHeatmap(exps);renderTab();if(activeTab===0)animateTabEntrance(document.getElementById('mainChart'),'.summary,.flip-card,#totalBudgetBar');setFlipHeight('homeFlipInner');}
 }
 function renderBalanceAdjustmentNote(txs,id){
   var el=document.getElementById(id);if(!el)return;
@@ -2342,6 +2418,7 @@ function switchTab(i){
     document.getElementById('mainChart').style.display=(i===0||i===1)?'block':'none';
     if(i===0||i===1)setFlipHeight('homeFlipInner');
     document.getElementById('fabBtn').classList.toggle('fab-hidden',i!==0);
+    updatePeriodToolbar();
     movePill(i);
     var el=document.getElementById('tabContent');
     var dir=i>prev?1:-1;
@@ -2360,7 +2437,8 @@ function movePill(i){
   var nav=document.getElementById('bottomNav');
   if(!pill||!nav)return;
   var btn=document.getElementById('bn'+i);
-  if(!btn)return;
+  if(!btn){pill.style.opacity='0';return;}
+  pill.style.opacity='1';
   var navRect=nav.getBoundingClientRect();
   var btnRect=btn.getBoundingClientRect();
   pill.style.left=(btnRect.left-navRect.left)+'px';
@@ -2386,6 +2464,7 @@ function renderTab(){
   else if(activeTab===1)renderCatTab(el);
   else if(activeTab===2)renderPatTab(el);
   else if(activeTab===3)renderAnnualTab(el);
+  else if(activeTab===4)renderInvestmentsTab(el);
   else renderSettingsTab(el);
 }
 
@@ -2774,6 +2853,7 @@ function renderCatTab(el,prefix){
     });
   }
   el.innerHTML=html;
+  animateTabEntrance(el,'.section-title,.cat-flip-card,.cat-arch-card,.add-cat-form');
   var monthlyByCat={},monthlyByCatInc={};
   transactions.forEach(function(t){
     if(t.type!=='expense'&&t.type!=='income')return;
@@ -2793,6 +2873,17 @@ function renderCatTab(el,prefix){
 }
 
 // PATRIMONY TAB
+function animateTabEntrance(el,selector){
+  if(!el||(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches))return;
+  var nodes=Array.prototype.slice.call(el.querySelectorAll(selector));
+  nodes.forEach(function(node,index){
+    node.style.animation='none';
+    node.style.opacity='0';
+    node.style.transform='translateY(8px)';
+    void node.offsetWidth;
+    node.style.animation='ft-tab-enter .32s cubic-bezier(.2,.75,.25,1) '+Math.min(index,5)*.035+'s both';
+  });
+}
 function toggleAccCard(id){var h=document.getElementById('histtable_'+id);if(!h)return;var open=h.style.display!=='none';h.style.display=open?'none':'block';var card=document.getElementById('acccard_'+id);if(card)card.classList.toggle('expanded',!open);}
 function defAccKey(){return 'ft_default_account'+(currentUser?'_'+currentUser.id:'');}
 function getDefaultAccountId(){try{var v=localStorage.getItem(defAccKey());return (v&&accounts.some(function(a){return a.id===v;}))?v:'';}catch(e){return '';}}
@@ -2801,9 +2892,11 @@ function openTransferFrom(accountId){openModal();setType('transfer');document.ge
 function renderPatTab(el){
   var yr=viewYear,mo=viewMonth+1;
   var defAccId=getDefaultAccountId();
-  var totalPat=accounts.reduce(function(s,a){return s+accountCalcBalance(a.id,yr,mo);},0);
+  var totalPat=accounts.reduce(function(sum,a){return sum+((portfolioValueHidden()&&a.is_investment)?0:accountCalcBalance(a.id,yr,mo));},0);
   var accRows=accounts.map(function(a){
     var calc=accountCalcBalance(a.id,yr,mo);
+    var isPrivateInvestmentBalance=!!a.is_investment&&portfolioValueHidden();
+    var calcText=isPrivateInvestmentBalance?'••••••':fmt(calc);
     var reset=accountLatestReset(a.id,yr,mo);
     var resetHtml=reset?'Última actualización: '+new Date((reset.reset_date||(reset.year+'-'+pad(reset.month)+'-01'))+'T12:00:00').toLocaleDateString('es-ES')+' → '+fmt(reset.amount):'Sin ajustes registrados, calculado desde el inicio';
     var hist=accountHistory(a.id);
@@ -2816,7 +2909,7 @@ function renderPatTab(el){
           // El teórico correcto es el que se calculó y guardó al hacer el ajuste
           // (excluye el propio ajuste). Recalcularlo aquí lo incluiría como punto
           // de partida y el desfase saldría siempre 0.
-          var th=isLockedAdjust(p)?null:(p.theoretical_amount!=null?Number(p.theoretical_amount):accountCalcBalanceAsOf(a.id,pDate));
+          var th=isLockedAdjust(p)?null:snapshotTheoreticalAmount(p,a.id);
           var d=th===null?(p.amount-0):(p.amount-th);
           var desfaseStr=th===null?'—':((Math.abs(d)>0.01?(d>0?'+':'')+fmt(d):'sin desfase'));
           return '<div class="pat-hist-row">'
@@ -2836,7 +2929,7 @@ function renderPatTab(el){
       +'<div class="pat-acc-color" style="background:'+a.color+'"></div>'
       +'<span class="pat-acc-name">'+capEsc(a.name)+(defAccId===a.id?'<span class="pat-acc-default-tag">predeterminada</span>':'')+'</span>'
       +'<button class="pat-acc-star'+(defAccId===a.id?' on':'')+'" data-action="set-default-acc" data-id="'+a.id+'" title="Usar como cuenta de gastos por defecto">'+(defAccId===a.id?'★':'☆')+'</button>'
-      +'<span class="pat-acc-theoretical">'+fmt(calc)+'</span>'
+      +'<span class="pat-acc-theoretical">'+calcText+'</span>'
       +'<button class="del-btn-sm" data-action="del-acc" data-id="'+a.id+'">×</button>'
       +'</div>'
       +'<div class="pat-acc-calc">'+resetHtml+'</div>'
@@ -2858,11 +2951,31 @@ function renderPatTab(el){
     +'<div class="section-title" style="margin-top:12px">Nueva cuenta</div>'
     +'<div class="add-cat-form"><div class="form-row"><input type="text" class="add-input" id="newAccInput" placeholder="Nombre de la cuenta..."><button class="add-btn" onclick="addAccount()">Añadir</button></div></div>'
     +'<div class="status-msg" id="patStatus"></div>';
+  animateTabEntrance(el,'.pat-total-card,.pat-account,.section-title,.add-cat-form');
 }
 function lastDayOfMonthStr(yr,mo){var d=new Date(yr,mo,0);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
 function isLockedAdjust(p){var id=(p&&typeof p==='object')?p.id:p;return typeof id==='string'&&id.indexOf('anchor_')===0;}
 async function ensureRevolutAnchor(uid){}
 var _historyCache={};
+function accountTheoreticalFromLastRealReset(accountId,dateStr){
+  // Un ajuste fija el saldo real de partida para el periodo posterior. Su
+  // transacción asociada se ignora por completo: no modifica este cálculo.
+  var reset=accountHistory(accountId).filter(function(p){
+    var d=p.reset_date||lastDayOfMonthStr(p.year,p.month);
+    return d<dateStr;
+  }).pop();
+  var base=reset?Number(reset.amount):0;
+  var baseDate=reset?(reset.reset_date||lastDayOfMonthStr(reset.year,reset.month)):'0000-01-01';
+  var live=transactions.filter(function(t){
+    return !t.is_balance_adjustment&&accountTouchesAccount(t,accountId)&&t.date>baseDate&&t.date<=dateStr;
+  }).reduce(function(sum,t){return sum+accountTxDelta(t,accountId);},0);
+  var voids=transactionVoids.reduce(function(sum,v){return sum+accountVoidDelta(v,accountId,baseDate,dateStr);},0);
+  return base+live+voids;
+}
+function snapshotTheoreticalAmount(snapshot,accountId){
+  if(!snapshot)return 0;
+  return accountTheoreticalFromLastRealReset(accountId,snapshot.reset_date||lastDayOfMonthStr(snapshot.year,snapshot.month));
+}
 function accountHistory(accountId){
   if(_historyCache[accountId])return _historyCache[accountId];
   return _historyCache[accountId]=patrimony.filter(function(p){return p.account_id===accountId;}).sort(function(a,b){
@@ -2900,7 +3013,10 @@ function accountVoidDelta(voided,accountId,baseDate,asOfDate){
   var voidedDate=String(voided.voided_at||'').slice(0,10);
   // Solo compensa una anulación posterior a la fotografía real: los movimientos
   // posteriores ya desaparecen del cálculo normal al haber sido borrados.
-  if(!voidedDate||voidedDate>asOfDate||tx.date>baseDate)return 0;
+  // Una anulación anterior o realizada el mismo día que la fotografía ya está
+  // incorporada en el saldo real que usamos como base. Solo compensa las
+  // anulaciones posteriores al ajuste.
+  if(!voidedDate||voidedDate<=baseDate||voidedDate>asOfDate||tx.date>baseDate)return 0;
   return -accountTxDelta(tx,accountId);
 }
 function accountCalcBalance(accountId,yr,mo){
@@ -2920,6 +3036,9 @@ function accountCalcBalanceAsOf(accountId,dateStr){
   var live=transactions.filter(function(t){return accountTouchesAccount(t,accountId)&&t.date>baseDate&&t.date<=dateStr;}).reduce(function(s,t){return s+accountTxDelta(t,accountId);},0);
   var voids=transactionVoids.reduce(function(s,v){return s+accountVoidDelta(v,accountId,baseDate,dateStr);},0);
   return base+live+voids;
+}
+function accountCalcTheoreticalAsOf(accountId,dateStr){
+  return accountTheoreticalFromLastRealReset(accountId,dateStr);
 }
 function accountRealBalance(accountId,yr,mo){
   var cutoff=(mo===12)?(yr+1)+'-01-01':yr+'-'+pad(mo+1)+'-01';
@@ -2943,9 +3062,12 @@ async function applyBalanceAdjustment(accountId){
   var laterExists=accountHistory(accountId).some(function(p){return (p.reset_date||lastDayOfMonthStr(p.year,p.month))>date;});
   if(laterExists&&!confirm('Ya existe un ajuste posterior a esta fecha. Este nuevo ajuste no afectará al saldo actual mostrado, solo al histórico. ¿Continuar?'))return;
   var yr=parseInt(date.slice(0,4)),mo=parseInt(date.slice(5,7));
-  var theoretical=accountCalcBalanceAsOf(accountId,date);
+  var theoretical=accountCalcTheoreticalAsOf(accountId,date);
   var diff=real-theoretical;
   setSync('syncing');var s=document.getElementById('patStatus');if(s){s.textContent='guardando...';s.className='status-msg';}
+  // El snapshot guarda el saldo real observado y su desfase frente al teórico.
+  // En fechas posteriores pasa a ser el nuevo punto de partida, pero el
+  // movimiento de actualización nunca entra en el saldo teórico.
   var item={id:'p'+accountId+Date.now()+Math.random().toString(36).slice(2,6),account_id:accountId,year:yr,month:mo,amount:real,theoretical_amount:theoretical,reset_date:date,user_id:currentUser.id};
   var adjustment=null;
   if(Math.abs(diff)>0.005){
@@ -3016,7 +3138,9 @@ async function addAccount(){var inp=document.getElementById('newAccInput');var n
 async function deleteAccount(id){
   var inUse=transactions.some(function(t){return t.account_id===id||t.to_account_id===id;});
   if(inUse){alert('No se puede eliminar: hay transacciones asociadas a esta cuenta. Elimínalas o reasígnalas primero.');return;}
-  if(!confirm('¿Eliminar esta cuenta?'))return;
+  var accName=(accounts.find(function(a){return a.id===id;})||{}).name||'esta cuenta';
+  var accepted=await confirmCriticalAction({title:'Eliminar cuenta',description:'Eliminarás '+accName+'. Esta acción afecta al historial de saldo de la cuenta.',counts:{cuenta:1},phrase:'ELIMINAR',approveLabel:'Eliminar cuenta'});
+  if(!accepted)return;
   var acc=accounts.find(function(a){return a.id===id;});
   var pats=patrimony.filter(function(p){return p.account_id===id;});
   setSync('syncing');
@@ -3279,6 +3403,7 @@ function renderAnnualTab(el){
     +'<div class="chart-card"><div class="chart-card-title">Evolución del patrimonio</div><canvas id="lineChartCanvas"></canvas><div class="chart-legend">'+lineLegend+'</div></div>'
     +statsHtml
     +'</div>';
+  animateTabEntrance(el,'.chart-year-nav,.compare-grid,.chart-card,.stat-title,.stat-grid');
   drawBarChart(document.getElementById('barChartCanvas'),incData,expData,savData);
   var lineLabels=MONTHS_S.slice();
   var series=accounts.map(function(a){var hasHistory=accountHistory(a.id).length>0;return {label:capitalize(a.name),color:a.color,data:Array.from({length:12},function(_,m){return hasHistory?accountCalcBalanceAsOf(a.id,lastDayOfMonthStr(chartYear,m+1)):null;})};});
@@ -3286,6 +3411,108 @@ function renderAnnualTab(el){
 }
 
 // SETTINGS TAB
+function assetRangeConfig(range){return {d:{interval:'5min',outputsize:78},m:{interval:'1day',outputsize:31},m6:{interval:'1day',outputsize:183},ytd:{interval:'1day',outputsize:366},y:{interval:'1day',outputsize:366},y5:{interval:'1week',outputsize:261}}[range]||{interval:'1day',outputsize:31};}
+function assetGraph(values){
+  values=(values||[]).slice().sort(function(a,b){return String(a.datetime||a.date||'').localeCompare(String(b.datetime||b.date||''));});
+  var nums=(values||[]).map(function(v){return Number(v.close);}).filter(Number.isFinite);
+  if(nums.length<2)return '<div class="search-status">No hay histórico disponible para este periodo.</div>';
+  var min=Math.min.apply(null,nums),max=Math.max.apply(null,nums),span=max-min||1;
+  var coords=nums.map(function(v,i){return [(i/(nums.length-1)*320).toFixed(1),(94-(v-min)/span*78).toFixed(1)];});
+  var pts=coords.map(function(p){return p.join(',');}).join(' '),area='0,100 '+pts+' 320,100';
+  var up=nums[nums.length-1]>=nums[0],color=up?'#34C759':'#FF5A52';
+  return '<div class="asset-chart-caption"><span>Mín. '+min.toLocaleString('es-ES',{maximumFractionDigits:2})+'</span><span>Máx. '+max.toLocaleString('es-ES',{maximumFractionDigits:2})+'</span></div><div class="asset-chart-tooltip"></div><svg data-values="'+encodeURIComponent(JSON.stringify(values||[]))+'" viewBox="0 0 320 100" preserveAspectRatio="none"><defs><linearGradient id="assetFill" x1="0" x2="0" y1="0" y2="1"><stop stop-color="'+color+'" stop-opacity=".18"/><stop offset="1" stop-color="'+color+'" stop-opacity="0"/></linearGradient></defs><path d="M0 20H320M0 50H320M0 80H320" stroke="currentColor" opacity=".08" stroke-width=".7" vector-effect="non-scaling-stroke"/><polygon points="'+area+'" fill="url(#assetFill)"/><polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="1.6" vector-effect="non-scaling-stroke" shape-rendering="geometricPrecision" stroke-linecap="round" stroke-linejoin="round"/><line class="asset-chart-guide" x1="0" x2="0" y1="0" y2="100" stroke="'+color+'" stroke-width=".8" vector-effect="non-scaling-stroke" opacity="0"/><circle class="asset-chart-dot" cx="0" cy="0" r="3.5" fill="var(--bg2)" stroke="'+color+'" stroke-width="1.8" vector-effect="non-scaling-stroke" opacity="0"/></svg>';
+}
+function bindAssetGraph(chart,values){
+  var points=(values||[]).filter(function(v){return Number.isFinite(Number(v.close));}),svg=chart&&chart.querySelector('svg'),tip=chart&&chart.querySelector('.asset-chart-tooltip');
+  if(!svg||!tip||points.length<2)return;
+  var nums=points.map(function(v){return Number(v.close);}),min=Math.min.apply(null,nums),max=Math.max.apply(null,nums),span=max-min||1,guide=svg.querySelector('.asset-chart-guide'),dot=svg.querySelector('.asset-chart-dot'),active=false;
+  function show(clientX){var rect=svg.getBoundingClientRect(),ratio=Math.max(0,Math.min(1,(clientX-rect.left)/rect.width)),i=Math.round(ratio*(points.length-1)),value=nums[i],y=94-(value-min)/span*78,x=i/(points.length-1)*320,raw=points[i].datetime||points[i].date||'',date=raw?new Date(raw.replace(' ','T')).toLocaleString('es-ES',{day:'2-digit',month:'short',year:raw.length>10?undefined:'numeric',hour:raw.length>10?'2-digit':undefined,minute:raw.length>10?'2-digit':undefined}):'Sin fecha';guide.setAttribute('x1',x);guide.setAttribute('x2',x);guide.setAttribute('opacity','1');dot.setAttribute('cx',x);dot.setAttribute('cy',y);dot.setAttribute('opacity','1');tip.innerHTML=value.toLocaleString('es-ES',{maximumFractionDigits:2})+'<small>'+htmlEscape(date)+'</small>';tip.style.left=(x/320*100)+'%';tip.style.top=(y/100*142+22)+'px';tip.style.opacity='1';chart.classList.add('is-inspecting');}
+  function hide(){if(active)return;guide.setAttribute('opacity','0');dot.setAttribute('opacity','0');tip.style.opacity='0';chart.classList.remove('is-inspecting');}
+  svg.addEventListener('pointerenter',function(e){if(e.pointerType!=='touch')show(e.clientX);});svg.addEventListener('pointermove',function(e){if(e.pointerType!=='touch'||active)show(e.clientX);});svg.addEventListener('pointerleave',hide);svg.addEventListener('pointerdown',function(e){active=true;svg.setPointerCapture&&svg.setPointerCapture(e.pointerId);show(e.clientX);});svg.addEventListener('pointerup',function(){active=false;hide();});svg.addEventListener('pointercancel',function(){active=false;hide();});
+}
+function inspectAssetGraph(svg,event){
+  var chart=svg.parentElement,tip=chart.querySelector('.asset-chart-tooltip'),guide=svg.querySelector('.asset-chart-guide'),dot=svg.querySelector('.asset-chart-dot'),values;
+  try{values=svg._assetValues||(svg._assetValues=JSON.parse(decodeURIComponent(svg.dataset.values||'')));}catch(e){return;}
+  var points=values.filter(function(v){return Number.isFinite(Number(v.close));});if(points.length<2)return;
+  var nums=points.map(function(v){return Number(v.close);}),min=Math.min.apply(null,nums),max=Math.max.apply(null,nums),span=max-min||1,rect=svg.getBoundingClientRect(),ratio=Math.max(0,Math.min(1,(event.clientX-rect.left)/rect.width)),i=Math.round(ratio*(points.length-1)),value=nums[i],x=i/(points.length-1)*320,y=94-(value-min)/span*78,raw=points[i].datetime||points[i].date||'',date=raw?new Date(raw.replace(' ','T')).toLocaleString('es-ES',{day:'2-digit',month:'short',year:raw.length>10?undefined:'numeric',hour:raw.length>10?'2-digit':undefined,minute:raw.length>10?'2-digit':undefined}):'Sin fecha';
+  guide.setAttribute('x1',x);guide.setAttribute('x2',x);guide.setAttribute('opacity','1');dot.setAttribute('cx',x);dot.setAttribute('cy',y);dot.setAttribute('opacity','1');tip.innerHTML=value.toLocaleString('es-ES',{maximumFractionDigits:2})+'<small>'+htmlEscape(date)+'</small>';tip.style.left=(x/320*100)+'%';tip.style.top=(y/100*142+22)+'px';tip.style.opacity='1';chart.classList.add('is-inspecting');
+}
+function clearAssetGraph(svg){var chart=svg.parentElement,tip=chart.querySelector('.asset-chart-tooltip'),guide=svg.querySelector('.asset-chart-guide'),dot=svg.querySelector('.asset-chart-dot');if(guide)guide.setAttribute('opacity','0');if(dot)dot.setAttribute('opacity','0');if(tip)tip.style.opacity='0';chart.classList.remove('is-inspecting');}
+var ASSET_LOGO_DOMAINS={AAPL:'apple.com',MSFT:'microsoft.com',GOOG:'google.com',GOOGL:'google.com',AMZN:'amazon.com',META:'meta.com',NVDA:'nvidia.com',TSLA:'tesla.com',NFLX:'netflix.com',AMD:'amd.com',INTC:'intel.com',ORCL:'oracle.com',IBM:'ibm.com',CRM:'salesforce.com',ADBE:'adobe.com',SPY:'ssga.com',VOO:'vanguard.com',VWCE:'vanguard.co.uk',VWRL:'vanguard.co.uk',QQQ:'invesco.com',IWDA:'blackrock.com',EUNL:'ishares.com',IUSA:'ishares.com'};
+function decorateAssetLogo(el,symbol){if(!el||el.dataset.logoReady)return;symbol=String(symbol||'').toUpperCase();el.dataset.logoReady='1';var domain=ASSET_LOGO_DOMAINS[symbol],fallback=htmlEscape(symbol.slice(0,1)||'•');if(!domain){el.classList.add('logo-fallback-only');el.innerHTML='<span class="logo-fallback">'+fallback+'</span>';return;}el.innerHTML='<img src="https://logo.clearbit.com/'+encodeURIComponent(domain)+'" alt="" referrerpolicy="no-referrer"><span class="logo-fallback">'+fallback+'</span>';var img=el.querySelector('img');img.onerror=function(){el.classList.add('logo-fallback-only');img.remove();};}
+function decorateInvestmentLogos(root){(root||document).querySelectorAll('.search-result i:not([data-logo-ready]),.asset-logo:not([data-logo-ready]),.position i:not([data-logo-ready])').forEach(function(el){var parent=el.closest('.search-result'),symbol=parent&&parent.dataset.symbol;if(!symbol&&el.closest('.asset-sheet')){symbol=((el.closest('.asset-sheet').querySelector('.asset-type')||{}).textContent||'').split(' · ')[0];}if(!symbol&&el.closest('.position')){symbol=((el.closest('.position').querySelector('small')||{}).textContent||'').split(' · ')[0];}decorateAssetLogo(el,symbol);});}
+var investmentLogoObserver=new MutationObserver(function(){decorateInvestmentLogos(document);});
+investmentLogoObserver.observe(document.body,{subtree:true,childList:true});
+document.addEventListener('pointermove',function(e){var svg=e.target.closest&&e.target.closest('.asset-sheet-chart svg');if(svg)inspectAssetGraph(svg,e);});
+document.addEventListener('pointerdown',function(e){var svg=e.target.closest&&e.target.closest('.asset-sheet-chart svg');if(svg){svg.setPointerCapture&&svg.setPointerCapture(e.pointerId);inspectAssetGraph(svg,e);}});
+document.addEventListener('pointerleave',function(e){var svg=e.target.closest&&e.target.closest('.asset-sheet-chart svg');if(svg&&e.pointerType!=='touch')clearAssetGraph(svg);},true);
+document.addEventListener('pointerup',function(e){var svg=e.target.closest&&e.target.closest('.asset-sheet-chart svg');if(svg&&e.pointerType==='touch')clearAssetGraph(svg);});
+function refreshAssetPeriodChange(sheet){
+  var svg=sheet&&sheet.querySelector('.asset-sheet-chart svg'),change=sheet&&sheet.querySelector('#assetChange'),data=sheet&&sheet.querySelector('#assetData');if(!svg||!change)return;
+  var values;try{values=svg._assetValues||(svg._assetValues=JSON.parse(decodeURIComponent(svg.dataset.values||'')));}catch(e){return;}
+  var nums=values.map(function(v){return Number(v.close);}).filter(Number.isFinite);if(nums.length<2)return;
+  var pct=(nums[nums.length-1]-nums[0])/nums[0]*100,label=(sheet.querySelector('#assetRanges button.active')||{}).textContent||'período',text=(pct>=0?'+':'')+pct.toLocaleString('es-ES',{maximumFractionDigits:2})+' %';
+  if(change.dataset.periodValue!==text){change.dataset.periodValue=text;change.textContent=text;change.classList.toggle('negative',pct<0);}
+}
+var assetPeriodObserver=new MutationObserver(function(records){var sheets=[];records.forEach(function(record){var node=record.target.nodeType===1?record.target:record.target.parentElement, sheet=node&&node.closest&&node.closest('.asset-sheet');if(sheet&&sheets.indexOf(sheet)<0)sheets.push(sheet);});sheets.forEach(function(sheet){refreshAssetPeriodChange(sheet);});});
+assetPeriodObserver.observe(document.body,{subtree:true,childList:true,characterData:true});
+var assetHistoryCache={};
+function investmentPrefsKey(name){return 'ft_invest_'+name+'_'+(currentUser?currentUser.id:'guest');}
+function portfolioValueHidden(){try{return localStorage.getItem(investmentPrefsKey('portfolio_hidden'))==='1';}catch(e){return false;}}
+function togglePortfolioValue(){try{localStorage.setItem(investmentPrefsKey('portfolio_hidden'),portfolioValueHidden()?'0':'1');}catch(e){}refreshTab();}
+function portfolioValueText(value){return portfolioValueHidden()?'••••••':value;}
+function recentAssets(){try{var values=JSON.parse(localStorage.getItem(investmentPrefsKey('recent_assets'))||'[]');return Array.isArray(values)?values.slice(0,3):[];}catch(e){return [];}}
+function rememberRecentAsset(name,type,symbol){try{var row={name:name,type:type||'Producto',symbol:symbol};var values=recentAssets().filter(function(x){return x&&x.symbol!==symbol;});values.unshift(row);localStorage.setItem(investmentPrefsKey('recent_assets'),JSON.stringify(values.slice(0,3)));}catch(e){}}
+
+function investmentUnits(symbol){return investmentOperations.filter(function(o){return o.symbol===symbol;}).reduce(function(total,o){return total+(o.side==='buy'?1:-1)*Number(o.units);},0);}
+function openInvestmentTradeModal(side){
+  var asset=assetDetailState;if(!asset)return;
+  var cashAccounts=accounts.filter(function(a){return !a.is_investment;});if(!cashAccounts.length){alert('Crea primero una cuenta desde Cuentas para poder operar.');return;}
+  var available=investmentUnits(asset.symbol),modal=document.createElement('div');modal.className='investment-trade-modal';
+  modal.innerHTML='<div class="investment-trade-card"><div class="investment-trade-head"><div><div class="investment-trade-kicker">'+htmlEscape(asset.symbol)+' · '+htmlEscape(asset.type||'Producto')+'</div><h3>'+ (side==='buy'?'Comprar ':'Vender ')+htmlEscape(asset.name)+'</h3></div><button class="investment-trade-close" type="button">×</button></div><div class="investment-trade-mode"><button class="active" data-mode="money">Por importe</button><button data-mode="units">Por participaciones</button></div><label class="investment-trade-field"><span id="tradeAmountLabel">Importe a '+(side==='buy'?'invertir':'retirar')+'</span><input id="tradeAmount" inputmode="decimal" type="number" min="0.01" step="0.01" placeholder="0,00"></label><label class="investment-trade-field"><span>Precio por participación</span><input id="tradePrice" inputmode="decimal" type="number" min="0.000001" step="any" placeholder="Cargando precio…"></label><label class="investment-trade-field"><span>Cuenta '+(side==='buy'?'de origen':'de destino')+'</span><select id="tradeAccount">'+cashAccounts.map(function(a){return '<option value="'+htmlEscape(a.id)+'">'+htmlEscape(a.name)+'</option>';}).join('')+'</select></label><label class="investment-trade-field"><span>Fecha de la operación</span><input id="tradeDate" type="date" value="'+new Date().toISOString().slice(0,10)+'"></label><div class="investment-trade-summary" id="tradeSummary">Introduce el importe y el precio ejecutado.</div><button class="investment-trade-submit '+(side==='sell'?'sell':'')+'" type="button">'+(side==='buy'?'Confirmar compra':'Confirmar venta')+'</button></div>';
+  document.body.appendChild(modal);var mode='money',amount=modal.querySelector('#tradeAmount'),price=modal.querySelector('#tradePrice'),summary=modal.querySelector('#tradeSummary');
+  function update(){var v=Number(amount.value),p=Number(price.value),units=mode==='money'?v/p:v,total=mode==='money'?v:v*p;if(v>0&&p>0&&units>0)summary.textContent=(mode==='money'?units.toLocaleString('es-ES',{maximumFractionDigits:6})+' participaciones':fmt(total))+(side==='sell'?' · disponibles: '+available.toLocaleString('es-ES',{maximumFractionDigits:6}):'');else summary.textContent='Introduce el importe y el precio ejecutado.';}
+  modal.querySelectorAll('[data-mode]').forEach(function(b){b.onclick=function(){mode=b.dataset.mode;modal.querySelectorAll('[data-mode]').forEach(function(x){x.classList.toggle('active',x===b);});modal.querySelector('#tradeAmountLabel').textContent=mode==='money'?'Importe a '+(side==='buy'?'invertir':'retirar'):'Participaciones';amount.placeholder=mode==='money'?'0,00':'0,000000';update();};});amount.oninput=price.oninput=update;
+  modal.querySelector('.investment-trade-close').onclick=function(){modal.remove();};modal.onclick=function(e){if(e.target===modal)modal.remove();};
+  sb.functions.invoke('market-data',{body:{action:'quote',symbol:asset.symbol}}).then(function(r){var q=r.data&&r.data.data,p=Number(q&&(q.price||q.close));if(Number.isFinite(p)){price.value=p;update();}}).catch(function(){});
+  modal.querySelector('.investment-trade-submit').onclick=async function(){var v=Number(amount.value),p=Number(price.value),units=mode==='money'?v/p:v,total=mode==='money'?v:v*p,date=modal.querySelector('#tradeDate').value,accountId=modal.querySelector('#tradeAccount').value;if(!date||!Number.isFinite(units)||units<=0||!Number.isFinite(p)||p<=0){summary.textContent='Revisa importe, precio y fecha.';return;}if(side==='sell'&&units>available+0.0000001){summary.textContent='No puedes vender más participaciones de las que tienes ('+available.toLocaleString('es-ES',{maximumFractionDigits:6})+').';return;}this.disabled=true;this.textContent='Guardando…';var r=await sb.rpc('record_investment_operation',{p_side:side,p_symbol:asset.symbol,p_product_name:asset.name,p_product_type:asset.type||null,p_units:units,p_unit_price:p,p_amount:total,p_operation_date:date,p_cash_account_id:accountId});if(r.error){summary.textContent='No se pudo guardar: '+r.error.message;this.disabled=false;this.textContent=side==='buy'?'Confirmar compra':'Confirmar venta';return;}modal.remove();await loadData();showSuccessToast(side==='buy'?'Compra registrada':'Venta registrada');};
+}
+document.addEventListener('click',function(e){var button=e.target.closest&&e.target.closest('.asset-actions .buy,.asset-actions .sell');if(button){e.preventDefault();openInvestmentTradeModal(button.classList.contains('buy')?'buy':'sell');}});
+function closeAssetSheet(sheet){assetDetailState=null;saveUiState();if(sheet)sheet.remove();}
+async function openAssetSheet(name,type,symbol){rememberRecentAsset(name,type,symbol);assetDetailState={name:name,type:type,symbol:symbol,range:(assetDetailState&&assetDetailState.symbol===symbol&&assetDetailState.range)||'m'};saveUiState();var el=document.querySelector('.invest-wrap');if(!el)return;el.insertAdjacentHTML('beforeend','<div class="asset-sheet"><div class="asset-sheet-top"><div class="asset-sheet-label">Detalle del producto</div><button class="asset-sheet-close" onclick="closeAssetSheet(this.parentElement.parentElement)">×</button></div><div class="asset-identity"><div class="asset-logo">'+htmlEscape(symbol.slice(0,1))+'</div><div><h2>'+htmlEscape(name)+'</h2><div class="asset-type">'+htmlEscape(symbol)+' · '+htmlEscape(type)+'</div></div></div><div class="asset-price-row"><div class="asset-price" id="assetPrice">Cargando…</div><div class="asset-change" id="assetChange">—</div></div><div class="asset-sheet-chart" id="assetChart"><div class="search-status">Cargando gráfica…</div></div><div class="asset-range" id="assetRanges">'+[['d','1D'],['m','1M'],['m6','6M'],['ytd','YTD'],['y','1A'],['y5','5A']].map(function(x){return '<button data-range="'+x[0]+'">'+x[1]+'</button>';}).join('')+'</div><div class="asset-data" id="assetData"><div><small>Último cierre</small><strong>—</strong></div><div><small>Variación diaria</small><strong>—</strong></div><div><small>Volumen</small><strong>—</strong></div><div><small>Tu posición</small><strong>0 €</strong></div></div><div class="asset-actions"><button class="sell">Vender</button><button class="buy">Comprar</button></div></div>');var sheet=el.lastElementChild;async function loadRange(range){sheet.querySelectorAll('#assetRanges button').forEach(function(b){b.classList.toggle('active',b.dataset.range===range);});var chart=sheet.querySelector('#assetChart'),key=symbol+'_'+range,cached=assetHistoryCache[key];if(cached&&Date.now()-cached.time<300000){chart.innerHTML=cached.html;return;}chart.innerHTML='<div class="search-status">Cargando gráfica…</div>';var cfg=assetRangeConfig(range),hist=await sb.functions.invoke('market-data',{body:{action:'history',symbol:symbol,interval:cfg.interval,outputsize:cfg.outputsize}}),data=hist.data&&hist.data.data,html=assetGraph(data&&data.values||[]);assetHistoryCache[key]={time:Date.now(),html:html};if(document.contains(sheet))chart.innerHTML=html;}sheet.querySelectorAll('#assetRanges button').forEach(function(b){b.onclick=function(){assetDetailState.range=b.dataset.range;saveUiState();loadRange(b.dataset.range);};});var quotePromise=sb.functions.invoke('market-data',{body:{action:'quote',symbol:symbol}});loadRange((assetDetailState&&assetDetailState.range)||'m');var quote=await quotePromise,q=quote.data&&quote.data.data;if(q&&document.contains(sheet)){var p=Number(q.price||q.close),pc=Number(q.percent_change||0),price=Number.isFinite(p)?p.toLocaleString('es-ES',{style:'currency',currency:q.currency||'USD'}):'—',change=(pc>=0?'+':'')+pc.toLocaleString('es-ES',{maximumFractionDigits:2})+' %';sheet.querySelector('#assetPrice').textContent=price;sheet.querySelector('#assetChange').textContent=change;sheet.querySelector('#assetChange').classList.toggle('negative',pc<0);sheet.querySelector('#assetData').innerHTML='<div><small>Último cierre</small><strong>'+price+'</strong></div><div><small>Variación diaria</small><strong class="'+(pc<0?'negative':'positive')+'">'+change+'</strong></div><div><small>Volumen</small><strong>'+(q.volume?Number(q.volume).toLocaleString('es-ES'):'—')+'</strong></div><div><small>Tu posición</small><strong>0 €</strong></div>';}}
+function renderSearchResults(container,items){
+  if(!items.length){container.innerHTML='<div class="search-status">No se han encontrado productos.</div>';return;}
+  container.innerHTML=items.slice(0,8).map(function(item){var name=htmlEscape(item.instrument_name||item.symbol||'Producto'),symbol=htmlEscape(item.symbol||''),type=htmlEscape(item.instrument_type||item.type||'Producto de inversión');return '<button class="search-result" data-symbol="'+symbol+'" data-name="'+name+'" data-type="'+type+'"><i>'+symbol.slice(0,1)+'</i><span><strong>'+name+'</strong><small>'+symbol+' · '+type+'</small></span></button>';}).join('');
+  container.querySelectorAll('.search-result').forEach(function(button){button.onclick=function(){container.innerHTML='';container.hidden=true;openAssetSheet(this.dataset.name,this.dataset.type,this.dataset.symbol);};});
+}
+function investmentPositionList(){
+  var bySymbol={};investmentOperations.forEach(function(o){var key=o.symbol;if(!bySymbol[key])bySymbol[key]={symbol:key,name:o.product_name||key,type:o.product_type||'Producto',units:0,cost:0};var p=bySymbol[key],u=Number(o.units),a=Number(o.amount);if(o.side==='buy'){p.units+=u;p.cost+=a;}else if(p.units>0){p.cost-=p.cost*(u/p.units);p.units-=u;}});
+  return Object.keys(bySymbol).map(function(k){return bySymbol[k];}).filter(function(p){return p.units>0.0000001;});
+}
+function refreshInvestmentMarketValue(){
+  var wrap=document.querySelector('.invest-wrap'),positions=investmentPositionList();if(!wrap)return;var totalEl=wrap.querySelector('.portfolio-card>strong'),stats=wrap.querySelectorAll('.invest-stats strong');if(!positions.length){if(totalEl)totalEl.textContent=portfolioValueText('—');return;}
+  if(totalEl)totalEl.textContent=portfolioValueHidden()?'••••••':'Actualizando…';if(stats[2])stats[2].textContent=portfolioValueText(String(positions.length));
+  Promise.all(positions.map(function(p){return sb.functions.invoke('market-data',{body:{action:'quote',symbol:p.symbol}}).then(function(r){var q=r.data&&r.data.data,price=Number(q&&(q.price||q.close));return Number.isFinite(price)?{p:p,value:p.units*price}:null;}).catch(function(){return null;});})).then(function(rows){if(!document.contains(wrap))return;var valid=rows.filter(Boolean),value=valid.reduce(function(s,r){return s+r.value;},0),cost=positions.reduce(function(s,p){return s+p.cost;},0),pct=cost?(value-cost)/cost*100:0;if(totalEl)totalEl.textContent=portfolioValueText(valid.length?fmt(value):fmt(cost));if(stats[0])stats[0].textContent=portfolioValueText(fmt(cost));if(stats[1])stats[1].textContent=portfolioValueHidden()?'••••••':(valid.length?(pct>=0?'+':'')+pct.toLocaleString('es-ES',{maximumFractionDigits:2})+' %':'—');});
+}
+function renderInvestmentOperations(wrap){
+  if(!wrap)return;var rows=investmentOperations.slice().sort(function(a,b){return String(b.operation_date).localeCompare(String(a.operation_date));}),html='<section class="invest-operations"><div class="invest-operations-head"><h3>Operaciones</h3><small>'+rows.length+' '+(rows.length===1?'movimiento':'movimientos')+'</small></div>';
+  if(!rows.length)html+='<div class="invest-empty" style="padding:18px"><small>Tus compras y ventas aparecerán aquí.</small></div>';
+  else html+=rows.map(function(o){var buy=o.side==='buy',date=new Date(o.operation_date+'T12:00:00').toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'}),units=Number(o.units).toLocaleString('es-ES',{maximumFractionDigits:6}),account=accNameById(o.cash_account_id);return '<div class="invest-operation-row" data-operation-id="'+htmlEscape(o.id)+'"><div class="invest-operation-side '+(buy?'':'sell')+'">'+(buy?'↓':'↑')+'</div><div class="invest-operation-main"><strong>'+htmlEscape(o.product_name||o.symbol)+'</strong><small>'+htmlEscape(o.symbol)+' · '+date+' · '+htmlEscape(account)+'</small></div><div class="invest-operation-value">'+fmt(o.amount)+'<small>'+units+' part.</small></div><button class="invest-operation-delete" title="Eliminar operación" data-operation-id="'+htmlEscape(o.id)+'">×</button></div>';}).join('');
+  html+='</section>';var portfolio=wrap.querySelector('.portfolio-card');if(portfolio)portfolio.insertAdjacentHTML('afterend',html);wrap.querySelectorAll('.invest-operation-delete').forEach(function(button){button.onclick=function(){deleteInvestmentOperation(this.dataset.operationId);};});wrap.querySelectorAll('.invest-operation-row').forEach(function(row){row.onclick=function(e){if(!e.target.closest('.invest-operation-delete'))openInvestmentOperationEdit(this.dataset.operationId);};});
+}
+function openInvestmentOperationEdit(id){var o=investmentOperations.find(function(x){return x.id===id;});if(!o)return;assetDetailState={name:o.product_name,type:o.product_type||'Producto',symbol:o.symbol};openInvestmentTradeModal(o.side);var m=document.querySelector('.investment-trade-modal');if(!m)return;var amount=m.querySelector('#tradeAmount'),price=m.querySelector('#tradePrice'),account=m.querySelector('#tradeAccount'),date=m.querySelector('#tradeDate'),submit=m.querySelector('.investment-trade-submit');amount.value=o.amount;price.value=o.unit_price;account.value=o.cash_account_id;date.value=o.operation_date;amount.dispatchEvent(new Event('input'));submit.textContent='Guardar cambios';submit.onclick=async function(){var total=Number(amount.value),p=Number(price.value),units=total/p,d=date.value,acc=account.value;if(!d||!total||!p||!units){alert('Revisa los datos');return;}submit.disabled=true;var del=await sb.rpc('delete_investment_operation',{p_operation_id:o.id});if(del.error){alert(del.error.message);submit.disabled=false;return;}var r=await sb.rpc('record_investment_operation',{p_side:o.side,p_symbol:o.symbol,p_product_name:o.product_name,p_product_type:o.product_type||null,p_units:units,p_unit_price:p,p_amount:total,p_operation_date:d,p_cash_account_id:acc});if(r.error){alert('No se pudo guardar: '+r.error.message);submit.disabled=false;return;}m.remove();await loadData();showSuccessToast('Operación actualizada');};}
+async function deleteInvestmentOperation(id){
+  var op=investmentOperations.find(function(x){return x.id===id;});if(!op)return;if(!confirm('¿Eliminar esta '+(op.side==='buy'?'compra':'venta')+'? También se eliminará el traspaso asociado y se recalculará el saldo de la cuenta.'))return;
+  var r=await sb.rpc('delete_investment_operation',{p_operation_id:id});if(r.error){alert('No se pudo eliminar la operación: '+r.error.message);return;}investmentOperations=investmentOperations.filter(function(x){return x.id!==id;});transactions=transactions.filter(function(t){return t.id!==op.transaction_id;});saveLocalCache();await loadData();showSuccessToast('Operación eliminada');
+}
+function renderInvestmentsTab(el){
+  var rawPositions=investmentPositionList(),positions=rawPositions.map(function(p){var units=p.units.toLocaleString('es-ES',{maximumFractionDigits:6});return [p.name,p.symbol+' · '+(portfolioValueHidden()?'••••••':units)+' participaciones',portfolioValueText(fmt(p.cost)),'Coste',p.symbol.slice(0,1)];}),recent=recentAssets(),recentChips=recent.length?recent.map(function(p){return '<button class="invest-chip" data-symbol="'+htmlEscape(p.symbol)+'" data-name="'+htmlEscape(p.name)+'" data-type="'+htmlEscape(p.type||'Producto')+'">'+htmlEscape(p.name)+'<span>'+htmlEscape(p.symbol)+'</span></button>';}).join(''):'<div class="search-status">Los tres últimos productos que abras aparecerán aquí.</div>';setTimeout(refreshInvestmentMarketValue,0);
+  el.innerHTML='<div class="invest-wrap"><div class="invest-head"><div><div class="invest-kicker">Mercados y cartera</div><div class="invest-title">Inversión</div></div><div class="invest-head-note">Sincronizado</div></div><section class="portfolio-card"><span>Valor de cartera <button type="button" onclick="togglePortfolioValue()" aria-label="Ocultar o mostrar valor de cartera" style="border:0;background:transparent;color:inherit;font-size:15px;cursor:pointer;padding:0 0 0 7px">'+(portfolioValueHidden()?'◉':'◌')+'</button></span><strong>'+portfolioValueText('—')+'</strong></section><div class="invest-stats"><div><small>Invertido</small><strong>—</strong></div><div><small>Rentabilidad</small><strong>—</strong></div><div><small>Posiciones</small><strong>0</strong></div></div><div class="invest-explore"><div class="invest-explore-label">Explorar mercados</div><input class="invest-search" placeholder="Buscar acción, ETF o fondo" autocomplete="off"><div class="search-results" hidden></div><div class="invest-explore-label" style="margin-top:14px">Últimos visitados</div><div class="invest-chips">'+recentChips+'</div></div><div class="invest-section-head"><h3>Tu cartera</h3><small>'+portfolioValueText(String(rawPositions.length))+' posiciones</small></div><section class="positions">'+positions.map(function(p){return '<div class="position"><i>'+p[4]+'</i><div><strong>'+p[0]+'</strong><small>'+p[1]+'</small></div><div class="position-spark">⌁</div><div class="position-value"><strong>'+p[2]+'</strong><b>'+p[3]+'</b></div></div>';}).join('')+'</section></div>';
+var wrap=el.querySelector('.invest-wrap'),positionsEl=el.querySelector('.positions');renderInvestmentOperations(wrap);var operationsEl=wrap&&wrap.querySelector('.invest-operations'),portfolioHead=wrap&&wrap.querySelector('.invest-section-head'),statsEl=wrap&&wrap.querySelector('.invest-stats'),explore=wrap&&wrap.querySelector('.invest-explore');if(operationsEl&&portfolioHead&&statsEl&&positionsEl&&explore){statsEl.insertAdjacentElement('afterend',portfolioHead);portfolioHead.insertAdjacentElement('afterend',positionsEl);explore.insertAdjacentElement('afterend',operationsEl);}if(!positions.length&&positionsEl)positionsEl.innerHTML='<div class="invest-empty"><i>↗</i><strong>Aún no tienes inversiones</strong><small>Busca un producto para consultar sus datos y realizar tu primera compra.</small></div>';else if(positionsEl)positionsEl.querySelectorAll('.position').forEach(function(row,i){row.onclick=function(){var p=rawPositions[i];if(p)openAssetSheet(p.name,p.type,p.symbol);};});
+if(wrap){var search=wrap.querySelector('.invest-search'),results=wrap.querySelector('.search-results'),timer,requestId=0;search.oninput=function(){clearTimeout(timer);var q=this.value.trim(),id=++requestId;if(q.length<2){results.hidden=true;results.innerHTML='';return;}results.hidden=false;results.innerHTML='<div class="search-status">Buscando productos…</div>';timer=setTimeout(async function(){var r=await sb.functions.invoke('market-data',{body:{action:'search',query:q}});if(id!==requestId)return;var items=r.data&&r.data.data&&r.data.data.data||[];if(r.error){results.innerHTML='<div class="search-status">No se pudo realizar la búsqueda.</div>';return;}renderSearchResults(results,items);},280);};wrap.querySelectorAll('.invest-chip').forEach(function(chip){chip.onclick=function(){openAssetSheet(this.dataset.name,this.dataset.type,this.dataset.symbol);};});}
+  if(assetDetailState)openAssetSheet(assetDetailState.name,assetDetailState.type,assetDetailState.symbol);
+}
+
 function renderSettingsTab(el){
   var email=currentUser?currentUser.email:'—';
   var lastBackup=currentUser?localStorage.getItem('ft_last_backup_'+currentUser.id):null;
@@ -3298,44 +3525,46 @@ function renderSettingsTab(el){
   }).join('');
 
   el.innerHTML='<div class="settings-wrap" style="display:flex;flex-direction:column;gap:20px">'
-    +'<div class="settings-section"><div class="settings-title">Cuenta</div><div class="settings-info">'+email+'</div><button class="settings-btn danger" onclick="signOut()">Cerrar sesión<span class="btn-arrow">›</span></button></div>'
-    
-    +'<div class="settings-section"><div class="settings-title">Apariencia</div><div class="settings-info" style="margin-bottom:8px">Tema claro u oscuro de la app</div><div class="theme-switch-row">'
+    +'<div class="settings-section"><div class="settings-title">Versión</div><div class="settings-info">FinTrack <strong>'+APP_VERSION+'</strong><br><span style="font-size:12px;color:var(--text3)">Último commit: <span id="appPublishedAt">consultando…</span></span></div><button class="settings-btn" onclick="forceSync()">↺ Sincronizar ahora</button><div class="status-msg" id="syncStatusMsg"></div></div>'
+    +'<div class="settings-section"><div class="settings-title">Apariencia</div><div class="theme-switch-row">'
     +themeOpts.map(function(o){return '<button class="theme-switch-btn'+(curTheme===o.v?' active':'')+'" onclick="setTheme(\''+o.v+'\')">'+o.label+'</button>';}).join('')
     +'</div></div>'
-    +'<div class="settings-section"><div class="settings-title">Tema de color</div><div class="settings-info">Color de acento de la app</div><div class="color-palette">'+accentSwatches+'</div></div>'
-    +'<div class="settings-section"><div class="settings-title">Presupuesto total mensual</div><div class="settings-info">Suma automática de los presupuestos de todas las categorías de '+capitalize(MONTHS[viewMonth])+': <strong>'+fmt(totalBudget())+'</strong></div></div>'
-    +'<div class="settings-section"><div class="settings-title">Copia de seguridad automática</div><div class="settings-info">'+(lastBackup?'Última copia: '+new Date(lastBackup).toLocaleDateString('es-ES'):'Sin copia reciente')+'<br>'+((autoBackupEnabled)?'Activa: descarga una copia local cada 7 días.':'Desactivada: las copias se descargan solo cuando tú las pides.')+'</div><button class="settings-btn" onclick="toggleAutoBackup()">'+(autoBackupEnabled?'✓ Copia automática activada':'Activar copia automática')+'</button><button class="settings-btn" onclick="downloadBackupNow()">↓ Descargar copia ahora</button></div>'
     +'<div class="settings-section"><div class="settings-title">Exportar datos</div><button class="settings-btn" onclick="openExportModal()">↓ Exportar (PDF · Excel · CSV)<span class="btn-arrow">›</span></button><button class="settings-btn" onclick="exportJSON()">↓ Exportar JSON (copia)</button></div>'
-    +'<div class="settings-section"><div class="settings-title">Importar copia</div><textarea id="importArea" style="width:100%;background:var(--bg3);border:1px solid var(--card-border);color:var(--text2);border-radius:var(--radius-sm);padding:8px 10px;font-size:12px;font-family:var(--mono);resize:vertical;outline:none;min-height:80px;max-height:240px" placeholder=\'{"transactions":[...],"categories":[...]}\'></textarea><button class="settings-btn" onclick="importJSON()">↑ Importar JSON</button><div class="status-msg" id="importStatus"></div></div>'
-    +'<div class="settings-section"><div class="settings-title">Sincronización</div><button class="settings-btn" onclick="forceSync()">↺ Sincronizar ahora</button><div class="status-msg" id="syncStatusMsg"></div></div>'
-    +'<div class="settings-section"><div class="settings-title">Versión</div><div class="settings-info">FinTrack <strong>'+APP_VERSION+'</strong><br><span style="font-size:12px;color:var(--text3)">Última versión instalada</span></div></div>'
-
+    +'<div class="settings-section"><div class="settings-title">Copia de Seguridad</div><div class="settings-info">Las copias se crean automáticamente cada cinco días y se conservan las tres últimas.'+(lastBackup?'<br>Última copia local: '+new Date(lastBackup).toLocaleDateString('es-ES'):'')+'</div><button class="settings-btn" onclick="downloadBackupNow()">↓ Descargar copia ahora</button><input id="importJSONFile" type="file" accept=".json,application/json" style="display:none" onchange="importJSONFile(this)"><button class="settings-btn" onclick="document.getElementById(&quot;importJSONFile&quot;).click()">↑ Importar JSON</button><div class="status-msg" id="importStatus"></div><button class="settings-btn" onclick="restoreLatestBackup()">↺ Restaurar última copia</button></div>'
+    +'<div class="settings-section"><div class="settings-title">Cuenta</div><div class="settings-info">'+email+'</div><button class="settings-btn danger" onclick="signOut()">Cerrar sesión<span class="btn-arrow">›</span></button></div>'
     +'<div class="settings-section"><div class="settings-title">Zona de peligro</div><button class="settings-btn danger" onclick="clearTxs()">⚠ Borrar todas las transacciones</button></div>'
     +'<div style="text-align:center;padding:16px 0;font-size:11px;font-family:var(--mono);color:var(--text3)">fintrack · '+email+'</div>'
     +'</div>';
+  setTimeout(loadLatestCommitTime,0);
 }
+function backupPreviewCounts(data){return {cuentas:(data.accounts||[]).length,categorías:(data.categories||[]).length,transacciones:(data.transactions||[]).length,presupuestos:(data.budgets||[]).length,ajustes:(data.patrimony||[]).length,operaciones_de_inversión:(data.investmentOperations||[]).length};}
+function confirmCriticalAction(options){return new Promise(function(resolve){var root=document.createElement('div');root.className='critical-confirm-bg';var countHtml=Object.keys(options.counts||{}).filter(function(k){return Number(options.counts[k])>0;}).map(function(k){return '<span><b>'+Number(options.counts[k]).toLocaleString('es-ES')+'</b> '+htmlEscape(k.replace(/_/g,' '))+'</span>';}).join('');root.innerHTML='<div class="critical-confirm-card" role="dialog" aria-modal="true" aria-labelledby="criticalConfirmTitle"><div class="critical-confirm-handle"></div><div class="critical-confirm-kicker">Confirmación de seguridad</div><h3 id="criticalConfirmTitle">'+htmlEscape(options.title)+'</h3><p>'+htmlEscape(options.description)+'</p>'+(countHtml?'<div class="critical-confirm-counts">'+countHtml+'</div>':'')+'<label class="critical-confirm-input"><span>Escribe <b>'+htmlEscape(options.phrase)+'</b> para continuar</span><input autocomplete="off" autocapitalize="characters"></label><div class="critical-confirm-actions"><button type="button" class="critical-confirm-cancel">Cancelar</button><button type="button" class="critical-confirm-approve" disabled>'+htmlEscape(options.approveLabel)+'</button></div></div>';document.body.appendChild(root);var input=root.querySelector('input'),approve=root.querySelector('.critical-confirm-approve');function close(value){root.remove();resolve(value);}input.oninput=function(){approve.disabled=input.value.trim().toUpperCase()!==options.phrase;};root.querySelector('.critical-confirm-cancel').onclick=function(){close(false);};approve.onclick=function(){close(true);};root.onclick=function(event){if(event.target===root)close(false);};setTimeout(function(){input.focus();},60);});}
+async function createSafetyBackup(reason){var result=await sb.functions.invoke('automatic-backup',{body:{reason:reason||'manual'}});if(result.error||!result.data||!result.data.ok)throw new Error((result.data&&result.data.error)||result.error&&result.error.message||'No se pudo crear la copia previa');return result.data.backup;}
+async function restoreLatestBackup(){setSync('syncing');var preview=await sb.functions.invoke('restore-backup',{body:{action:'preview'}});if(preview.error||!preview.data||!preview.data.ok){alert((preview.data&&preview.data.error)||preview.error&&preview.error.message||'No se pudo preparar la vista previa');setSync('err');return;}setSync('ok');var p=preview.data.preview,accepted=await confirmCriticalAction({title:'Restaurar última copia',description:'Se sustituirán los datos actuales por la copia del '+new Date(p.created_at).toLocaleString('es-ES')+'. Antes se guardará automáticamente una copia de tu estado actual.',counts:p.counts,phrase:'RESTAURAR',approveLabel:'Restaurar copia'});if(!accepted)return;setSync('syncing');var r=await sb.functions.invoke('restore-backup',{body:{action:'restore'}});if(r.error||!r.data||!r.data.ok){alert((r.data&&r.data.error)||r.error&&r.error.message||'No se pudo restaurar la copia');setSync('err');return;}await loadData();showSuccessToast('Copia restaurada correctamente');}
+async function loadLatestCommitTime(){var el=document.getElementById('appPublishedAt');if(!el)return;try{var r=await fetch('https://api.github.com/repos/mgesm/fintrack/commits/main',{headers:{Accept:'application/vnd.github+json'}});var d=await r.json(),date=d&&d.commit&&d.commit.committer&&d.commit.committer.date;if(!date)throw 0;el.textContent=new Date(date).toLocaleString('es-ES',{timeZone:'Europe/Madrid',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',timeZoneName:'short'});}catch(e){el.textContent=APP_PUBLISHED_AT;}}
 async function signOut(){
   var cKey='ft_cache_'+(currentUser?currentUser.id:'');
   if(offlineQueue.length&&!isOffline){await processOfflineQueue();}
   if(offlineQueue.length&&!confirm('Hay '+offlineQueue.length+' cambio(s) pendientes. Aceptar: cerrar sesión y conservarlos para cuando vuelvas a entrar. Cancelar: seguir en la app.'))return;
   // La cola se conserva por usuario; la caché visible se elimina antes de
   // esperar a la red para no dejar datos financieros en este dispositivo.
-  if(cKey!=='ft_cache_')localStorage.removeItem(cKey);
+  if(cKey!=='ft_cache_'){localStorage.removeItem(cKey);localStorage.removeItem(secureCacheStorageKey(currentUser.id));}
   transactions=[];categories=[];accounts=[];patrimony=[];budgets=[];recurrenceExclusions=[];transactionVoids=[];_monthTxCache={};_yearTxCache={};txVersion++;
   try{await sb.auth.signOut();}catch(e){}
   showAuth();
 }
 async function forceSync(){
-  var s=document.getElementById('syncStatusMsg');
-  if(isOffline){if(s){s.textContent='sin conexión · los cambios se guardarán al reconectar';s.className='status-msg status-err';}return;}
-  if(loadDataInFlight){if(s){s.textContent='la sincronización ya está en curso';s.className='status-msg';}return;}
-  if(s){s.textContent='sincronizando...';s.className='status-msg';}setSync('syncing');
+  var status=document.getElementById('syncStatusMsg');
+  if(isOffline){if(status){status.textContent='sin conexión · los cambios se guardarán al reconectar';status.className='status-msg status-err';}return;}
+  if(loadDataInFlight){if(status){status.textContent='la sincronización ya está en curso';status.className='status-msg';}return;}
+  if(status){status.textContent='sincronizando...';status.className='status-msg';}setSync('syncing');
   var ok=await loadData();
-  if(s){s.textContent=ok?'✓ sincronizado':'No se ha podido sincronizar · reintenta';s.className='status-msg '+(ok?'status-ok':'status-err');}
+  status=document.getElementById('syncStatusMsg')||status;
+  if(status){status.textContent=ok?'✓ sincronizado':'No se ha podido sincronizar · reintenta';status.className='status-msg '+(ok?'status-ok':'status-err');}
 }
 async function clearTxs(){
-  if(!confirm('Se descargará una copia previa. ¿Borrar TODAS las transacciones, exclusiones y anulaciones? Esta acción no se puede deshacer.'))return;
+  var accepted=await confirmCriticalAction({title:'Borrar movimientos',description:'Se descargará una copia previa y se eliminarán todos los movimientos, exclusiones y anulaciones. Esta acción no se puede deshacer.',counts:{movimientos:transactions.length},phrase:'BORRAR',approveLabel:'Borrar movimientos'});
+  if(!accepted)return;
   try{exportJSON();}catch(e){showSuccessToast('No se pudo descargar la copia previa');return;}
   setSync('syncing');
   var cleared=await sb.rpc('clear_fintrack_data');
@@ -3698,7 +3927,10 @@ async function archiveCat(id){
   else setSync('err');
 }
 async function deleteCat(id){
-  if(!confirm('¿Eliminar esta categoría?'))return;
+  var catToDelete=categories.find(function(c){return c.id===id;});
+  var affectedCount=transactions.filter(function(t){return t.category===id;}).length;
+  var accepted=await confirmCriticalAction({title:'Eliminar categoría',description:'La categoría dejará de estar disponible. Sus movimientos existentes se conservarán sin categoría activa.',counts:{categoría:1,movimientos_afectados:affectedCount},phrase:'ELIMINAR',approveLabel:'Eliminar categoría'});
+  if(!accepted)return;
   var cat=categories.find(function(c){return c.id===id;});
   var name=cat?cat.name:catById(id).name;
   var catBudgets=budgets.filter(function(b){return b.category_id===id;});
@@ -3736,7 +3968,7 @@ async function deleteSubcat(catId,sub){var cat=categories.find(function(c){retur
 async function saveCatColor(catId,color){var cat=categories.find(function(c){return c.id===catId;});if(!cat)return;var prev=cat.color;cat.color=color;setSync('syncing');if(isOffline){if(queueOp({type:'update',table:'categories',id:catId,data:{color:color}})){saveLocalCache();setSync('err');refreshTab();}else cat.color=prev;return;}var r=await sb.from('categories').update({color:color}).eq('id',catId);if(!r.error){saveLocalCache();setSync('ok');refreshTab();}else{setSync('err');cat.color=prev;}}
 
 // EXPORT
-function exportJSON(){var json=JSON.stringify({version:3,transactions:transactions,categories:categories,accounts:accounts,patrimony:patrimony,budgets:budgets,recurrenceExclusions:recurrenceExclusions,transactionVoids:transactionVoids},null,2);var blob=new Blob([json],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fintrack_backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();}
+function exportJSON(){var json=JSON.stringify({version:4,transactions:transactions,categories:categories,accounts:accounts,patrimony:patrimony,budgets:budgets,recurrenceExclusions:recurrenceExclusions,transactionVoids:transactionVoids,investmentOperations:investmentOperations},null,2);var blob=new Blob([json],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fintrack_backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();}
 // ── export period selection ───────────────────────────────────────
 function todayStr(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
 function currentMonthRange(){var from=viewYear+'-'+pad(viewMonth+1)+'-01';var to=lastDayOfMonthStr(viewYear,viewMonth+1);return {from:from,to:to,label:capitalize(MONTHS[viewMonth])+' '+viewYear};}
@@ -4047,16 +4279,56 @@ function validateImportData(d){
     checkDupIds(d.transactionVoids,'anulación');
   }
 }
-async function importJSON(){
-  var raw=document.getElementById('importArea').value.trim();var s=document.getElementById('importStatus');
+function readBackupFile(file){
+  return new Promise(function(resolve,reject){
+    var reader=new FileReader();
+    reader.onerror=function(){reject(new Error('no se pudo leer el archivo seleccionado'));};
+    reader.onload=function(){resolve(String(reader.result||''));};
+    reader.readAsText(file,'UTF-8');
+  });
+}
+async function importJSONFile(input){
+  var file=input&&input.files&&input.files[0];if(!file)return;
+  var status=document.getElementById('importStatus');
+  try{
+    if(file.size>10485760)throw new Error('la copia supera el tamaño máximo de 10 MB');
+    if(status){status.textContent='leyendo archivo...';status.className='status-msg';}
+    await importJSON(await readBackupFile(file),status);
+  }catch(e){
+    if(status){status.textContent='Error al importar: '+(e&&e.message?e.message:'archivo no válido');status.className='status-msg status-err';}
+  }finally{input.value='';}
+}
+function normalizeImportedBackup(data){
+  if(!data||typeof data!=='object')return data;
+  // Las copias automáticas de Supabase usan { data: { recurrence_exclusions, ... } };
+  // las exportaciones manuales usan las colecciones directamente en la raíz.
+  if(data.data&&typeof data.data==='object'&&!Array.isArray(data.data)){
+    var source=data.data;
+    return {
+      version:data.version||3,
+      transactions:source.transactions||[],
+      categories:source.categories||[],
+      accounts:source.accounts||[],
+      patrimony:source.patrimony||[],
+      budgets:source.budgets||[],
+      recurrenceExclusions:source.recurrenceExclusions||source.recurrence_exclusions||[],
+      transactionVoids:source.transactionVoids||source.transaction_voids||[],
+      investmentOperations:source.investmentOperations||source.investment_operations||[]
+    };
+  }
+  return data;
+}
+async function importJSON(rawInput,statusEl){
+  var raw=typeof rawInput==='string'?rawInput.trim():'';var s=statusEl||document.getElementById('importStatus');
   function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
   try{
     if(raw.length>10485760)throw new Error('la copia supera el tamaño máximo de 10 MB');
-    var d=JSON.parse(raw);
+    var d=normalizeImportedBackup(JSON.parse(raw));
     validateImportData(d);
-    var uid=currentUser.id;
-    s.textContent='guardando copia de seguridad previa...';s.className='status-msg';
-    try{exportJSON();}catch(e){}
+    var accepted=await confirmCriticalAction({title:'Importar copia de seguridad',description:'Se mostrarán los datos del archivo y se sustituirán tus datos actuales. Antes se creará una copia de seguridad real de tu estado actual.',counts:backupPreviewCounts(d),phrase:'IMPORTAR',approveLabel:'Importar copia'});
+    if(!accepted)return;
+    s.textContent='creando copia de seguridad previa...';s.className='status-msg';
+    await createSafetyBackup('before_import');
     s.textContent='importando datos de forma segura...';
     var atomicImport=await sb.rpc('replace_fintrack_data',{payload:d});
     if(atomicImport.error)throw new Error('importación: '+atomicImport.error.message);
@@ -4362,6 +4634,7 @@ function applyLayout(){
     document.getElementById('tabContent').style.display='flex';
     var fab=document.getElementById('fabBtn'); if(fab) fab.classList.toggle('fab-hidden',activeTab!==0);
     for(var j=0;j<5;j++){var bn=document.getElementById('bn'+j);if(bn)bn.classList.toggle('active',j===activeTab);}
+    updatePeriodToolbar();
     render();
     movePill(activeTab);
   }
@@ -4371,20 +4644,22 @@ function dtRender(){
   if(!IS_DESKTOP) return;
   clearBalanceCache();
   // Month labels in sidebar
+  var showPeriodControls=activeTab!==3&&activeTab!==5;
+  var dtMonthNav=document.querySelector('.dt-month-nav');if(dtMonthNav)dtMonthNav.style.display=showPeriodControls?'flex':'none';
   var ml=document.getElementById('dtMonthLabel');if(ml)ml.textContent=homeAnnualMode?(''+viewYear):(capitalize(MONTHS[viewMonth])+' '+viewYear);
-  var dhab=document.getElementById('dtHomeAnnualBtn');if(dhab)dhab.classList.toggle('active',homeAnnualMode);
+  var dhab=document.getElementById('dtHomeAnnualBtn');if(dhab){dhab.style.display=showPeriodControls?'flex':'none';dhab.classList.toggle('active',homeAnnualMode);}
   // Nav active state
   document.querySelectorAll('.dt-nav-item').forEach(function(btn){
     btn.classList.toggle('active',parseInt(btn.getAttribute('data-tab'))===activeTab);
   });
   // Page title
-  var titles=['Inicio','Categorías','Cuentas','Anual','Ajustes'];
+  var titles=['Inicio','Categorías','Cuentas','Anual','Inversiones','Ajustes'];
   var pt=document.getElementById('dtPageTitle');if(pt)pt.textContent=titles[activeTab]||'';
   // User info
   if(currentUser){
     var em=currentUser.email||'';
     var av=document.getElementById('dtAvatar');if(av)av.textContent=em[0]?em[0].toUpperCase():'?';
-    var de=document.getElementById('dtEmail');if(de)de.textContent=activeTab===4?em:maskEmail(em);
+    var de=document.getElementById('dtEmail');if(de)de.textContent=activeTab===5?em:maskEmail(em);
   }
   // Compute stats
   var txs=getDashboardTx();
@@ -4465,6 +4740,7 @@ function dtRender(){
     else if(activeTab===1)renderCatTab(tabInner,'dt');
     else if(activeTab===2)renderPatTab(tabInner);
     else if(activeTab===3)renderAnnualTab(tabInner);
+    else if(activeTab===4)renderInvestmentsTab(tabInner);
     else renderSettingsTab(tabInner);
   }
   // Render donut after DOM update (canvas now in DOM)
