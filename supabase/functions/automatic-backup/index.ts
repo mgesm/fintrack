@@ -53,6 +53,11 @@ Deno.serve(async (req) => {
   try { body = await req.json(); } catch (_) {}
   const user = await authenticatedUser(client, req);
   if (user) {
+    if (body.action === "status") {
+      const { data: latest, error: statusErr } = await client.from("backup_runs").select("created_at,status,path,error_message").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
+      if (statusErr) return json({ error: statusErr.message }, 500);
+      return json({ ok: true, latest: latest || null });
+    }
     try {
       const result = await snapshot(client, user.id, body.reason === "before_import" ? "before_import" : "manual");
       return json({ ok: true, backup: result });

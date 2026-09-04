@@ -1,6 +1,6 @@
 # FinTrack — contexto técnico y operativo
 
-> **Versión del documento:** 2.4  
+> **Versión del documento:** 2.5  
 > **Última actualización:** 2026-09-04  
 > **Repositorio:** `mgesm/fintrack` (rama `main`)  
 > **Producción:** https://mgesm.github.io/fintrack/  
@@ -62,7 +62,7 @@ El HTML contiene funciones de renderizado por pestaña, consultas Supabase, esta
 
 `serviceworker.js` registra una caché versionada. La navegación utiliza red primero con respaldo de caché; los activos estáticos se sirven preferentemente desde caché. Esto permite instalación y cierta continuidad offline, pero es la principal causa de que una versión antigua siga visible.
 
-**Regla de publicación obligatoria:** cualquier cambio de `index.html` que deba verse inmediatamente requiere incrementar tanto la versión visible de la app como el identificador de caché del service worker y publicar ambos archivos. Después hay que probar una recarga completa o cerrar y reabrir la PWA. El cache name vigente conocido al redactar este documento es `fintrack-cache-v133` y la versión de aplicación es `2026.09.03.12`; deben tratarse como valores que se incrementan, no como constantes eternas.
+**Regla de publicación obligatoria:** cualquier cambio de `index.html` que deba verse inmediatamente requiere incrementar tanto la versión visible de la app como el identificador de caché del service worker y publicar ambos archivos. Después hay que probar una recarga completa o cerrar y reabrir la PWA. El cache name vigente conocido al redactar este documento es `fintrack-cache-v134` y la versión de aplicación es `2026.09.04.1`; deben tratarse como valores que se incrementan, no como constantes eternas.
 
 La sección Versión de Ajustes muestra además `APP_PUBLISHED_AT`: fecha y hora de publicación en España. Debe actualizarse en cada despliegue junto con `APP_VERSION` y la caché.
 
@@ -388,7 +388,7 @@ Las entradas son acumulativas. Toda entrada nueva debe incluir fecha, cambio, ar
 
 | 2026-09-03 | Se eliminó por completo el gráfico de evolución de cartera y sus consultas históricas. La cabecera conserva únicamente el valor numérico y los indicadores de cartera. | `index.html`, `serviceworker.js`. | Cálculo de valoración intacto; versión `2026.09.03.12`, caché `v133`. |
 
-| 2026-09-04 | Se consolidó el contexto vigente: valoración de `IE00BYX5MX67` con precio actual y respaldo NAV, eliminación definitiva del gráfico de cartera y renovación del snapshot del repositorio. | `PROJECT_CONTEXT.md`, `backup/`. | Contraste con el árbol remoto de `main`; publicado. |
+| 2026-09-04 | Se implementó el conjunto de mejoras integrales: validación sintáctica automatizada con script Node.js, desacoplamiento y soporte multiusuario/autenticado en `monthly-report`, caché de cotizaciones con TTL de 10 min en Inversión, selector de ámbito para búsqueda global entre todos los movimientos o el mes actual, feedback interactivo de carga de precio en modal de compra/venta y monitorización del estado de copias en la nube en Ajustes. | `index.html`, `serviceworker.js`, `monthly-report/index.ts`, `automatic-backup/index.ts`, `scripts/validate-syntax.js`, `PROJECT_CONTEXT.md`. | Cuatro bloques de scripts embebidos validados sin errores con `node scripts/validate-syntax.js`; versión `2026.09.04.1`, caché `v134`. |
 
 ## 12. Decisiones descartadas (no volver a proponer sin petición expresa)
 
