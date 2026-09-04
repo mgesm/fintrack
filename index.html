@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -1400,7 +1400,7 @@ button:not(:disabled):active{transform:scale(.975);}
 </div>
 
 <script>
-var APP_VERSION='2026.09.04.4';
+var APP_VERSION='2026.09.04.5';
 var APP_PUBLISHED_AT='04/09/2026 12:47 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
@@ -3644,8 +3644,8 @@ function inspectAssetGraph(svg,event){
   guide.setAttribute('x1',x);guide.setAttribute('x2',x);guide.setAttribute('opacity','1');dot.setAttribute('cx',x);dot.setAttribute('cy',y);dot.setAttribute('opacity','1');tip.innerHTML=value.toLocaleString('es-ES',{maximumFractionDigits:2})+'<small>'+htmlEscape(date)+'</small>';tip.style.left=(x/320*100)+'%';tip.style.top=(y/100*142+22)+'px';tip.style.opacity='1';chart.classList.add('is-inspecting');
 }
 function clearAssetGraph(svg){var chart=svg.parentElement,tip=chart.querySelector('.asset-chart-tooltip'),guide=svg.querySelector('.asset-chart-guide'),dot=svg.querySelector('.asset-chart-dot');if(guide)guide.setAttribute('opacity','0');if(dot)dot.setAttribute('opacity','0');if(tip)tip.style.opacity='0';chart.classList.remove('is-inspecting');}
-var ASSET_LOGO_DOMAINS={AAPL:'apple.com',MSFT:'microsoft.com',GOOG:'google.com',GOOGL:'google.com',AMZN:'amazon.com',META:'meta.com',NVDA:'nvidia.com',TSLA:'tesla.com',NFLX:'netflix.com',AMD:'amd.com',INTC:'intel.com',ORCL:'oracle.com',IBM:'ibm.com',CRM:'salesforce.com',ADBE:'adobe.com',SPY:'ssga.com',VOO:'vanguard.com',VWCE:'vanguard.co.uk',VWRL:'vanguard.co.uk',QQQ:'invesco.com',IWDA:'blackrock.com',EUNL:'ishares.com',IUSA:'ishares.com'};
-function decorateAssetLogo(el,symbol){if(!el||el.dataset.logoReady)return;symbol=String(symbol||'').toUpperCase();el.dataset.logoReady='1';var domain=ASSET_LOGO_DOMAINS[symbol],fallback=htmlEscape(symbol.slice(0,1)||'•');if(!domain){el.classList.add('logo-fallback-only');el.innerHTML='<span class="logo-fallback">'+fallback+'</span>';return;}el.innerHTML='<img src="https://logo.clearbit.com/'+encodeURIComponent(domain)+'" alt="" referrerpolicy="no-referrer"><span class="logo-fallback">'+fallback+'</span>';var img=el.querySelector('img');img.onerror=function(){el.classList.add('logo-fallback-only');img.remove();};}
+var ASSET_LOGO_DOMAINS={VWCE:'vanguard.co.uk',VWRL:'vanguard.co.uk',EUNL:'ishares.com',IUSA:'ishares.com',IWDA:'blackrock.com',CSPX:'ishares.com',VUSA:'vanguard.co.uk',VGWL:'vanguard.co.uk',MEUD:'amundi.com',DBXD:'xtrackers.com',SPY:'ssga.com',GLD:'ssga.com','IE00BYX5MX67':'fidelity.com','LU1829220216':'amundi.com','IE00B4L5Y983':'ishares.com'};
+function decorateAssetLogo(el,symbol){if(!el||el.dataset.logoReady)return;symbol=String(symbol||'').toUpperCase();el.dataset.logoReady='1';var fallback=htmlEscape(symbol.slice(0,1)||'•');var parqetUrl='https://assets.parqet.com/logos/symbol/'+encodeURIComponent(symbol);el.innerHTML='<img src="'+parqetUrl+'" alt="" referrerpolicy="no-referrer"><span class="logo-fallback">'+fallback+'</span>';var img=el.querySelector('img');img.onerror=function(){var domain=ASSET_LOGO_DOMAINS[symbol];if(domain){img.onerror=function(){el.classList.add('logo-fallback-only');img.remove();};img.src='https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://'+encodeURIComponent(domain)+'&size=128';}else{el.classList.add('logo-fallback-only');img.remove();}};}
 function decorateInvestmentLogos(root){(root||document).querySelectorAll('.search-result i:not([data-logo-ready]),.asset-logo:not([data-logo-ready]),.position i:not([data-logo-ready])').forEach(function(el){var parent=el.closest('.search-result'),symbol=parent&&parent.dataset.symbol;if(!symbol&&el.closest('.asset-sheet')){symbol=((el.closest('.asset-sheet').querySelector('.asset-type')||{}).textContent||'').split(' · ')[0];}if(!symbol&&el.closest('.position')){symbol=((el.closest('.position').querySelector('small')||{}).textContent||'').split(' · ')[0];}decorateAssetLogo(el,symbol);});}
 var investmentLogoObserver=new MutationObserver(function(){decorateInvestmentLogos(document);});
 investmentLogoObserver.observe(document.body,{subtree:true,childList:true});
