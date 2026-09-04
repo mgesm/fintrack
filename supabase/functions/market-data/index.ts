@@ -146,7 +146,8 @@ async function yahooHistory(input: string, interval: string, outputsize: number)
   const values = (result.timestamp || []).map((ts: number, i: number) => {
     const close = result?.indicators?.quote?.[0]?.close?.[i];
     if (!Number.isFinite(Number(close))) return null;
-    return { datetime: new Date(ts * 1000).toISOString().slice(isIntraday ? 0 : 10, isIntraday ? 16 : 10), close: String(close) };
+    const iso = new Date(ts * 1000).toISOString();
+    return { datetime: isIntraday ? iso.slice(0, 16) : iso.slice(0, 10), close: String(close) };
   }).filter(Boolean).slice(-Math.max(2, Math.min(outputsize, 5000)));
   return { meta: { symbol, currency: result?.meta?.currency || "EUR", source: "yahoo-fund" }, values };
 }

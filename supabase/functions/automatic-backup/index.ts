@@ -15,11 +15,22 @@ async function sha256(value: string) {
   const bytes = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value)));
   return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
+async function fetchAllRows(client: any, table: string, userId: string) {
+  const rows: any[] = [];
+  const pageSize = 1000;
+  for (let from = 0; ; from += pageSize) {
+    const { data, error } = await client.from(table).select("*").eq("user_id", userId).range(from, from + pageSize - 1);
+    if (error) throw new Error(table + ": " + error.message);
+    if (!data || !data.length) break;
+    rows.push(...data);
+    if (data.length < pageSize) break;
+  }
+  return rows;
+}
 async function snapshot(client: any, userId: string, reason: string) {
   const entries = await Promise.all(tables.map(async (table) => {
-    const { data, error } = await client.from(table).select("*").eq("user_id", userId);
-    if (error) throw new Error(table + ": " + error.message);
-    return [table, data ?? []] as const;
+    const data = await fetchAllRows(client, table, userId);
+    return [table, data] as const;
   }));
   const now = new Date();
   const path = userId + "/fintrack-" + now.toISOString().replace(/[:.]/g, "-") + ".json";

@@ -34,13 +34,14 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;}
   --radius:32px;--radius-sm:26px;--radius-xs:18px;
   --font:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Plus Jakarta Sans','Inter',system-ui,sans-serif;
   --logo-font:'Outfit','Plus Jakarta Sans',sans-serif;
-  --brand-green:#34C759;
+  --brand-green:#248A3D;
   --mono:-apple-system,BlinkMacSystemFont,'SF Pro Text','Plus Jakarta Sans','Inter',system-ui,sans-serif;
   --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
   --accent-grad:linear-gradient(135deg,#34C759,#0FB8AD);
   --nav-glass:rgba(255,255,255,0.05);
 }
 @media(prefers-color-scheme:dark){:root{
+  --brand-green:#34C759;
   --bg:#06060A;--bg2:rgba(54,54,60,0.55);--bg3:rgba(255,255,255,0.07);--bg4:rgba(255,255,255,0.12);
   --bg-grouped:#1C1C1E;
   --card-border:rgba(255,255,255,0.12);
@@ -288,16 +289,19 @@ body{display:flex;flex-direction:column;width:100%;max-width:430px;margin:0 auto
 .app-mark{height:28px;display:flex;align-items:center;font-family:var(--logo-font);font-size:23px;font-weight:800;letter-spacing:-1.4px;color:var(--text);}
 .app-mark .mark-accent{color:var(--brand-green);}
 .header-actions{display:flex;justify-content:flex-end;align-items:center;}
-.header-gear{width:36px;height:36px;border:0;border-radius:50%;background:var(--bg3);color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.header-gear{width:36px;height:36px;border:0;border-radius:50%;background:var(--bg3);color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;position:relative;}
+.header-gear::after{content:'';position:absolute;inset:-6px;}
 .header-gear:active{background:var(--bg4);transform:scale(.94);}
 .period-toolbar{display:flex;justify-content:flex-end;align-items:center;gap:8px;padding-top:1px;margin-left:auto;}
 .header.period-hidden .period-toolbar{display:none;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
 .month-nav{display:flex;align-items:center;gap:4px;}
-.home-annual-toggle{background:var(--bg3);border:none;color:var(--text3);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;-webkit-tap-highlight-color:transparent;margin-right:2px;}
+.home-annual-toggle{background:var(--bg3);border:none;color:var(--text3);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;-webkit-tap-highlight-color:transparent;margin-right:2px;position:relative;}
+.home-annual-toggle::after{content:'';position:absolute;inset:-6px;}
 .home-annual-toggle.active{background:var(--accent);color:#fff;}
 #dtHomeAnnualBtn{width:auto;height:auto;border-radius:99px;padding:7px 14px;font-size:12px;font-weight:600;gap:6px;display:flex;}
-.nav-btn{background:var(--bg3);border:none;color:var(--text3);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;-webkit-tap-highlight-color:transparent;}
+.nav-btn{background:var(--bg3);border:none;color:var(--text3);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;-webkit-tap-highlight-color:transparent;position:relative;}
+.nav-btn::after{content:'';position:absolute;inset:-6px;}
 .nav-btn:active{background:var(--bg4);transform:scale(0.94);}
 .month-label{font-size:14px;font-weight:500;color:var(--text);min-width:106px;text-align:center;letter-spacing:-0.2px;}
 
@@ -305,7 +309,7 @@ body{display:flex;flex-direction:column;width:100%;max-width:430px;margin:0 auto
 .invest-wrap{padding:12px 16px 28px;width:100%;}.invest-title{font-size:28px;font-weight:800;letter-spacing:-1px;margin:4px 0 14px;}.portfolio-card,.invest-stats>div,.positions{background:var(--bg2);border:1px solid var(--card-border);box-shadow:var(--shadow-sm);}.portfolio-card{border-radius:var(--radius);padding:20px 18px 14px;}.portfolio-card>span,.invest-stats small,.position small{color:var(--text3);font-size:13px;display:block;}.portfolio-card>strong{display:block;font-family:var(--mono);font-size:30px;letter-spacing:-1.2px;margin-top:8px;}.portfolio-card>b,.positive,.position-value b{color:var(--green);font-size:15px;}.portfolio-chart{color:var(--green);margin-top:14px;}.portfolio-chart svg{height:96px;width:100%;}.portfolio-chart small{display:block;color:var(--text3);font-size:10px;white-space:nowrap;}.invest-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 22px;}.invest-stats>div{border-radius:20px;padding:12px 10px;overflow:hidden;}.invest-stats strong{font-size:14px;white-space:nowrap;display:block;margin-top:4px;}.invest-wrap h3{font-size:18px;margin:0 0 9px;}.positions{border-radius:var(--radius-sm);overflow:hidden;}.position{display:grid;grid-template-columns:34px minmax(0,1fr) 30px auto;gap:9px;align-items:center;padding:13px 12px;border-bottom:1px solid var(--separator2);}.position:last-child{border:0}.position i{width:32px;height:32px;background:color-mix(in srgb,var(--brand-green) 15%,transparent);border-radius:10px;color:var(--brand-green);display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:800;}.position>div:nth-child(2){min-width:0}.position>div:nth-child(2)>strong{font-size:13px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.position-spark{color:var(--green);font-size:25px;transform:rotate(-16deg)}.position-value{text-align:right;white-space:nowrap}.position-value strong,.position-value b{display:block;font-size:13px;}.invest-operation{width:100%;border:0;border-radius:20px;background:var(--accent);color:#fff;font-family:var(--font);font-size:16px;font-weight:700;padding:15px;margin-top:16px;box-shadow:0 6px 16px rgba(52,199,89,.25);}
 
 /* INVESTMENT ASSET SHEET */
-.invest-search{width:100%;border:0;border-radius:18px;background:var(--bg3);color:var(--text);font:500 15px var(--font);padding:13px 15px;margin:0;outline:0}.search-results{margin:7px 0 14px;background:var(--bg2);border:1px solid var(--card-border);border-radius:20px;box-shadow:var(--shadow-sm);overflow:hidden}.search-result{width:100%;border:0;border-bottom:1px solid var(--separator2);background:transparent;color:var(--text);padding:11px 13px;display:flex;align-items:center;gap:10px;text-align:left;font-family:var(--font)}.search-result:last-child{border-bottom:0}.search-result i{background:color-mix(in srgb,var(--brand-green) 14%,transparent);color:var(--brand-green);font-style:normal;font-weight:800;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:9px}.search-result strong{font-size:14px;display:block}.search-result small{display:block;color:var(--text3);font-size:12px;margin-top:2px}.search-status{padding:12px 14px;color:var(--text3);font-size:13px}.invest-empty{padding:28px 18px;text-align:center;color:var(--text3)}.invest-empty i{display:flex;width:42px;height:42px;margin:0 auto 10px;border-radius:14px;background:color-mix(in srgb,var(--brand-green) 14%,transparent);color:var(--brand-green);align-items:center;justify-content:center;font-size:20px;font-style:normal}.invest-empty strong{display:block;color:var(--text);font-size:15px;margin-bottom:5px}.invest-empty small{font-size:13px;line-height:1.4}.asset-sheet{position:absolute;inset:0;background:var(--bg);z-index:8;padding:14px 16px 26px;overflow:auto}.asset-sheet-close{border:0;background:var(--bg3);border-radius:50%;width:34px;height:34px;color:var(--text);font-size:22px;float:right}.asset-sheet h2{font-size:25px;margin:10px 0 2px}.asset-type{color:var(--text3);font-size:14px}.asset-price{font:800 30px var(--mono);margin:20px 0 3px}.asset-change{color:var(--green);font-weight:700}.asset-sheet-chart{color:var(--green);margin:18px 0 10px;background:var(--bg2);border-radius:24px;padding:16px}.asset-sheet-chart svg{width:100%;height:150px}.asset-range{display:flex;justify-content:space-between;gap:4px;margin:0 2px 18px}.asset-range button{border:0;background:transparent;color:var(--text3);border-radius:10px;padding:6px 8px;font:600 12px var(--font)}.asset-range button.active{background:var(--bg3);color:var(--text)}.asset-data{display:grid;grid-template-columns:1fr 1fr;gap:8px}.asset-data div{padding:13px;background:var(--bg2);border-radius:18px}.asset-data small{display:block;color:var(--text3);font-size:12px}.asset-data strong{font-size:15px;margin-top:4px;display:block}.asset-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}.asset-actions button{border:0;border-radius:18px;padding:14px;font:700 16px var(--font)}.asset-actions .buy{background:var(--accent);color:white}.asset-actions .sell{background:var(--bg3);color:var(--red)}
+.invest-search{width:100%;border:0;border-radius:18px;background:var(--bg3);color:var(--text);font:500 15px var(--font);padding:13px 15px;margin:0;outline:0}.search-results{margin:7px 0 14px;background:var(--bg2);border:1px solid var(--card-border);border-radius:20px;box-shadow:var(--shadow-sm);overflow:hidden}.search-result{width:100%;border:0;border-bottom:1px solid var(--separator2);background:transparent;color:var(--text);padding:11px 13px;display:flex;align-items:center;gap:10px;text-align:left;font-family:var(--font)}.search-result:last-child{border-bottom:0}.search-result i{background:color-mix(in srgb,var(--brand-green) 14%,transparent);color:var(--brand-green);font-style:normal;font-weight:800;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:9px}.search-result strong{font-size:14px;display:block}.search-result small{display:block;color:var(--text3);font-size:12px;margin-top:2px}.search-status{padding:12px 14px;color:var(--text3);font-size:13px}.invest-empty{padding:28px 18px;text-align:center;color:var(--text3)}.invest-empty i{display:flex;width:42px;height:42px;margin:0 auto 10px;border-radius:14px;background:color-mix(in srgb,var(--brand-green) 14%,transparent);color:var(--brand-green);align-items:center;justify-content:center;font-size:20px;font-style:normal}.invest-empty strong{display:block;color:var(--text);font-size:15px;margin-bottom:5px}.invest-empty small{font-size:13px;line-height:1.4}.asset-sheet{position:absolute;inset:0;background:var(--bg);z-index:8;padding:14px 16px 26px;overflow:auto}.asset-sheet-close{border:0;background:var(--bg3);border-radius:50%;width:38px;height:38px;min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;color:var(--text);font-size:22px;float:right;cursor:pointer;}.asset-sheet h2{font-size:25px;margin:10px 0 2px}.asset-type{color:var(--text3);font-size:14px}.asset-price{font:800 30px var(--mono);margin:20px 0 3px}.asset-change{color:var(--green);font-weight:700}.asset-sheet-chart{color:var(--green);margin:18px 0 10px;background:var(--bg2);border-radius:24px;padding:16px}.asset-sheet-chart svg{width:100%;height:150px}.asset-range{display:flex;justify-content:space-between;gap:4px;margin:0 2px 18px}.asset-range button{border:0;background:transparent;color:var(--text3);border-radius:10px;padding:6px 8px;font:600 12px var(--font)}.asset-range button.active{background:var(--bg3);color:var(--text)}.asset-data{display:grid;grid-template-columns:1fr 1fr;gap:8px}.asset-data div{padding:13px;background:var(--bg2);border-radius:18px}.asset-data small{display:block;color:var(--text3);font-size:12px}.asset-data strong{font-size:15px;margin-top:4px;display:block}.asset-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}.asset-actions button{border:0;border-radius:18px;padding:14px;font:700 16px var(--font)}.asset-actions .buy{background:var(--accent);color:white}.asset-actions .sell{background:var(--bg3);color:var(--red)}
 
 /* SUMMARY CARDS */
 .summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:8px 16px;}
@@ -560,7 +564,7 @@ body{display:flex;flex-direction:column;width:100%;max-width:430px;margin:0 auto
 .cat-bar-fill{height:4px;border-radius:99px;transition:width 0.5s ease;}
 .cat-budget-marker{position:absolute;top:-4px;width:2px;height:12px;background:rgba(0,0,0,0.2);border-radius:1px;}
 .budget-alert{font-size:12px;font-weight:500;margin-top:5px;}
-.budget-alert.warn{color:var(--amber);}.budget-alert.over{color:var(--red);}.budget-alert.ok{color:var(--green);}
+.budget-alert.warn{color:var(--amber);}.budget-alert.over{color:var(--red);}.budget-alert.ok{color:var(--brand-green);}
 .subcat-list{padding-left:22px;margin-top:6px;display:flex;flex-direction:column;gap:1px;}
 .subcat-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--separator2);}
 .subcat-row:last-child{border-bottom:none;}
@@ -1018,6 +1022,7 @@ select.field-input option{background:var(--bg2);}
 
 /* ── MANUAL THEME OVERRIDE (forced light/dark, independent of OS) ── */
 html[data-theme="light"]{
+  --brand-green:#248A3D;
   --bg:#EEF0F3;--bg2:rgba(255,255,255,0.62);--bg3:rgba(120,120,140,0.08);--bg4:rgba(120,120,140,0.14);
   --bg-grouped:#FFFFFF;--card-border:rgba(255,255,255,0.65);
   --glass-hi:rgba(255,255,255,0.7);--glass-edge:rgba(255,255,255,0.35);
@@ -1029,6 +1034,7 @@ html[data-theme="light"]{
   --nav-glass:rgba(255,255,255,0.05);
 }
 html[data-theme="dark"]{
+  --brand-green:#34C759;
   --bg:#06060A;--bg2:rgba(54,54,60,0.55);--bg3:rgba(255,255,255,0.07);--bg4:rgba(255,255,255,0.12);
   --bg-grouped:#1C1C1E;--card-border:rgba(255,255,255,0.12);
   --glass-hi:rgba(255,255,255,0.22);--glass-edge:rgba(255,255,255,0.14);
@@ -1058,7 +1064,7 @@ html[data-theme="dark"] .dt-user{border-top-color:rgba(255,255,255,0.08);}
 .invest-wrap{max-width:760px;margin:auto;padding:14px 16px 34px;position:relative}.invest-allocation{background:var(--bg2);border:1px solid var(--card-border);border-radius:20px;padding:14px 16px;margin-bottom:20px;box-shadow:var(--shadow-sm);transition:border-color var(--motion-fast) ease,box-shadow var(--motion-base) ease}.invest-allocation:hover{border-color:var(--interactive-border)}.invest-alloc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.invest-alloc-head span{font-size:12px;font-weight:700;color:var(--text);letter-spacing:-.01em}.invest-alloc-head small{font-size:11px;color:var(--text3)}.invest-alloc-bar{display:flex;height:8px;border-radius:999px;overflow:hidden;background:var(--bg3);margin-bottom:10px;gap:2px}.invest-alloc-seg{height:100%;transition:width .25s ease;min-width:3px}.invest-alloc-legend{display:flex;flex-wrap:wrap;gap:6px 12px}.invest-alloc-item{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}.invest-alloc-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}.invest-alloc-item strong{font-weight:600;color:var(--text);margin-left:1px}.invest-alloc-item small{color:var(--text3);font-size:10px;margin-left:2px}.invest-head{display:flex;justify-content:space-between;align-items:flex-end;margin:2px 0 18px}.invest-kicker{font:700 11px var(--mono);letter-spacing:.09em;color:var(--brand-green);text-transform:uppercase;margin-bottom:5px}.invest-title{font-size:30px;margin:0}.invest-head-note{font-size:12px;color:var(--text3);padding-bottom:4px}.portfolio-card{border-radius:24px;padding:20px 18px 17px;background:linear-gradient(138deg,color-mix(in srgb,var(--brand-green) 17%,var(--bg2)),var(--bg2) 62%);position:relative;overflow:hidden}.portfolio-card:after{content:'';position:absolute;width:155px;height:155px;border:1px solid color-mix(in srgb,var(--brand-green) 22%,transparent);border-radius:50%;right:-75px;top:-95px}.portfolio-card .portfolio-empty{color:var(--text3);font-size:13px;margin-top:8px}.invest-stats{margin-bottom:22px}.invest-stats>div{border-radius:17px}.invest-section-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 10px}.invest-section-head h3{margin:0}.invest-section-head small{font-size:12px;color:var(--text3)}.invest-explore{margin:24px 0 20px}.invest-explore-label{font-size:12px;color:var(--text3);margin-bottom:9px}.invest-chips{display:flex;gap:8px;overflow:auto;padding:1px 1px 5px}.invest-chip{border:1px solid var(--card-border);background:var(--bg2);color:var(--text);border-radius:14px;padding:9px 12px;white-space:nowrap;font:700 13px var(--font);text-align:left}.invest-chip span{display:block;color:var(--text3);font-size:10px;font-weight:500;margin-top:2px}.invest-search{border:1px solid var(--card-border);background:var(--bg2);box-shadow:var(--shadow-sm);padding:14px 15px;margin-bottom:1px}.positions{border-radius:20px}.invest-empty{padding:32px 18px}.asset-sheet{padding:14px 16px 92px;z-index:2;border-radius:24px;box-shadow:0 18px 55px rgba(0,0,0,.22)}.asset-sheet-top{display:flex;align-items:center;justify-content:space-between}.asset-sheet-close{border-radius:12px;width:38px;height:34px}.asset-sheet-label{font:700 11px var(--mono);letter-spacing:.08em;color:var(--text3);text-transform:uppercase}.asset-identity{display:flex;align-items:center;gap:11px;margin:18px 0 2px}.asset-logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(140deg,color-mix(in srgb,var(--brand-green) 24%,var(--bg2)),var(--bg3));display:grid;place-items:center;color:var(--brand-green);font-weight:800;font-size:17px}.asset-sheet h2{font-size:23px;margin:0}.asset-type{font-size:13px;margin-top:3px}.asset-price-row{display:flex;align-items:end;justify-content:space-between;margin:22px 0 5px}.asset-price{margin:0}.asset-change{padding:6px 9px;border-radius:999px;background:color-mix(in srgb,var(--green) 13%,transparent)}.asset-change.negative{background:color-mix(in srgb,var(--red) 12%,transparent);color:var(--red)}.asset-sheet-chart{border:1px solid var(--card-border);background:linear-gradient(145deg,var(--bg2),color-mix(in srgb,var(--brand-green) 6%,var(--bg2)));min-height:180px}.asset-sheet-chart svg{display:block!important;height:142px!important}.asset-chart-caption{display:flex;justify-content:space-between;color:var(--text3);font-size:11px;margin-bottom:5px}.asset-range{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;padding:3px;background:var(--bg3);border-radius:13px}.asset-range button.active{background:var(--bg2);box-shadow:var(--shadow-sm)}.asset-data div{border:1px solid var(--card-border);border-radius:17px}.asset-actions{position:absolute;bottom:0;left:0;right:0;margin:0;padding:12px 16px max(15px,env(safe-area-inset-bottom));background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(12px);border-top:1px solid var(--card-border)}.asset-actions button{border-radius:16px}
 </style>
 <style>.asset-sheet-chart{position:relative;touch-action:none;user-select:none}.asset-sheet-chart.is-inspecting{cursor:crosshair}.asset-chart-tooltip{position:absolute;z-index:2;pointer-events:none;transform:translate(-50%,-100%);padding:7px 9px;background:var(--text);color:var(--bg);border-radius:10px;box-shadow:var(--shadow-sm);font:700 12px var(--mono);white-space:nowrap;opacity:0;transition:opacity .12s}.asset-chart-tooltip small{display:block;opacity:.68;font:500 10px var(--font);margin-top:2px}</style>
-<style>.investment-trade-modal{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.42);display:flex;align-items:flex-end;justify-content:center;padding:16px}.investment-trade-card{width:min(500px,100%);background:var(--bg);border:1px solid var(--card-border);border-radius:26px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.32)}.investment-trade-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:18px}.investment-trade-head h3{margin:3px 0 0;font-size:21px}.investment-trade-kicker{font-size:12px;color:var(--text3)}.investment-trade-close{border:0;background:var(--bg3);color:var(--text);border-radius:11px;width:36px;height:34px;font-size:20px}.investment-trade-mode{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;background:var(--bg3);border-radius:14px;margin-bottom:14px}.investment-trade-mode button{border:0;background:transparent;border-radius:10px;padding:9px;color:var(--text3);font:700 13px var(--font)}.investment-trade-mode button.active{background:var(--bg2);color:var(--text);box-shadow:var(--shadow-sm)}.investment-trade-field{display:block;margin:11px 0}.investment-trade-field span{display:block;font-size:12px;color:var(--text3);margin:0 0 6px}.investment-trade-field input,.investment-trade-field select{width:100%;background:var(--bg2);border:1px solid var(--card-border);border-radius:13px;padding:12px;color:var(--text);font:600 15px var(--font)}.investment-trade-summary{font:700 13px var(--mono);padding:11px 0;color:var(--text2)}.investment-trade-submit{width:100%;border:0;border-radius:15px;background:var(--accent);color:white;padding:14px;font:800 15px var(--font)}.investment-trade-submit.sell{background:var(--red)}@keyframes tradeSheetIn{from{transform:translateY(28px);opacity:0}to{transform:translateY(0);opacity:1}}.investment-trade-modal{background:rgba(0,0,0,.32);backdrop-filter:blur(4px);padding:0;align-items:flex-end}.investment-trade-card{max-width:430px;border-radius:34px 34px 0 0;padding:8px 20px calc(32px + var(--safe-bottom));background:var(--bg2);box-shadow:0 -20px 60px rgba(0,0,0,.18);animation:tradeSheetIn .32s cubic-bezier(.32,.72,0,1) both}.investment-trade-card:before{content:'';display:block;width:36px;height:4px;margin:4px auto 18px;border-radius:99px;background:var(--bg4)}.investment-trade-field input,.investment-trade-field select{background:var(--bg3);border-radius:18px;padding:12px 14px;font-size:16px}.investment-trade-field input:focus,.investment-trade-field select:focus{outline:0;box-shadow:0 0 0 3px rgba(52,199,89,.25)}.investment-trade-mode{border-radius:18px;padding:3px}.investment-trade-mode button{border-radius:12px}.investment-trade-submit{border-radius:18px}</style>
+<style>.investment-trade-modal{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.42);display:flex;align-items:flex-end;justify-content:center;padding:16px}.investment-trade-card{width:min(500px,100%);background:var(--bg);border:1px solid var(--card-border);border-radius:26px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.32)}.investment-trade-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:18px}.investment-trade-head h3{margin:3px 0 0;font-size:21px}.investment-trade-kicker{font-size:12px;color:var(--text3)}.investment-trade-close{border:0;background:var(--bg3);color:var(--text);border-radius:11px;width:38px;height:38px;min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px}.investment-trade-mode{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;background:var(--bg3);border-radius:14px;margin-bottom:14px}.investment-trade-mode button{border:0;background:transparent;border-radius:10px;padding:9px;color:var(--text3);font:700 13px var(--font)}.investment-trade-mode button.active{background:var(--bg2);color:var(--text);box-shadow:var(--shadow-sm)}.investment-trade-field{display:block;margin:11px 0}.investment-trade-field span{display:block;font-size:12px;color:var(--text3);margin:0 0 6px}.investment-trade-field input,.investment-trade-field select{width:100%;background:var(--bg2);border:1px solid var(--card-border);border-radius:13px;padding:12px;color:var(--text);font:600 15px var(--font)}.investment-trade-summary{font:700 13px var(--mono);padding:11px 0;color:var(--text2)}.investment-trade-submit{width:100%;border:0;border-radius:15px;background:var(--accent);color:white;padding:14px;font:800 15px var(--font)}.investment-trade-submit.sell{background:var(--red)}@keyframes tradeSheetIn{from{transform:translateY(28px);opacity:0}to{transform:translateY(0);opacity:1}}.investment-trade-modal{background:rgba(0,0,0,.32);backdrop-filter:blur(4px);padding:0;align-items:flex-end}.investment-trade-card{max-width:430px;border-radius:34px 34px 0 0;padding:8px 20px calc(32px + var(--safe-bottom));background:var(--bg2);box-shadow:0 -20px 60px rgba(0,0,0,.18);animation:tradeSheetIn .32s cubic-bezier(.32,.72,0,1) both}.investment-trade-card:before{content:'';display:block;width:36px;height:4px;margin:4px auto 18px;border-radius:99px;background:var(--bg4)}.investment-trade-field input,.investment-trade-field select{background:var(--bg3);border-radius:18px;padding:12px 14px;font-size:16px}.investment-trade-field input:focus,.investment-trade-field select:focus{outline:0;box-shadow:0 0 0 3px rgba(52,199,89,.25)}.investment-trade-mode{border-radius:18px;padding:3px}.investment-trade-mode button{border-radius:12px}.investment-trade-submit{border-radius:18px}</style>
 <style>.asset-logo img,.search-result i img,.position i img{width:100%;height:100%;object-fit:contain;display:block}.asset-logo .logo-fallback,.search-result i .logo-fallback,.position i .logo-fallback{display:none;width:100%;height:100%;place-items:center}.asset-logo.logo-fallback-only .logo-fallback,.search-result i.logo-fallback-only .logo-fallback,.position i.logo-fallback-only .logo-fallback{display:grid}</style>
 <style>.asset-logo:not(.logo-fallback-only),.search-result i:not(.logo-fallback-only),.position i:not(.logo-fallback-only){background:transparent!important;box-shadow:none!important;border-radius:0!important}.asset-logo:not(.logo-fallback-only) img,.search-result i:not(.logo-fallback-only) img,.position i:not(.logo-fallback-only) img{filter:none!important}</style>
 <style>.invest-operations{margin:17px 0 3px;border:1px solid var(--card-border);border-radius:20px;overflow:hidden;background:var(--bg2);box-shadow:var(--shadow-sm)}.invest-operations-head{display:flex;justify-content:space-between;align-items:center;padding:13px 14px 10px}.invest-operations-head h3{font-size:15px!important;margin:0!important}.invest-operations-head small{font-size:11px;color:var(--text3)}.invest-operation-row{display:grid;grid-template-columns:32px minmax(0,1fr) auto 28px;gap:9px;align-items:center;padding:10px 12px;border-top:1px solid var(--separator2);transition:background .18s ease}.invest-operation-row:hover{background:color-mix(in srgb,var(--brand-green) 6%,var(--bg2))}.invest-operation-side{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;font-weight:800;background:color-mix(in srgb,var(--brand-green) 14%,transparent);color:var(--brand-green)}.invest-operation-side.sell{background:color-mix(in srgb,var(--red) 12%,transparent);color:var(--red)}.invest-operation-main{min-width:0}.invest-operation-main strong{display:block;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.invest-operation-main small{display:block;color:var(--text3);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}.invest-operation-value{text-align:right;font:700 12px var(--mono);white-space:nowrap}.invest-operation-value small{display:block;color:var(--text3);font:500 10px var(--font);margin-top:2px}.invest-operation-delete{width:27px;height:27px;border:0;border-radius:9px;background:transparent;color:var(--text3);font-size:18px}.invest-operation-delete:hover{background:color-mix(in srgb,var(--red) 12%,transparent);color:var(--red)}</style>
@@ -1394,8 +1400,8 @@ button:not(:disabled):active{transform:scale(.975);}
 </div>
 
 <script>
-var APP_VERSION='2026.09.04.2';
-var APP_PUBLISHED_AT='04/09/2026 11:45 CEST';
+var APP_VERSION='2026.09.04.3';
+var APP_PUBLISHED_AT='04/09/2026 12:30 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
 var sb=window.supabase.createClient(SB_URL,SB_KEY);
@@ -1428,15 +1434,26 @@ var DEFAULT_CATS=[
   {id:'c8',name:'otros',color:'#8E8E93',icon:'📦',subcats:[],position:7}
 ];
 function pad(n){return String(n).padStart(2,'0');}
+function localIsoDate(isoOrDate){if(!isoOrDate)return '';var d=new Date(isoOrDate);if(isNaN(d.getTime()))return '';return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function normStr(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();}
 function htmlEscape(s){return s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/`/g,'&#96;');}
-// Escapa el contenido antes de resaltar la búsqueda para que las notas y los
-// nombres de categoría sigan siendo texto seguro al insertarse en el HTML.
+// Resalta coincidencias escapando cada fragmento para preservar entidades HTML sin romperlas.
 function hlText(value,query){
-  var text=htmlEscape(value);
+  var s=String(value||'');
   var q=String(query||'').trim();
-  if(!q)return text;
+  if(!q||!s)return htmlEscape(s);
   var escaped=q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-  return text.replace(new RegExp('('+escaped+')','gi'),'<mark class="tx-search-hit">$1</mark>');
+  var regex;
+  try{regex=new RegExp(escaped,'gi');}catch(e){return htmlEscape(s);}
+  var parts=[],lastIdx=0,match;
+  while((match=regex.exec(s))!==null){
+    if(match.index>lastIdx)parts.push(htmlEscape(s.slice(lastIdx,match.index)));
+    parts.push('<mark class="tx-search-hit">'+htmlEscape(match[0])+'</mark>');
+    lastIdx=regex.lastIndex;
+    if(!regex.global)break;
+  }
+  if(lastIdx<s.length)parts.push(htmlEscape(s.slice(lastIdx)));
+  return parts.join('');
 }
 function capitalize(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
 function capEsc(s){return htmlEscape(capitalize(s));}
@@ -1545,10 +1562,13 @@ function autoRecurBudgetBreakdown(catId,year,month){
       occ=addInterval(occ,interval,anchorDay);
       guard++;
     }
+    var latest=group[0];
+    group.forEach(function(t){if(new Date(t.date+'T12:00:00')>new Date(latest.date+'T12:00:00'))latest=t;});
+    var unitAmount=Number(latest.amount!=null?latest.amount:root.amount);
     if(count>0){
-      var amt=root.amount*count;
+      var amt=unitAmount*count;
       total+=amt;
-      items.push({label:root.note||(root.subcategory?capitalize(root.subcategory):'Gasto recurrente'),amount:Math.round(amt*100)/100,count:count});
+      items.push({label:latest.note||root.note||(latest.subcategory?capitalize(latest.subcategory):(root.subcategory?capitalize(root.subcategory):'Gasto recurrente')),amount:Math.round(amt*100)/100,count:count});
     }
   });
   items.sort(function(a,b){return b.amount-a.amount;});
@@ -1630,23 +1650,40 @@ function setTheme(mode){
 
 window.addEventListener('online',function(){isOffline=false;document.getElementById('offlineBanner').classList.remove('show');setSync('syncing');loadData();});
 window.addEventListener('offline',function(){isOffline=true;document.getElementById('offlineBanner').classList.add('show');setSync('err');});
+var isProcessingOfflineQueue=false;
 async function processOfflineQueue(){
-  if(!currentUser||!offlineQueue.length)return;
+  if(!currentUser||!offlineQueue.length||isProcessingOfflineQueue)return;
+  isProcessingOfflineQueue=true;
   setSync('syncing');
   var failed=[];
-  for(var i=0;i<offlineQueue.length;i++){
-    var op=offlineQueue[i];
-    var res;
-    try{
-      if(op.type==='insert')res=await sb.from(op.table).upsert(op.data,{onConflict:'id'});
-      else if(op.type==='update')res=await sb.from(op.table).update(op.data).eq('id',op.id);
-      else if(op.type==='delete')res=await sb.from(op.table).delete().eq('id',op.id);
-    }catch(e){failed.push(op);res=null;}
-    if(res&&res.error)failed.push(op);
-    else if(res&&op.type==='insert'&&op.table==='recurrence_exclusions'&&!isRecurrenceExcluded(op.data.recur_series_id,op.data.skipped_date))recurrenceExclusions.push(op.data);
+  try{
+    for(var i=0;i<offlineQueue.length;i++){
+      var op=offlineQueue[i];
+      var res;
+      try{
+        if(op.type==='insert'){
+          var conflictTarget='id';
+          if(op.table==='transaction_voids')conflictTarget='user_id,transaction_id';
+          else if(op.table==='recurrence_exclusions')conflictTarget='user_id,recur_series_id,skipped_date';
+          res=await sb.from(op.table).upsert(op.data,{onConflict:conflictTarget});
+        }
+        else if(op.type==='update')res=await sb.from(op.table).update(op.data).eq('id',op.id);
+        else if(op.type==='delete')res=await sb.from(op.table).delete().eq('id',op.id);
+      }catch(e){failed.push(op);res=null;}
+      if(res&&res.error){
+        if(res.error.code==='23505'){
+          // Conflicto de clave única ya resuelto en base de datos
+        }else{
+          failed.push(op);
+        }
+      }
+      else if(res&&op.type==='insert'&&op.table==='recurrence_exclusions'&&!isRecurrenceExcluded(op.data.recur_series_id,op.data.skipped_date))recurrenceExclusions.push(op.data);
+    }
+    offlineQueue=failed;localStorage.setItem(queueKey(),JSON.stringify(offlineQueue));
+    setSync(failed.length?'err':'ok');
+  }finally{
+    isProcessingOfflineQueue=false;
   }
-  offlineQueue=failed;localStorage.setItem(queueKey(),JSON.stringify(offlineQueue));
-  setSync(failed.length?'err':'ok');
 }
 function queueKey(){return 'ft_queue_'+(currentUser?currentUser.id:'anon');}
 function queueOp(op){
@@ -1913,6 +1950,7 @@ function showApp(){
   try{localStorage.removeItem('ft_pin');localStorage.removeItem('ft_bio');}catch(e){}
   restoreUiState();
   var accent=localStorage.getItem('ft_accent');if(accent)setAccent(accent);
+  offlineQueue=[];
   var queue=localStorage.getItem(queueKey());if(queue)try{offlineQueue=JSON.parse(queue)||[];}catch(e){}
   IS_DESKTOP=window.innerWidth>=768;
   if(IS_DESKTOP){
@@ -1960,10 +1998,66 @@ var secureCacheKeyPromise=null,secureCacheDbPromise=null;
 function secureCacheStorageKey(uid){return 'ft_cache_secure_'+uid;}
 function cacheBytesToB64(bytes){var out='';for(var i=0;i<bytes.length;i+=0x8000)out+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));return btoa(out);}
 function cacheB64ToBytes(value){var bin=atob(value),bytes=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);return bytes;}
-function secureCacheDatabase(){if(secureCacheDbPromise)return secureCacheDbPromise;secureCacheDbPromise=new Promise(function(resolve,reject){if(!window.indexedDB)return reject(new Error('IndexedDB no disponible'));var req=indexedDB.open('fintrack-secure-cache',1);req.onupgradeneeded=function(){if(!req.result.objectStoreNames.contains('keys'))req.result.createObjectStore('keys');};req.onsuccess=function(){resolve(req.result);};req.onerror=function(){reject(req.error||new Error('No se pudo abrir el almacén seguro'));};});return secureCacheDbPromise;}
-async function secureCacheKey(){if(secureCacheKeyPromise)return secureCacheKeyPromise;secureCacheKeyPromise=(async function(){if(!window.crypto||!crypto.subtle)throw new Error('Cifrado local no disponible');var db=await secureCacheDatabase();var stored=await new Promise(function(resolve,reject){var r=db.transaction('keys','readonly').objectStore('keys').get('device-key');r.onsuccess=function(){resolve(r.result);};r.onerror=function(){reject(r.error);};});if(stored)return stored;var key=await crypto.subtle.generateKey({name:'AES-GCM',length:256},false,['encrypt','decrypt']);await new Promise(function(resolve,reject){var r=db.transaction('keys','readwrite').objectStore('keys').put(key,'device-key');r.onsuccess=function(){resolve();};r.onerror=function(){reject(r.error);};});return key;})();return secureCacheKeyPromise;}
+function secureCacheDatabase(){
+  if(secureCacheDbPromise)return secureCacheDbPromise;
+  secureCacheDbPromise=new Promise(function(resolve,reject){
+    if(!window.indexedDB)return reject(new Error('IndexedDB no disponible'));
+    var req=indexedDB.open('fintrack-secure-cache',1);
+    req.onupgradeneeded=function(){if(!req.result.objectStoreNames.contains('keys'))req.result.createObjectStore('keys');};
+    req.onsuccess=function(){resolve(req.result);};
+    req.onerror=function(){secureCacheDbPromise=null;reject(req.error||new Error('No se pudo abrir el almacén seguro'));};
+  });
+  return secureCacheDbPromise;
+}
+async function secureCacheKey(){
+  if(secureCacheKeyPromise)return secureCacheKeyPromise;
+  secureCacheKeyPromise=(async function(){
+    try{
+      if(!window.crypto||!crypto.subtle)throw new Error('Cifrado local no disponible');
+      var db=await secureCacheDatabase();
+      var stored=await new Promise(function(resolve,reject){
+        var r=db.transaction('keys','readonly').objectStore('keys').get('device-key');
+        r.onsuccess=function(){resolve(r.result);};
+        r.onerror=function(){reject(r.error);};
+      });
+      if(stored)return stored;
+      var key=await crypto.subtle.generateKey({name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+      await new Promise(function(resolve,reject){
+        var r=db.transaction('keys','readwrite').objectStore('keys').put(key,'device-key');
+        r.onsuccess=function(){resolve();};
+        r.onerror=function(){reject(r.error);};
+      });
+      return key;
+    }catch(err){
+      secureCacheKeyPromise=null;
+      throw err;
+    }
+  })();
+  return secureCacheKeyPromise;
+}
 async function saveSecureLocalCache(uid,payload){var key=await secureCacheKey(),iv=crypto.getRandomValues(new Uint8Array(12)),raw=new TextEncoder().encode(JSON.stringify(payload)),cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},key,raw);localStorage.setItem(secureCacheStorageKey(uid),JSON.stringify({version:1,iv:cacheBytesToB64(iv),data:cacheBytesToB64(new Uint8Array(cipher))}));localStorage.removeItem('ft_cache_'+uid);}
-async function readSecureLocalCache(uid){var stored=localStorage.getItem(secureCacheStorageKey(uid));if(stored){try{var envelope=JSON.parse(stored),key=await secureCacheKey(),plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:cacheB64ToBytes(envelope.iv)},key,cacheB64ToBytes(envelope.data));return JSON.parse(new TextDecoder().decode(plain));}catch(e){localStorage.removeItem(secureCacheStorageKey(uid));return null;}}var legacy=localStorage.getItem('ft_cache_'+uid);if(!legacy)return null;try{var parsed=JSON.parse(legacy);await saveSecureLocalCache(uid,parsed);return parsed;}catch(e){localStorage.removeItem('ft_cache_'+uid);return null;}}
+async function readSecureLocalCache(uid){
+  var stored=localStorage.getItem(secureCacheStorageKey(uid));
+  if(stored){
+    try{
+      var envelope=JSON.parse(stored),key=await secureCacheKey(),plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:cacheB64ToBytes(envelope.iv)},key,cacheB64ToBytes(envelope.data));
+      return JSON.parse(new TextDecoder().decode(plain));
+    }catch(e){
+      if(e&&(e.name==='OperationError'||e.name==='SyntaxError'))localStorage.removeItem(secureCacheStorageKey(uid));
+      return null;
+    }
+  }
+  var legacy=localStorage.getItem('ft_cache_'+uid);
+  if(!legacy)return null;
+  try{
+    var parsed=JSON.parse(legacy);
+    await saveSecureLocalCache(uid,parsed);
+    return parsed;
+  }catch(e){
+    if(e&&e.name==='SyntaxError')localStorage.removeItem('ft_cache_'+uid);
+    return null;
+  }
+}
 function currentCachePayload(){return {transactions:transactions,categories:categories,accounts:accounts,patrimony:patrimony,budgets:budgets,recurrenceExclusions:recurrenceExclusions,transactionVoids:transactionVoids,investmentOperations:investmentOperations};}
 async function loadData(){
   if(!currentUser)return false;
@@ -2022,6 +2116,7 @@ async function loadData(){
 var txVersion=0;
 function saveLocalCache(){
   txVersion++;_donutSig='';_barSig={};_lineSig={};
+  clearBalanceCache();
   if(typeof invalidateTxIndices==='function'){invalidateTxIndices();scheduleTxIndexing();}
   document.querySelectorAll('canvas[data-drawn]').forEach(function(cv){cv.removeAttribute('data-drawn');});
   if(!currentUser)return;
@@ -2045,8 +2140,8 @@ async function processRecurring(){
   var created=0,failures=[];
   var today=new Date();today.setHours(23,59,59,999);
   var processed={};
-  for(var i=0;i<recurring.length;i++){
-    var t=recurring[i];
+  for(var ri=0;ri<recurring.length;ri++){
+    var t=recurring[ri];
     var interval=t.recur_interval||'monthly';
     // Prefer the real series id; only fall back to the old composite-field key
     // for legacy rows created before recur_series_id existed.
@@ -2070,7 +2165,7 @@ async function processRecurring(){
       await Promise.all(oldExclusions.map(function(x){return sb.from('recurrence_exclusions').update({recur_series_id:legacySeriesId}).eq('id',x.id);}));
       root.recur_series_id=legacySeriesId;root.recur_anchor_date=root.date;seriesKey=legacySeriesId;processed[legacySeriesId]=true;
     }
-    var anchorDay=parseInt(root.date.slice(8,10),10);
+    var anchorDay=parseInt((root.recur_anchor_date||root.date).slice(8,10),10);
     var endDate=root.recur_end_date?new Date(root.recur_end_date+'T12:00:00'):null;
     var lastDate=new Date(root.date+'T12:00:00');
     related.forEach(function(tx){var d=new Date(tx.date+'T12:00:00');if(d>lastDate)lastDate=d;});
@@ -2533,6 +2628,7 @@ document.addEventListener('click',function(e){
   else if(action==='del-tx')requestDeleteTx(id);
   else if(action==='del-cat')deleteCat(id);
   else if(action==='archive-cat')archiveCat(id);
+  else if(action==='rename-cat')promptRenameCat(id);
   else if(action==='show-subform'){var pfx=IS_DESKTOP?'dt':'';var f=document.getElementById('subform_'+pfx+id);f.style.display=f.style.display==='none'?'block':'none';if(f.style.display==='block')document.getElementById('subinput_'+pfx+id).focus();setFlipHeight(catFlipId(id));}
   else if(action==='show-colorform'){var pfx=IS_DESKTOP?'dt':'';var f=document.getElementById('colorform_'+pfx+id);f.style.display=f.style.display==='none'?'block':'none';setFlipHeight(catFlipId(id));}
   else if(action==='set-cat-color')saveCatColor(id,sub);
@@ -2670,11 +2766,32 @@ function toggleSearchScope(){
 }
 function renderTxList(){
   var wrap=document.getElementById('txListWrap');if(!wrap)return;
-  var useAll=searchScope==='all'||filterDateFrom||filterDateTo;
-  var txs=homeAnnualMode?getYearTx():(useAll?transactions.slice():getMonthTx());
+  var txs=(searchScope==='all'||filterDateFrom||filterDateTo)?transactions.slice():(homeAnnualMode?getYearTx():getMonthTx());
   if(filterDateFrom)txs=txs.filter(function(t){return t.date>=filterDateFrom;});
   if(filterDateTo)txs=txs.filter(function(t){return t.date<=filterDateTo;});
-  if(searchQuery){var q=searchQuery.toLowerCase();txs=txs.filter(function(t){var c=txDisplayCategory(t);return c.name.toLowerCase().includes(q)||(t.note&&t.note.toLowerCase().includes(q))||(t.subcategory&&t.subcategory.includes(q))||((t.tags||[]).some(function(g){return g.includes(q);}));});}
+  if(searchQuery){
+    var q=normStr(searchQuery);
+    var qNum=searchQuery.trim().replace(',','.');
+    var isNumSearch=/^\d+(\.\d+)?$/.test(qNum);
+    txs=txs.filter(function(t){
+      var c=txDisplayCategory(t);
+      if(normStr(c.name).includes(q))return true;
+      if(t.note&&normStr(t.note).includes(q))return true;
+      if(t.subcategory&&normStr(t.subcategory).includes(q))return true;
+      if((t.tags||[]).some(function(g){return normStr(g).includes(q);}))return true;
+      if(t.type==='transfer'){
+        if(normStr('transferencia').includes(q)||normStr('traspaso').includes(q))return true;
+        var fromAcc=accounts.find(function(a){return a.id===t.account_id;});
+        var toAcc=accounts.find(function(a){return a.id===t.to_account_id;});
+        if(fromAcc&&normStr(fromAcc.name).includes(q))return true;
+        if(toAcc&&normStr(toAcc.name).includes(q))return true;
+      }
+      if(isNumSearch&&String(t.amount).includes(qNum))return true;
+      var fVal=fmt(t.amount).replace(/\s/g,'').toLowerCase();
+      if(fVal.includes(q))return true;
+      return false;
+    });
+  }
   if(filterType!=='all')txs=txs.filter(function(t){return t.type===filterType;});
   if(filterCat)txs=txs.filter(function(t){return t.category===filterCat;});
   txs=applySort(txs);
@@ -2718,22 +2835,27 @@ function updateFilterCount(){
 }
 function onTxSearchInput(input){searchQuery=input.value;renderTxList();}
 function accNameById(id){var a=accounts.find(function(a){return a.id===id;});return a?capitalize(a.name):'?';}
+function isAccountInvestment(accId){var a=accounts.find(function(acc){return acc.id===accId;});return !!(a&&a.is_investment);}
 function buildTxItem(t){
   if(t.type==='transfer'){
     var rec='';
     var delBtn=IS_DESKTOP?'<div class="tx-actions"><button class="tx-btn del" data-action="del-tx" data-id="'+t.id+'" title="eliminar">×</button></div>':'';
+    var hideTra=portfolioValueHidden()&&(isAccountInvestment(t.account_id)||isAccountInvestment(t.to_account_id));
+    var traAmtStr=hideTra?'••••••':fmt(t.amount);
     return '<div class="tx-swipe-wrap"'+(IS_DESKTOP?'':' data-swipe-id="'+t.id+'"')+'><div class="tx-delete-bg"><span class="tx-delete-x">×</span></div>'
       +'<div class="tx-item" onclick="if(!event.target.closest(\'.tx-btn\'))editTx(\''+t.id+'\')">'
       +'<div style="width:34px;height:34px;border-radius:12px;background:rgba(0,122,255,0.16);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--blue);font-size:15px;">⇄</div>'
       +'<div class="tx-info"><div class="tx-top"><span class="tx-cat">'+htmlEscape(accNameById(t.account_id))+' → '+htmlEscape(accNameById(t.to_account_id))+'</span></div>'
       +(t.note?'<div class="tx-note">'+hlText(t.note,searchQuery)+'</div>':'')+'</div>'
-      +'<div class="tx-right"><span class="tx-amount" style="color:var(--blue)">'+fmt(t.amount)+'</span>'+rec
+      +'<div class="tx-right"><span class="tx-amount" style="color:var(--blue)">'+traAmtStr+'</span>'+rec
       +delBtn+'</div></div></div>';
   }
   var c=txDisplayCategory(t);var sign=t.is_balance_adjustment?(t.type==='expense'?'−':'+'):(t.type==='expense'?'−':'+');var col=t.type==='expense'?'var(--red)':'var(--green)';
   var sub=t.subcategory?'<span class="tx-subcat">'+capitalize(htmlEscape(t.subcategory))+'</span>':'';
   var rec=t.recurring?'<div class="tx-recurring-badge">↺ Recurrente</div>':'';
   var delBtn=IS_DESKTOP?'<div class="tx-actions"><button class="tx-btn del" data-action="del-tx" data-id="'+t.id+'" title="eliminar">×</button></div>':'';
+  var hideTx=portfolioValueHidden()&&isAccountInvestment(t.account_id);
+  var txAmtStr=hideTx?'••••••':(sign+fmt(t.amount));
   return '<div class="tx-swipe-wrap"'+(IS_DESKTOP?'':' data-swipe-id="'+t.id+'"')+'><div class="tx-delete-bg"><span class="tx-delete-x">×</span></div>'
     +'<div class="tx-item" onclick="if(!event.target.closest(\'.tx-btn\'))editTx(\''+t.id+'\')">'
     +'<div style="width:34px;height:34px;border-radius:12px;background:'+c.color+'22;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'
@@ -2741,7 +2863,7 @@ function buildTxItem(t){
     +'</div>'
     +'<div class="tx-info"><div class="tx-top"><span class="tx-cat">'+hlText(capitalize(c.name),searchQuery)+'</span>'+sub+'</div>'
     +(t.note?'<div class="tx-note">'+hlText(t.note,searchQuery)+'</div>':'')+'</div>'
-    +'<div class="tx-right"><span class="tx-amount" style="color:'+col+'">'+sign+fmt(t.amount)+'</span>'+rec
+    +'<div class="tx-right"><span class="tx-amount" style="color:'+col+'">'+txAmtStr+'</span>'+rec
     +delBtn+'</div></div></div>';
 }
 
@@ -2824,8 +2946,8 @@ function renderCatTab(el,prefix){
   var incs=dashTxs.filter(function(t){return t.type==='income';});
   // Cache bycat totals — compute once, not per-category in forEach
   var bycat={},bysubcat={},bycatInc={},bysubcatInc={};
-  exps.forEach(function(t){bycat[t.category]=(bycat[t.category]||0)+t.amount;if(t.subcategory){var k=t.category+'||'+t.subcategory;bysubcat[k]=(bysubcat[k]||0)+t.amount;}});
-  incs.forEach(function(t){bycatInc[t.category]=(bycatInc[t.category]||0)+t.amount;if(t.subcategory){var k=t.category+'||'+t.subcategory;bysubcatInc[k]=(bysubcatInc[k]||0)+t.amount;}});
+  exps.forEach(function(t){var a=Number(t.amount)||0;bycat[t.category]=(bycat[t.category]||0)+a;if(t.subcategory){var k=t.category+'||'+t.subcategory;bysubcat[k]=(bysubcat[k]||0)+a;}});
+  incs.forEach(function(t){var a=Number(t.amount)||0;bycatInc[t.category]=(bycatInc[t.category]||0)+a;if(t.subcategory){var k=t.category+'||'+t.subcategory;bysubcatInc[k]=(bysubcatInc[k]||0)+a;}});
   var totalExp=Object.values(bycat).reduce(function(a,b){return a+b;},0)||1;
   var totalInc=Object.values(bycatInc).reduce(function(a,b){return a+b;},0)||1;
   var activeCats=categories.filter(function(c){return !c.archived;});
@@ -2840,8 +2962,8 @@ function renderCatTab(el,prefix){
     var budgetNote=isInc?'':budgetNoteForCat(c.id);
     var autoBreakdown=(!isInc&&isAutoSubBudgetCat(c.id)&&!hasManualBudget(c.id)&&!homeAnnualMode)?autoRecurBudgetBreakdown(c.id,viewYear,viewMonth):null;
     var maxBar=budget>0?Math.max(budget,amt):pctDenom||1;
-    var pctBar=budget>0?Math.min(Math.round(amt/maxBar*100),100):Math.min(Math.round(amt/maxBar*100),100);
-    var budgetPctBar=budget>0?Math.min(Math.round(budget/maxBar*100),100):0;
+    var pctBar=budget>0?Math.max(0,Math.min(Math.round(amt/maxBar*100),100)):Math.max(0,Math.min(Math.round(amt/maxBar*100),100));
+    var budgetPctBar=budget>0?Math.max(0,Math.min(Math.round(budget/maxBar*100),100)):0;
     var budgetAlert='';
     if(budget>0){
       var used=Math.round(amt/budget*100);
@@ -2865,7 +2987,7 @@ function renderCatTab(el,prefix){
       +'<div class="cat-row-top">'
       +'<span class="cat-drag-handle" onpointerdown="catDragStart(event,\''+c.id+'\')">⠿</span>'
       +'<div class="cat-color" style="background:'+c.color+'22;cursor:pointer;width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0" data-action="show-colorform" data-id="'+c.id+'">'+catIconSvg(c,18)+'</div>'
-      +'<span style="flex:1;font-size:15px;font-weight:500;color:var(--text)">'+capEsc(c.name)+'</span>'
+      +'<span style="flex:1;display:flex;align-items:center;gap:6px;min-width:0"><strong style="font-size:15px;font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+capEsc(c.name)+'</strong><button type="button" class="cat-rename-btn" data-action="rename-cat" data-id="'+c.id+'" title="Renombrar categoría" aria-label="Renombrar categoría" style="background:none;border:none;color:var(--text3);cursor:pointer;padding:2px 4px;font-size:12px">✎</button></span>'
       +'<span style="font-family:var(--mono);font-size:11px;color:var(--text3)">'+(amt>0?Math.round(amt/pctDenom*100)+'%':'')+'</span>'
       +'<span style="font-family:var(--mono);font-size:13px;color:var(--text2);margin-left:6px">'+(amt>0?fmt(amt):'—')+'</span>'
       +'<button class="arch-btn-sm" data-action="archive-cat" data-id="'+c.id+'" title="'+(c.archived?'Restaurar':'Archivar')+'">'
@@ -2951,7 +3073,18 @@ function animateTabEntrance(el,selector){
 }
 function toggleAccCard(id){var h=document.getElementById('histtable_'+id);if(!h)return;var open=h.style.display!=='none';h.style.display=open?'none':'block';var card=document.getElementById('acccard_'+id);if(card)card.classList.toggle('expanded',!open);}
 function defAccKey(){return 'ft_default_account'+(currentUser?'_'+currentUser.id:'');}
-function getDefaultAccountId(){try{var v=localStorage.getItem(defAccKey());return (v&&accounts.some(function(a){return a.id===v;}))?v:'';}catch(e){return '';}}
+function getDefaultAccountId(){
+  try{
+    var v=localStorage.getItem(defAccKey());
+    if(v&&accounts.some(function(a){return a.id===v;}))return v;
+  }catch(e){}
+  if(!accounts||!accounts.length)return '';
+  var def=accounts.find(function(a){return a.is_default;});
+  if(def)return def.id;
+  var nonInv=accounts.find(function(a){return !a.is_investment;});
+  if(nonInv)return nonInv.id;
+  return accounts[0].id;
+}
 function setDefaultAccount(id){try{if(getDefaultAccountId()===id)localStorage.removeItem(defAccKey());else localStorage.setItem(defAccKey(),id);}catch(e){}refreshTab();}
 function openTransferFrom(accountId){openModal();setType('transfer');document.getElementById('txFromAccount').value=accountId;}
 function renderPatTab(el){
@@ -2963,7 +3096,7 @@ function renderPatTab(el){
     var isPrivateInvestmentBalance=!!a.is_investment&&portfolioValueHidden();
     var calcText=isPrivateInvestmentBalance?'••••••':fmt(calc);
     var reset=accountLatestReset(a.id,yr,mo);
-    var resetHtml=reset?'Última actualización: '+new Date((reset.reset_date||(reset.year+'-'+pad(reset.month)+'-01'))+'T12:00:00').toLocaleDateString('es-ES')+' → '+fmt(reset.amount):'Sin ajustes registrados, calculado desde el inicio';
+    var resetHtml=reset?'Última actualización: '+new Date((reset.reset_date||(reset.year+'-'+pad(reset.month)+'-01'))+'T12:00:00').toLocaleDateString('es-ES')+' → '+(isPrivateInvestmentBalance?'••••••':fmt(reset.amount)):'Sin ajustes registrados, calculado desde el inicio';
     var hist=accountHistory(a.id);
     var histHtml='';
     if(hist.length){
@@ -2979,9 +3112,9 @@ function renderPatTab(el){
           var desfaseStr=th===null?'—':((Math.abs(d)>0.01?(d>0?'+':'')+fmt(d):'sin desfase'));
           return '<div class="pat-hist-row">'
             +'<span>'+new Date((p.reset_date||(p.year+'-'+pad(p.month)+'-01'))+'T12:00:00').toLocaleDateString('es-ES')+'</span>'
-            +'<span>'+fmt(p.amount)+'</span>'
-            +'<span>'+(th===null?'—':fmt(th))+'</span>'
-            +'<span>'+desfaseStr+'</span>'
+            +'<span>'+(isPrivateInvestmentBalance?'••••••':fmt(p.amount))+'</span>'
+            +'<span>'+(isPrivateInvestmentBalance?'••••••':(th===null?'—':fmt(th)))+'</span>'
+            +'<span>'+(isPrivateInvestmentBalance?'••••••':desfaseStr)+'</span>'
             +(isLockedAdjust(p)
               ?'<span class="pat-hist-lock" title="Saldo inicial fijo · no se puede eliminar"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="11" width="15" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>'
               :'<button class="pat-hist-del" data-action="del-adjust" data-id="'+p.id+'" title="eliminar ajuste">×</button>')
@@ -3065,10 +3198,8 @@ function accountTxDelta(t,accountId){
   if(t.is_balance_adjustment)return 0;
   if(t.type==='transfer'){
     var d=0;
-    var toExists=t.to_account_id&&accounts.some(function(a){return a.id===t.to_account_id;});
-    var fromExists=t.account_id&&accounts.some(function(a){return a.id===t.account_id;});
-    if(t.account_id===accountId&&toExists)d-=Number(t.amount);
-    if(t.to_account_id===accountId&&fromExists)d+=Number(t.amount);
+    if(t.account_id===accountId)d-=Number(t.amount);
+    if(t.to_account_id===accountId)d+=Number(t.amount);
     return d;
   }
   if(!(t.account_id===accountId||(!t.account_id&&accounts.length===1)))return 0;
@@ -3077,7 +3208,7 @@ function accountTxDelta(t,accountId){
 function accountTouchesAccount(t,accountId){return !t.is_balance_adjustment&&(t.account_id===accountId||t.to_account_id===accountId||(!t.account_id&&t.type!=='transfer'&&accounts.length===1));}
 function accountVoidDelta(voided,accountId,baseDate,asOfDate){
   var tx=voided&&voided.transaction_data;if(!tx||!accountTouchesAccount(tx,accountId))return 0;
-  var voidedDate=String(voided.voided_at||'').slice(0,10);
+  var voidedDate=localIsoDate(voided.voided_at)||(String(voided.voided_at||'').slice(0,10));
   // Solo compensa una anulación posterior a la fotografía real: los movimientos
   // posteriores ya desaparecen del cálculo normal al haber sido borrados.
   // Una anulación anterior o realizada el mismo día que la fotografía ya está
@@ -3405,7 +3536,8 @@ function renderAnnualTab(el){
   var prevInc=prevTxs.filter(function(t){return t.type==='income'&&dayOf(t.date)<=prevExpCutoff;}).reduce(function(s,t){return s+t.amount;},0);
   var expDiff=curExp-prevExp,incDiff=curInc-prevInc;
   function legItem(c,l){return '<span class="chart-legend-item"><span class="chart-legend-dot" style="background:'+c+'"></span>'+l+'</span>';}
-  var lineLegend=accounts.length?accounts.map(function(a){return legItem(a.color,capEsc(a.name));}).join(''):legItem('#8E8E93','Sin datos');
+  var visibleAccounts=accounts.filter(function(a){return !(portfolioValueHidden()&&a.is_investment);});
+  var lineLegend=visibleAccounts.length?visibleAccounts.map(function(a){return legItem(a.color,capEsc(a.name));}).join(''):legItem('#8E8E93','Sin datos');
   var incData=Array(12).fill(0),expData=Array(12).fill(0),savData=[];
   var yearTxs=_txByYearStr[String(chartYear)]||[];
   yearTxs.forEach(function(t){var m=parseInt(String(t.date).slice(5,7),10)-1;if(m>=0&&m<12){if(t.type==='income')incData[m]+=Number(t.amount)||0;else if(t.type==='expense')expData[m]+=Number(t.amount)||0;}});
@@ -3480,7 +3612,7 @@ function renderAnnualTab(el){
   animateTabEntrance(el,'.chart-year-nav,.compare-grid,.chart-card,.stat-title,.stat-grid');
   drawBarChart(document.getElementById('barChartCanvas'),incData,expData,savData);
   var lineLabels=MONTHS_S.slice();
-  var series=accounts.map(function(a){var hasHistory=accountHistory(a.id).length>0;return {label:capitalize(a.name),color:a.color,data:Array.from({length:12},function(_,m){return hasHistory?accountCalcBalanceAsOf(a.id,lastDayOfMonthStr(chartYear,m+1)):null;})};});
+  var series=visibleAccounts.map(function(a){var hasHistory=accountHistory(a.id).length>0;return {label:capitalize(a.name),color:a.color,data:Array.from({length:12},function(_,m){return hasHistory?accountCalcBalanceAsOf(a.id,lastDayOfMonthStr(chartYear,m+1)):null;})};});
   drawLineChart(document.getElementById('lineChartCanvas'),series,lineLabels);
 }
 
@@ -3542,14 +3674,23 @@ function investmentUnits(symbol){return investmentOperations.filter(function(o){
 function openInvestmentTradeModal(side){
   var asset=assetDetailState;if(!asset)return;
   var cashAccounts=accounts.filter(function(a){return !a.is_investment;});if(!cashAccounts.length){alert('Crea primero una cuenta desde Cuentas para poder operar.');return;}
+  var lastTrigger=document.activeElement;
   var available=investmentUnits(asset.symbol),modal=document.createElement('div');modal.className='investment-trade-modal';
-  modal.innerHTML='<div class="investment-trade-card"><div class="investment-trade-head"><div><div class="investment-trade-kicker">'+htmlEscape(asset.symbol)+' · '+htmlEscape(asset.type||'Producto')+'</div><h3>'+ (side==='buy'?'Comprar ':'Vender ')+htmlEscape(asset.name)+'</h3></div><button class="investment-trade-close" type="button">×</button></div><div class="investment-trade-mode"><button class="active" data-mode="money">Por importe</button><button data-mode="units">Por participaciones</button></div><label class="investment-trade-field"><span id="tradeAmountLabel">Importe a '+(side==='buy'?'invertir':'retirar')+'</span><input id="tradeAmount" inputmode="decimal" type="number" min="0.01" step="0.01" placeholder="0,00"></label><label class="investment-trade-field"><span>Precio por participación</span><input id="tradePrice" inputmode="decimal" type="number" min="0.000001" step="any" placeholder="Consultando precio de mercado…"></label><label class="investment-trade-field"><span>Cuenta '+(side==='buy'?'de origen':'de destino')+'</span><select id="tradeAccount">'+cashAccounts.map(function(a){return '<option value="'+htmlEscape(a.id)+'">'+htmlEscape(a.name)+'</option>';}).join('')+'</select></label><label class="investment-trade-field"><span>Fecha de la operación</span><input id="tradeDate" type="date" value="'+new Date().toISOString().slice(0,10)+'"></label><div class="investment-trade-summary" id="tradeSummary">Cargando cotización actual…</div><button class="investment-trade-submit '+(side==='sell'?'sell':'')+'" type="button">'+(side==='buy'?'Confirmar compra':'Confirmar venta')+'</button></div>';
+  modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');modal.setAttribute('aria-labelledby','tradeModalTitle');
+  modal.innerHTML='<div class="investment-trade-card"><div class="investment-trade-head"><div><div class="investment-trade-kicker">'+htmlEscape(asset.symbol)+' · '+htmlEscape(asset.type||'Producto')+'</div><h3 id="tradeModalTitle">'+ (side==='buy'?'Comprar ':'Vender ')+htmlEscape(asset.name)+'</h3></div><button class="investment-trade-close" type="button" aria-label="Cerrar">×</button></div><div class="investment-trade-mode"><button class="active" data-mode="money">Por importe</button><button data-mode="units">Por participaciones</button></div><label class="investment-trade-field"><span id="tradeAmountLabel">Importe a '+(side==='buy'?'invertir':'retirar')+'</span><input id="tradeAmount" inputmode="decimal" type="number" min="0.01" step="0.01" placeholder="0,00"></label><label class="investment-trade-field"><span>Precio por participación</span><input id="tradePrice" inputmode="decimal" type="number" min="0.000001" step="any" placeholder="Consultando precio de mercado…"></label><label class="investment-trade-field"><span>Cuenta '+(side==='buy'?'de origen':'de destino')+'</span><select id="tradeAccount">'+cashAccounts.map(function(a){return '<option value="'+htmlEscape(a.id)+'">'+htmlEscape(a.name)+'</option>';}).join('')+'</select></label><label class="investment-trade-field"><span>Fecha de la operación</span><input id="tradeDate" type="date" value="'+new Date().toISOString().slice(0,10)+'"></label><div class="investment-trade-summary" id="tradeSummary">Cargando cotización actual…</div><button class="investment-trade-submit '+(side==='sell'?'sell':'')+'" type="button">'+(side==='buy'?'Confirmar compra':'Confirmar venta')+'</button></div>';
   document.body.appendChild(modal);var mode='money',amount=modal.querySelector('#tradeAmount'),price=modal.querySelector('#tradePrice'),summary=modal.querySelector('#tradeSummary');
+  function closeModal(){
+    window.removeEventListener('keydown',onModalKeyDown);
+    modal.remove();
+    if(lastTrigger&&typeof lastTrigger.focus==='function')try{lastTrigger.focus();}catch(e){}
+  }
+  function onModalKeyDown(e){if(e.key==='Escape'){e.preventDefault();closeModal();}}
+  window.addEventListener('keydown',onModalKeyDown);
   function update(){var v=Number(amount.value),p=Number(price.value),units=mode==='money'?v/p:v,total=mode==='money'?v:v*p;if(v>0&&p>0&&units>0)summary.textContent=(mode==='money'?units.toLocaleString('es-ES',{maximumFractionDigits:6})+' participaciones':fmt(total))+(side==='sell'?' · disponibles: '+available.toLocaleString('es-ES',{maximumFractionDigits:6}):'');else summary.textContent='Introduce el importe y el precio ejecutado.';}
   modal.querySelectorAll('[data-mode]').forEach(function(b){b.onclick=function(){mode=b.dataset.mode;modal.querySelectorAll('[data-mode]').forEach(function(x){x.classList.toggle('active',x===b);});modal.querySelector('#tradeAmountLabel').textContent=mode==='money'?'Importe a '+(side==='buy'?'invertir':'retirar'):'Participaciones';amount.placeholder=mode==='money'?'0,00':'0,000000';update();};});amount.oninput=price.oninput=update;
-  modal.querySelector('.investment-trade-close').onclick=function(){modal.remove();};modal.onclick=function(e){if(e.target===modal)modal.remove();};
+  modal.querySelector('.investment-trade-close').onclick=function(){closeModal();};modal.onclick=function(e){if(e.target===modal)closeModal();};
   getCachedQuote(asset.symbol,180000).then(function(q){var p=Number(q&&(q.price||q.close));if(Number.isFinite(p)){price.value=p;update();}else if(!amount.value){summary.textContent='Introduce el importe y el precio ejecutado.';}}).catch(function(){if(!amount.value)summary.textContent='Introduce el importe y el precio ejecutado.';});
-  modal.querySelector('.investment-trade-submit').onclick=async function(){var v=Number(amount.value),p=Number(price.value),units=mode==='money'?v/p:v,total=mode==='money'?v:v*p,date=modal.querySelector('#tradeDate').value,accountId=modal.querySelector('#tradeAccount').value;if(!date||!Number.isFinite(units)||units<=0||!Number.isFinite(p)||p<=0){summary.textContent='Revisa importe, precio y fecha.';return;}if(side==='sell'&&units>available+0.0000001){summary.textContent='No puedes vender más participaciones de las que tienes ('+available.toLocaleString('es-ES',{maximumFractionDigits:6})+').';return;}this.disabled=true;this.textContent='Guardando…';var r=await sb.rpc('record_investment_operation',{p_side:side,p_symbol:asset.symbol,p_product_name:asset.name,p_product_type:asset.type||null,p_units:units,p_unit_price:p,p_amount:total,p_operation_date:date,p_cash_account_id:accountId});if(r.error){summary.textContent='No se pudo guardar: '+r.error.message;this.disabled=false;this.textContent=side==='buy'?'Confirmar compra':'Confirmar venta';return;}modal.remove();await loadData();showSuccessToast(side==='buy'?'Compra registrada':'Venta registrada');};
+  modal.querySelector('.investment-trade-submit').onclick=async function(){var v=Number(amount.value),p=Number(price.value),units=mode==='money'?v/p:v,total=mode==='money'?v:v*p,date=modal.querySelector('#tradeDate').value,accountId=modal.querySelector('#tradeAccount').value;if(!date||!Number.isFinite(units)||units<=0||!Number.isFinite(p)||p<=0){summary.textContent='Revisa importe, precio y fecha.';return;}if(side==='sell'&&units>available+0.0000001){summary.textContent='No puedes vender más participaciones de las que tienes ('+available.toLocaleString('es-ES',{maximumFractionDigits:6})+').';return;}this.disabled=true;this.textContent='Guardando…';var r=await sb.rpc('record_investment_operation',{p_side:side,p_symbol:asset.symbol,p_product_name:asset.name,p_product_type:asset.type||null,p_units:units,p_unit_price:p,p_amount:total,p_operation_date:date,p_cash_account_id:accountId});if(r.error){summary.textContent='No se pudo guardar: '+r.error.message;this.disabled=false;this.textContent=side==='buy'?'Confirmar compra':'Confirmar venta';return;}closeModal();await loadData();showSuccessToast(side==='buy'?'Compra registrada':'Venta registrada');};
 }
 document.addEventListener('click',function(e){var button=e.target.closest&&e.target.closest('.asset-actions .buy,.asset-actions .sell');if(button){e.preventDefault();openInvestmentTradeModal(button.classList.contains('buy')?'buy':'sell');}});
 function closeAssetSheet(sheet){assetDetailState=null;saveUiState();if(sheet)sheet.remove();}
@@ -3560,7 +3701,25 @@ function renderSearchResults(container,items){
   container.querySelectorAll('.search-result').forEach(function(button){button.onclick=function(){container.innerHTML='';container.hidden=true;openAssetSheet(this.dataset.name,this.dataset.type,this.dataset.symbol);};});
 }
 function investmentPositionList(){
-  var bySymbol={};investmentOperations.forEach(function(o){var key=o.symbol;if(!bySymbol[key])bySymbol[key]={symbol:key,name:o.product_name||key,type:o.product_type||'Producto',units:0,cost:0};var p=bySymbol[key],u=Number(o.units),a=Number(o.amount);if(o.side==='buy'){p.units+=u;p.cost+=a;}else if(p.units>0){p.cost-=p.cost*(u/p.units);p.units-=u;}});
+  var bySymbol={};
+  var ops=investmentOperations.slice().sort(function(a,b){
+    var d=String(a.operation_date).localeCompare(String(b.operation_date));
+    if(d!==0)return d;
+    return String(a.created_at||a.id||'').localeCompare(String(b.created_at||b.id||''));
+  });
+  ops.forEach(function(o){
+    var key=o.symbol;
+    if(!bySymbol[key])bySymbol[key]={symbol:key,name:o.product_name||key,type:o.product_type||'Producto',units:0,cost:0};
+    var p=bySymbol[key],u=Number(o.units),a=Number(o.amount);
+    if(o.side==='buy'){
+      p.units+=u;
+      p.cost+=a;
+    }else if(p.units>0){
+      p.cost-=p.cost*(u/p.units);
+      p.units-=u;
+      if(p.units<=0.0000001){p.units=0;p.cost=0;}
+    }
+  });
   return Object.keys(bySymbol).map(function(k){return bySymbol[k];}).filter(function(p){return p.units>0.0000001;});
 }
 function normalizeAssetType(raw){
@@ -3569,7 +3728,7 @@ function normalizeAssetType(raw){
   if(t.indexOf('etf')!==-1)return 'ETFs';
   if(t.indexOf('fondo')!==-1||t.indexOf('fund')!==-1)return 'Fondos';
   if(t.indexOf('acci')!==-1||t.indexOf('stock')!==-1||t.indexOf('equity')!==-1||t.indexOf('share')!==-1)return 'Acciones';
-  if(t.indexOf('cripto')!==-1||t.indexOf('crypto')!==-1||t.indexOf('btc')!==-1||t.indexOf('eth')!==-1)return 'Cripto';
+  if(t.indexOf('cripto')!==-1||t.indexOf('crypto')!==-1||t.indexOf('btc')!==-1||t.indexOf('eth')!==-1||t.indexOf('digital currency')!==-1)return 'Cripto';
   if(t.indexOf('bono')!==-1||t.indexOf('bond')!==-1||t.indexOf('renta fija')!==-1)return 'Renta fija';
   return 'Otros';
 }
@@ -3618,7 +3777,7 @@ function refreshInvestmentMarketValue(){
 function renderInvestmentOperations(wrap){
   if(!wrap)return;var rows=investmentOperations.slice().sort(function(a,b){return String(b.operation_date).localeCompare(String(a.operation_date));}),html='<section class="invest-operations"><div class="invest-operations-head"><h3>Operaciones</h3><small>'+rows.length+' '+(rows.length===1?'movimiento':'movimientos')+'</small></div>';
   if(!rows.length)html+='<div class="invest-empty" style="padding:18px"><small>Tus compras y ventas aparecerán aquí.</small></div>';
-  else html+=rows.map(function(o){var buy=o.side==='buy',date=new Date(o.operation_date+'T12:00:00').toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'}),units=Number(o.units).toLocaleString('es-ES',{maximumFractionDigits:6}),account=accNameById(o.cash_account_id);return '<div class="invest-operation-row" data-operation-id="'+htmlEscape(o.id)+'"><div class="invest-operation-side '+(buy?'':'sell')+'">'+(buy?'↓':'↑')+'</div><div class="invest-operation-main"><strong>'+htmlEscape(o.product_name||o.symbol)+'</strong><small>'+htmlEscape(o.symbol)+' · '+date+' · '+htmlEscape(account)+'</small></div><div class="invest-operation-value">'+fmt(o.amount)+'<small>'+units+' part.</small></div><button class="invest-operation-delete" title="Eliminar operación" data-operation-id="'+htmlEscape(o.id)+'">×</button></div>';}).join('');
+  else html+=rows.map(function(o){var buy=o.side==='buy',date=new Date(o.operation_date+'T12:00:00').toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'}),units=Number(o.units).toLocaleString('es-ES',{maximumFractionDigits:6}),account=accNameById(o.cash_account_id);var valStr=portfolioValueHidden()?'••••••':fmt(o.amount);var unitsStr=portfolioValueHidden()?'••••••':(units+' part.');return '<div class="invest-operation-row" data-operation-id="'+htmlEscape(o.id)+'"><div class="invest-operation-side '+(buy?'':'sell')+'">'+(buy?'↓':'↑')+'</div><div class="invest-operation-main"><strong>'+htmlEscape(o.product_name||o.symbol)+'</strong><small>'+htmlEscape(o.symbol)+' · '+date+' · '+htmlEscape(account)+'</small></div><div class="invest-operation-value">'+valStr+'<small>'+unitsStr+'</small></div><button class="invest-operation-delete" title="Eliminar operación" data-operation-id="'+htmlEscape(o.id)+'">×</button></div>';}).join('');
   html+='</section>';var portfolio=wrap.querySelector('.portfolio-card');if(portfolio)portfolio.insertAdjacentHTML('afterend',html);wrap.querySelectorAll('.invest-operation-delete').forEach(function(button){button.onclick=function(){deleteInvestmentOperation(this.dataset.operationId);};});wrap.querySelectorAll('.invest-operation-row').forEach(function(row){row.onclick=function(e){if(!e.target.closest('.invest-operation-delete'))openInvestmentOperationEdit(this.dataset.operationId);};});
 }
 function openInvestmentOperationEdit(id){var o=investmentOperations.find(function(x){return x.id===id;});if(!o)return;assetDetailState={name:o.product_name,type:o.product_type||'Producto',symbol:o.symbol};openInvestmentTradeModal(o.side);var m=document.querySelector('.investment-trade-modal');if(!m)return;var amount=m.querySelector('#tradeAmount'),price=m.querySelector('#tradePrice'),account=m.querySelector('#tradeAccount'),date=m.querySelector('#tradeDate'),submit=m.querySelector('.investment-trade-submit');amount.value=o.amount;price.value=o.unit_price;account.value=o.cash_account_id;date.value=o.operation_date;amount.dispatchEvent(new Event('input'));submit.textContent='Guardar cambios';submit.onclick=async function(){var total=Number(amount.value),p=Number(price.value),units=total/p,d=date.value,acc=account.value;if(!d||!total||!p||!units){alert('Revisa los datos');return;}submit.disabled=true;var del=await sb.rpc('delete_investment_operation',{p_operation_id:o.id});if(del.error){alert(del.error.message);submit.disabled=false;return;}var r=await sb.rpc('record_investment_operation',{p_side:o.side,p_symbol:o.symbol,p_product_name:o.product_name,p_product_type:o.product_type||null,p_units:units,p_unit_price:p,p_amount:total,p_operation_date:d,p_cash_account_id:acc});if(r.error){alert('No se pudo guardar: '+r.error.message);submit.disabled=false;return;}m.remove();await loadData();showSuccessToast('Operación actualizada');};}
@@ -3678,7 +3837,30 @@ async function loadCloudBackupStatus(){
   }
 }
 function backupPreviewCounts(data){return {cuentas:(data.accounts||[]).length,categorías:(data.categories||[]).length,transacciones:(data.transactions||[]).length,presupuestos:(data.budgets||[]).length,ajustes:(data.patrimony||[]).length,operaciones_de_inversión:(data.investmentOperations||[]).length};}
-function confirmCriticalAction(options){return new Promise(function(resolve){var root=document.createElement('div');root.className='critical-confirm-bg';var countHtml=Object.keys(options.counts||{}).filter(function(k){return Number(options.counts[k])>0;}).map(function(k){return '<span><b>'+Number(options.counts[k]).toLocaleString('es-ES')+'</b> '+htmlEscape(k.replace(/_/g,' '))+'</span>';}).join('');root.innerHTML='<div class="critical-confirm-card" role="dialog" aria-modal="true" aria-labelledby="criticalConfirmTitle"><div class="critical-confirm-handle"></div><div class="critical-confirm-kicker">Confirmación de seguridad</div><h3 id="criticalConfirmTitle">'+htmlEscape(options.title)+'</h3><p>'+htmlEscape(options.description)+'</p>'+(countHtml?'<div class="critical-confirm-counts">'+countHtml+'</div>':'')+'<label class="critical-confirm-input"><span>Escribe <b>'+htmlEscape(options.phrase)+'</b> para continuar</span><input autocomplete="off" autocapitalize="characters"></label><div class="critical-confirm-actions"><button type="button" class="critical-confirm-cancel">Cancelar</button><button type="button" class="critical-confirm-approve" disabled>'+htmlEscape(options.approveLabel)+'</button></div></div>';document.body.appendChild(root);var input=root.querySelector('input'),approve=root.querySelector('.critical-confirm-approve');function close(value){root.remove();resolve(value);}input.oninput=function(){approve.disabled=input.value.trim().toUpperCase()!==options.phrase;};root.querySelector('.critical-confirm-cancel').onclick=function(){close(false);};approve.onclick=function(){close(true);};root.onclick=function(event){if(event.target===root)close(false);};setTimeout(function(){input.focus();},60);});}
+function confirmCriticalAction(options){
+  return new Promise(function(resolve){
+    var lastTrigger=document.activeElement;
+    var root=document.createElement('div');
+    root.className='critical-confirm-bg';
+    var countHtml=Object.keys(options.counts||{}).filter(function(k){return Number(options.counts[k])>0;}).map(function(k){return '<span><b>'+Number(options.counts[k]).toLocaleString('es-ES')+'</b> '+htmlEscape(k.replace(/_/g,' '))+'</span>';}).join('');
+    root.innerHTML='<div class="critical-confirm-card" role="dialog" aria-modal="true" aria-labelledby="criticalConfirmTitle"><div class="critical-confirm-handle"></div><div class="critical-confirm-kicker">Confirmación de seguridad</div><h3 id="criticalConfirmTitle">'+htmlEscape(options.title)+'</h3><p>'+htmlEscape(options.description)+'</p>'+(countHtml?'<div class="critical-confirm-counts">'+countHtml+'</div>':'')+'<label class="critical-confirm-input"><span>Escribe <b>'+htmlEscape(options.phrase)+'</b> para continuar</span><input autocomplete="off" autocapitalize="characters"></label><div class="critical-confirm-actions"><button type="button" class="critical-confirm-cancel">Cancelar</button><button type="button" class="critical-confirm-approve" disabled>'+htmlEscape(options.approveLabel)+'</button></div></div>';
+    document.body.appendChild(root);
+    var input=root.querySelector('input'),approve=root.querySelector('.critical-confirm-approve');
+    function close(value){
+      window.removeEventListener('keydown',onKeyDown);
+      root.remove();
+      if(lastTrigger&&typeof lastTrigger.focus==='function')try{lastTrigger.focus();}catch(e){}
+      resolve(value);
+    }
+    function onKeyDown(e){if(e.key==='Escape'){e.preventDefault();close(false);}}
+    window.addEventListener('keydown',onKeyDown);
+    input.oninput=function(){approve.disabled=input.value.trim().toUpperCase()!==options.phrase;};
+    root.querySelector('.critical-confirm-cancel').onclick=function(){close(false);};
+    approve.onclick=function(){close(true);};
+    root.onclick=function(event){if(event.target===root)close(false);};
+    setTimeout(function(){input.focus();},60);
+  });
+}
 async function createSafetyBackup(reason){var result=await sb.functions.invoke('automatic-backup',{body:{reason:reason||'manual'}});if(result.error||!result.data||!result.data.ok)throw new Error((result.data&&result.data.error)||result.error&&result.error.message||'No se pudo crear la copia previa');return result.data.backup;}
 async function restoreLatestBackup(){setSync('syncing');var preview=await sb.functions.invoke('restore-backup',{body:{action:'preview'}});if(preview.error||!preview.data||!preview.data.ok){alert((preview.data&&preview.data.error)||preview.error&&preview.error.message||'No se pudo preparar la vista previa');setSync('err');return;}setSync('ok');var p=preview.data.preview,accepted=await confirmCriticalAction({title:'Restaurar última copia',description:'Se sustituirán los datos actuales por la copia del '+new Date(p.created_at).toLocaleString('es-ES')+'. Antes se guardará automáticamente una copia de tu estado actual.',counts:p.counts,phrase:'RESTAURAR',approveLabel:'Restaurar copia'});if(!accepted)return;setSync('syncing');var r=await sb.functions.invoke('restore-backup',{body:{action:'restore'}});if(r.error||!r.data||!r.data.ok){alert((r.data&&r.data.error)||r.error&&r.error.message||'No se pudo restaurar la copia');setSync('err');return;}await loadData();showSuccessToast('Copia restaurada correctamente');}
 async function loadLatestCommitTime(){var el=document.getElementById('appPublishedAt');if(!el)return;try{var r=await fetch('https://api.github.com/repos/mgesm/fintrack/commits/main',{headers:{Accept:'application/vnd.github+json'}});var d=await r.json(),date=d&&d.commit&&d.commit.committer&&d.commit.committer.date;if(!date)throw 0;el.textContent=new Date(date).toLocaleString('es-ES',{timeZone:'Europe/Madrid',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',timeZoneName:'short'});}catch(e){el.textContent=APP_PUBLISHED_AT;}}
@@ -3689,7 +3871,7 @@ async function signOut(){
   // La cola se conserva por usuario; la caché visible se elimina antes de
   // esperar a la red para no dejar datos financieros en este dispositivo.
   if(cKey!=='ft_cache_'){localStorage.removeItem(cKey);localStorage.removeItem(secureCacheStorageKey(currentUser.id));}
-  transactions=[];categories=[];accounts=[];patrimony=[];budgets=[];recurrenceExclusions=[];transactionVoids=[];_monthTxCache={};_yearTxCache={};if(typeof invalidateTxIndices==='function')invalidateTxIndices();txVersion++;
+  transactions=[];categories=[];accounts=[];patrimony=[];budgets=[];recurrenceExclusions=[];transactionVoids=[];offlineQueue=[];investmentOperations=[];_monthTxCache={};_yearTxCache={};if(typeof invalidateTxIndices==='function')invalidateTxIndices();txVersion++;
   try{await sb.auth.signOut();}catch(e){}
   showAuth();
 }
@@ -4005,7 +4187,7 @@ async function deleteTx(id,undoExclusion){
     try{
       var r=await sb.rpc('void_fintrack_transaction',{target_id:id});
       if(!r.error){transactionVoids.push(voided);transactions=transactions.filter(function(t){return t.id!==id;});saveLocalCache();setSync('ok');}
-      else{setSync('err');return;}
+      else{throw r.error;}
     }catch(ex){
       transactionVoids.push(voided);transactions=transactions.filter(function(t){return t.id!==id;});queueOp({type:'insert',table:'transaction_voids',data:voided});queueOp({type:'delete',table:'transactions',id:id});saveLocalCache();setSync('err');
     }
@@ -4015,12 +4197,21 @@ async function deleteTx(id,undoExclusion){
 }
 async function undoRecurringOccurrenceDelete(tx,exclusion){
   setSync('syncing');
-  recurrenceExclusions=recurrenceExclusions.filter(function(x){return x.id!==exclusion.id;});
+  recurrenceExclusions=recurrenceExclusions.filter(function(x){
+    return x.id!==exclusion.id && !(x.recur_series_id===exclusion.recur_series_id && x.skipped_date===exclusion.skipped_date);
+  });
   if(isOffline){
-    offlineQueue=offlineQueue.filter(function(op){return !(op.type==='insert'&&op.table==='recurrence_exclusions'&&op.data&&op.data.id===exclusion.id);});
+    offlineQueue=offlineQueue.filter(function(op){
+      return !(op.type==='insert'&&op.table==='recurrence_exclusions'&&op.data&&
+        (op.data.id===exclusion.id || (op.data.recur_series_id===exclusion.recur_series_id && op.data.skipped_date===exclusion.skipped_date)));
+    });
     localStorage.setItem(queueKey(),JSON.stringify(offlineQueue));saveLocalCache();await restoreTx(tx);return;
   }
-  var r=await sb.from('recurrence_exclusions').delete().eq('id',exclusion.id);
+  var query=exclusion.id?sb.from('recurrence_exclusions').delete().eq('id',exclusion.id):sb.from('recurrence_exclusions').delete().match({user_id:currentUser.id,recur_series_id:exclusion.recur_series_id,skipped_date:exclusion.skipped_date});
+  var r=await query;
+  if(r.error&&exclusion.recur_series_id&&exclusion.skipped_date){
+    r=await sb.from('recurrence_exclusions').delete().match({user_id:currentUser.id,recur_series_id:exclusion.recur_series_id,skipped_date:exclusion.skipped_date});
+  }
   if(r.error){recurrenceExclusions.push(exclusion);saveLocalCache();setSync('err');return;}
   saveLocalCache();await restoreTx(tx);
 }
@@ -4102,6 +4293,15 @@ async function deleteCat(id){
   var catBudgets=budgets.filter(function(b){return b.category_id===id;});
   var affectedTx=transactions.filter(function(t){return t.category===id;}).map(function(t){return {id:t.id,category:t.category,subcategory:t.subcategory};});
   setSync('syncing');
+  if(isOffline){
+    categories=categories.filter(function(c){return c.id!==id;});
+    budgets=budgets.filter(function(b){return b.category_id!==id;});
+    if(filterCat===id)filterCat='';
+    queueOp({type:'delete',table:'categories',id:id});
+    saveLocalCache();setSync('err');refreshTab();
+    showUndoToast('Categoría eliminada',function(){restoreCat(cat,catBudgets,affectedTx);});
+    return;
+  }
   var r=await sb.rpc('delete_fintrack_category',{target_id:id});
   if(!r.error){
     categories=categories.filter(function(c){return c.id!==id;});
@@ -4130,8 +4330,37 @@ async function restoreCat(cat,catBudgets,affectedTx){
   saveLocalCache();setSync('ok');refreshTab();
 }
 async function addSubcat(catId){var pfx=IS_DESKTOP?'dt':'';var inp=document.getElementById('subinput_'+pfx+catId);var name=inp.value.trim().toLowerCase();if(!name)return;var cat=categories.find(function(c){return c.id===catId;});if(!cat||name.length>60||(cat.subcats||[]).some(function(s){return String(s).toLowerCase()===name.toLowerCase();}))return;cat.subcats.push(name);setSync('syncing');if(isOffline){if(queueOp({type:'update',table:'categories',id:catId,data:{subcats:cat.subcats}})){saveLocalCache();inp.value='';setSync('err');refreshTab();}return;}var r=await sb.from('categories').update({subcats:cat.subcats}).eq('id',catId);if(!r.error){saveLocalCache();setSync('ok');inp.value='';refreshTab();}else{setSync('err');var ix=cat.subcats.indexOf(name);if(ix>=0)cat.subcats.splice(ix,1);}}
-async function deleteSubcat(catId,sub){var cat=categories.find(function(c){return c.id===catId;});if(!cat)return;if(!confirm('¿Quitar esta subcategoría de las nuevas transacciones? Los movimientos históricos conservarán su referencia.'))return;var previous=(cat.subcats||[]).slice();cat.subcats=previous.filter(function(s){return s!==sub;});setSync('syncing');var r=await sb.from('categories').update({subcats:cat.subcats}).eq('id',catId);if(!r.error){saveLocalCache();setSync('ok');refreshTab();}else{setSync('err');cat.subcats=previous;}}
+async function deleteSubcat(catId,sub){var cat=categories.find(function(c){return c.id===catId;});if(!cat)return;if(!confirm('¿Quitar esta subcategoría de las nuevas transacciones? Los movimientos históricos conservarán su referencia.'))return;var previous=(cat.subcats||[]).slice();cat.subcats=previous.filter(function(s){return s!==sub;});setSync('syncing');if(isOffline){if(queueOp({type:'update',table:'categories',id:catId,data:{subcats:cat.subcats}})){saveLocalCache();setSync('err');refreshTab();}else{cat.subcats=previous;}return;}var r=await sb.from('categories').update({subcats:cat.subcats}).eq('id',catId);if(!r.error){saveLocalCache();setSync('ok');refreshTab();}else{setSync('err');cat.subcats=previous;}}
 async function saveCatColor(catId,color){var cat=categories.find(function(c){return c.id===catId;});if(!cat)return;var prev=cat.color;cat.color=color;setSync('syncing');if(isOffline){if(queueOp({type:'update',table:'categories',id:catId,data:{color:color}})){saveLocalCache();setSync('err');refreshTab();}else cat.color=prev;return;}var r=await sb.from('categories').update({color:color}).eq('id',catId);if(!r.error){saveLocalCache();setSync('ok');refreshTab();}else{setSync('err');cat.color=prev;}}
+async function renameCat(id,newName){
+  var cat=categories.find(function(c){return c.id===id;});if(!cat)return;
+  var name=String(newName||'').trim().toLowerCase();
+  if(!name||name.length>80)return;
+  if(categories.some(function(c){return c.id!==id&&String(c.name).trim().toLowerCase()===name;})){
+    alert('Ya existe una categoría con ese nombre');return;
+  }
+  var prev=cat.name;
+  cat.name=name;
+  setSync('syncing');
+  if(isOffline){
+    if(queueOp({type:'update',table:'categories',id:id,data:{name:name}})){
+      saveLocalCache();setSync('err');refreshTab();
+    }else{cat.name=prev;}
+    return;
+  }
+  var r=await sb.from('categories').update({name:name}).eq('id',id);
+  if(!r.error){saveLocalCache();setSync('ok');refreshTab();showSuccessToast('Categoría renombrada');}
+  else{setSync('err');cat.name=prev;}
+}
+function promptRenameCat(id){
+  var cat=categories.find(function(c){return c.id===id;});if(!cat)return;
+  var currentName=cat.name;
+  var n=prompt('Nuevo nombre para la categoría:',currentName);
+  if(n===null)return;
+  var clean=n.trim().toLowerCase();
+  if(!clean||clean===currentName.toLowerCase())return;
+  renameCat(id,clean);
+}
 
 // EXPORT
 function exportJSON(){var json=JSON.stringify({version:4,transactions:transactions,categories:categories,accounts:accounts,patrimony:patrimony,budgets:budgets,recurrenceExclusions:recurrenceExclusions,transactionVoids:transactionVoids,investmentOperations:investmentOperations},null,2);var blob=new Blob([json],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fintrack_backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();}
@@ -4239,9 +4468,9 @@ function exportPDF(range){
   var doc=new window.jspdf.jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
   var PW=210,M=16;
   var txs=getExportTx(range).sort(function(a,b){return new Date(b.date)-new Date(a.date);});
-  var exps=txs.filter(function(t){return t.type==='expense';});
+  var exps=txs.filter(function(t){return t.type==='expense'&&!t.is_balance_adjustment;});
   var tExp=exps.reduce(function(s,t){return s+t.amount;},0);
-  var tInc=txs.filter(function(t){return t.type==='income';}).reduce(function(s,t){return s+t.amount;},0);
+  var tInc=txs.filter(function(t){return t.type==='income'&&!t.is_balance_adjustment;}).reduce(function(s,t){return s+t.amount;},0);
   var bal=tInc-tExp;
   // header bar
   doc.setFillColor(26,24,20);doc.rect(0,0,PW,30,'F');
@@ -4329,23 +4558,33 @@ function exportPDF(range){
   function drawTxHeader(){
     doc.setFillColor(26,24,20);doc.rect(M,y-5,PW-2*M,7,'F');
     doc.setTextColor(255,255,255);doc.setFontSize(8);doc.setFont('helvetica','bold');
-    doc.text('Fecha',M+2,y);doc.text('Categoría',M+26,y);doc.text('Nota',M+70,y);doc.text('Importe',PW-M-2,y,{align:'right'});y+=6;
+    doc.text('Fecha',M+2,y);doc.text('Categoría',M+26,y);doc.text('Nota / Detalle',M+70,y);doc.text('Importe',PW-M-2,y,{align:'right'});y+=6;
     doc.setFont('helvetica','normal');
   }
   drawTxHeader();
   txs.forEach(function(t,i){
-    if(y>285){doc.addPage();y=20;drawTxHeader();}
+    if(y>280){doc.addPage();y=20;drawTxHeader();}
     if(i%2===0){doc.setFillColor(247,245,242);doc.rect(M,y-4,PW-2*M,6,'F');}
     var c=catById(t.category);
     doc.setTextColor(70,70,70);doc.setFontSize(8);
     doc.text(t.date.slice(8,10)+'/'+t.date.slice(5,7),M+2,y);
-    doc.text((t.type==='transfer'?'Transferencia':capitalize(c.name)).slice(0,20),M+26,y);
-    doc.text((t.note||t.subcategory||'').slice(0,34),M+70,y);
+    var catLabel=t.type==='transfer'?'Transferencia':(t.is_balance_adjustment?'Ajuste saldo':capitalize(c.name));
+    doc.text(catLabel.slice(0,20),M+26,y);
+    var desc=t.type==='transfer'?(accNameById(t.account_id)+' → '+accNameById(t.to_account_id)):(t.is_balance_adjustment?('Ajuste · '+(t.note||'')):(t.note||t.subcategory||''));
+    doc.text(desc.slice(0,34),M+70,y);
     var sign=t.type==='expense'?'-':(t.type==='income'?'+':'');
     if(t.type==='expense')doc.setTextColor(204,74,56);else if(t.type==='income')doc.setTextColor(45,148,103);else doc.setTextColor(44,111,176);
     doc.setFont('helvetica','bold');doc.text(sign+fmt(t.amount),PW-M-2,y,{align:'right'});doc.setFont('helvetica','normal');
     y+=6;
   });
+  var totalPages=doc.internal.getNumberOfPages();
+  for(var pi=1;pi<=totalPages;pi++){
+    doc.setPage(pi);
+    doc.setFontSize(8);
+    doc.setFont('helvetica','normal');
+    doc.setTextColor(150,150,150);
+    doc.text('Pág. '+pi+' de '+totalPages,PW/2,290,{align:'center'});
+  }
   doc.save('fintrack_'+range.label.replace(/[^0-9a-zA-Z]+/g,'_')+'.pdf');
 }
 function exportCSV(range){
@@ -4501,24 +4740,6 @@ async function importJSON(rawInput,statusEl){
     s.textContent='✓ '+d.transactions.length+' transacciones importadas';s.className='status-msg status-ok';
     await loadData();
     return;
-    s.textContent='borrando datos actuales...';
-    await Promise.all([sb.from('patrimony').delete().eq('user_id',uid),sb.from('transactions').delete().eq('user_id',uid),sb.from('recurrence_exclusions').delete().eq('user_id',uid)]);
-    await sb.from('accounts').delete().eq('user_id',uid);
-    await sb.from('categories').delete().eq('user_id',uid);
-    await sb.from('budgets').delete().eq('user_id',uid);
-    await sleep(1500);
-    s.textContent='importando categorías...';
-    var cats=d.categories.map(function(c){return {id:c.id,name:c.name,color:c.color,subcats:c.subcats||[],position:c.position||0,archived:!!c.archived,user_id:uid};});
-    var r1=await sb.from('categories').insert(cats);if(r1.error)throw new Error('categorías: '+r1.error.message);
-    await sleep(300);s.textContent='importando transacciones...';
-    var txs=d.transactions.map(function(t){return {id:t.id,type:t.type,amount:t.amount,category:t.category,subcategory:t.subcategory||null,note:t.note||null,date:t.date,recurring:t.recurring||false,recur_interval:t.recur_interval||null,recur_end_date:t.recur_end_date||null,recur_series_id:t.recur_series_id||(t.recurring?('rsL'+t.type+'|'+t.category+'|'+(t.account_id||'')+'|'+t.amount+'|'+(t.recur_interval||'monthly')):null),tags:t.tags||[],account_id:t.account_id||null,to_account_id:t.to_account_id||null,user_id:uid};});
-    var chunk=50;for(var i=0;i<txs.length;i+=chunk){var r2=await sb.from('transactions').upsert(txs.slice(i,i+chunk));if(r2.error)throw new Error('transacciones: '+r2.error.message+' (importación parcial: '+i+' de '+txs.length+' transacciones importadas antes del fallo)');}
-    if(d.accounts&&d.accounts.length){await sleep(300);var accs=d.accounts.map(function(a){return {id:a.id,name:a.name,color:a.color,position:a.position||0,user_id:uid};});var r3=await sb.from('accounts').insert(accs);if(r3.error)throw new Error('cuentas: '+r3.error.message);}
-    if(d.patrimony&&d.patrimony.length){await sleep(300);var pat=d.patrimony.map(function(p){return {id:p.id,account_id:p.account_id,year:p.year,month:p.month,amount:p.amount,theoretical_amount:p.theoretical_amount!==undefined?p.theoretical_amount:null,reset_date:p.reset_date||null,user_id:uid};});for(var pi=0;pi<pat.length;pi+=chunk){var r4=await sb.from('patrimony').insert(pat.slice(pi,pi+chunk));if(r4.error)throw new Error('patrimonio: '+r4.error.message);}}
-    if(d.budgets&&d.budgets.length){await sleep(300);var bud=d.budgets.map(function(b){return {id:b.id,category_id:b.category_id,amount:b.amount,is_total:b.is_total||false,month_year:b.month_year||null,note:b.note||null,user_id:uid};});for(var bi2=0;bi2<bud.length;bi2+=chunk){var r5=await sb.from('budgets').insert(bud.slice(bi2,bi2+chunk));if(r5.error)throw new Error('presupuestos: '+r5.error.message);}}
-    if(d.recurrenceExclusions&&d.recurrenceExclusions.length){var excl=d.recurrenceExclusions.map(function(x){return {id:x.id,recur_series_id:x.recur_series_id,skipped_date:x.skipped_date,user_id:uid};});for(var ei=0;ei<excl.length;ei+=chunk){var r6=await sb.from('recurrence_exclusions').insert(excl.slice(ei,ei+chunk));if(r6.error)throw new Error('exclusiones de recurrencia: '+r6.error.message);}}
-    s.textContent='✓ '+d.transactions.length+' transacciones importadas';s.className='status-msg status-ok';
-    await sleep(500);await loadData();
   }catch(e){s.textContent='✗ error: '+e.message;s.className='status-msg status-err';}
 }
 function exportXLSX(range){
@@ -4676,12 +4897,19 @@ function exportXLSX(range){
       var ym=yr+'-'+pad(m+1);
       var txs=_txByMonthStr[ym]||[];
       if(!txs.length)return;
-      var inc=txs.filter(function(t){return t.type==='income';}).reduce(function(s,t){return s+t.amount;},0);
-      var exp=txs.filter(function(t){return t.type==='expense';}).reduce(function(s,t){return s+t.amount;},0);
+      var inc=0,exp=0,catExpMap={};
+      for(var ti=0;ti<txs.length;ti++){
+        var t=txs[ti],amt=Number(t.amount)||0;
+        if(t.type==='income')inc+=amt;
+        else if(t.type==='expense'){
+          exp+=amt;
+          if(t.category)catExpMap[t.category]=(catExpMap[t.category]||0)+amt;
+        }
+      }
       var bal=inc-exp;
       var rowData=[yr,MONTHS[m],inc,-exp,bal];
       categories.forEach(function(c){
-        var catExp=txs.filter(function(t){return t.type==='expense'&&t.category===c.id;}).reduce(function(s,t){return s+t.amount;},0);
+        var catExp=catExpMap[c.id]||0;
         rowData.push(catExp>0?-catExp:0);
       });
       var isNewYr=prevYr!==yr;prevYr=yr;
@@ -4947,7 +5175,8 @@ function dtSetType(t){
 }
 
 async function dtQuickAdd(){
-  var amount=parseFloat(document.getElementById('dtQAmount').value);
+  var rawAmount=parseFloat(document.getElementById('dtQAmount').value);
+  var amount=Math.round(rawAmount*100)/100;
   var cat=document.getElementById('dtQCat').value;
   var note=document.getElementById('dtQNote').value.trim()||null;
   var date=document.getElementById('dtQDate').value||new Date().toISOString().split('T')[0];
@@ -4955,15 +5184,24 @@ async function dtQuickAdd(){
   if(!Number.isFinite(amount)||amount<=0){if(status){status.style.color='var(--red)';status.textContent='Introduce un importe válido';}return;}
   if(status){status.textContent='Guardando...';status.style.color='var(--text3)';}
   setSync('syncing');
-  var accountId=accounts.length?accounts[0].id:null;
+  var accountId=typeof getDefaultAccountId==='function'?getDefaultAccountId():(accounts.length?accounts[0].id:null);
   var tx={id:'tx'+Date.now()+Math.random().toString(36).slice(2,6),type:dtType,amount:amount,category:cat,subcategory:null,note:note,date:date,recurring:false,tags:[],account_id:accountId,to_account_id:null,user_id:currentUser.id};
-  if(isOffline){transactions.unshift(tx);queueOp({type:'insert',table:'transactions',data:tx});saveLocalCache();setSync('ok');}
-  else{var r=await sb.from('transactions').insert(tx).select();
-  if(r.error){setSync('err');if(status){status.textContent='Error';status.style.color='var(--red)';}return;}
-  transactions.unshift(r.data[0]||tx);saveLocalCache();setSync('ok');}
+  if(isOffline){
+    transactions.unshift(tx);
+    queueOp({type:'insert',table:'transactions',data:tx});
+    saveLocalCache();
+    setSync('err');
+    if(status){status.textContent='✓ Guardado (offline)';status.style.color='var(--amber,#f5a623)';}
+  }else{
+    var r=await sb.from('transactions').insert(tx).select();
+    if(r.error){setSync('err');if(status){status.textContent='Error';status.style.color='var(--red)';}return;}
+    transactions.unshift(r.data[0]||tx);
+    saveLocalCache();
+    setSync('ok');
+    if(status){status.textContent='✓ Guardado';status.style.color='var(--green)';}
+  }
   document.getElementById('dtQAmount').value='';
   document.getElementById('dtQNote').value='';
-  if(status){status.textContent='✓ Guardado';status.style.color='var(--green)';}
   setTimeout(function(){if(status)status.textContent='';},2000);
   dtRender();
 }
@@ -5059,7 +5297,7 @@ sb.auth.onAuthStateChange(function(event,session){
   }
   else{
     loadGeneration++;loadDataInFlight=false;loadDataPromise=null;
-    currentUser=null;transactions=[];categories=[];accounts=[];patrimony=[];budgets=[];recurrenceExclusions=[];transactionVoids=[];showAuth();
+    currentUser=null;transactions=[];categories=[];accounts=[];patrimony=[];budgets=[];recurrenceExclusions=[];transactionVoids=[];offlineQueue=[];investmentOperations=[];_monthTxCache={};_yearTxCache={};if(typeof invalidateTxIndices==='function')invalidateTxIndices();showAuth();
   }
 });
 
