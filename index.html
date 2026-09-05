@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -1415,7 +1415,7 @@ button:not(:disabled):active{transform:scale(.975);}
 </div>
 
 <script>
-var APP_VERSION='2026.09.05.3';
+var APP_VERSION='2026.09.05.4';
 var APP_PUBLISHED_AT='04/09/2026 12:47 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
@@ -3048,11 +3048,18 @@ function renderCatTab(el,prefix){
     var pctBar=budget>0?Math.max(0,Math.min(Math.round(amt/maxBar*100),100)):Math.max(0,Math.min(Math.round(amt/maxBar*100),100));
     var budgetPctBar=budget>0?Math.max(0,Math.min(Math.round(budget/maxBar*100),100)):0;
     var budgetAlert='';
+    var catPctDisplay='';
     if(budget>0){
       var used=Math.round(amt/budget*100);
       var alertCol=used>=100?'var(--red)':budgetGradientColor(used);
       if(amt>budget)budgetAlert='<div class="budget-alert" style="color:'+alertCol+'">⚠ Excedido en '+fmt(amt-budget)+' ('+used+'% usado)</div>';
       else budgetAlert='<div class="budget-alert" style="color:'+alertCol+'">quedan '+fmt(budget-amt)+' ('+used+'% usado)</div>';
+      if(!isInc&&amt>0){
+        var usedCol=used>=100?'var(--red)':(used>=80?'var(--amber)':'var(--text3)');
+        catPctDisplay='<span style="font-family:var(--mono);font-size:11px;font-weight:'+(used>=100?'600':'400')+';color:'+usedCol+'" title="'+used+'% del presupuesto usado">'+used+'%</span>';
+      }
+    } else if(amt>0){
+      catPctDisplay='<span style="font-family:var(--mono);font-size:11px;color:var(--text3)" title="'+Math.round(amt/pctDenom*100)+'% del total">'+Math.round(amt/pctDenom*100)+'%</span>';
     }
     var subcatHtml='';
     (c.subcats||[]).forEach(function(s){
@@ -3071,7 +3078,7 @@ function renderCatTab(el,prefix){
       +'<span class="cat-drag-handle" onpointerdown="catDragStart(event,\''+c.id+'\')">⠿</span>'
       +'<div class="cat-color" style="background:'+c.color+'22;cursor:pointer;width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0" data-action="show-colorform" data-id="'+c.id+'">'+catIconSvg(c,18)+'</div>'
       +'<span style="flex:1;display:flex;align-items:center;gap:6px;min-width:0"><strong style="font-size:15px;font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+capEsc(c.name)+'</strong><button type="button" class="cat-rename-btn" data-action="rename-cat" data-id="'+c.id+'" title="Renombrar categoría" aria-label="Renombrar categoría" style="background:none;border:none;color:var(--text3);cursor:pointer;padding:2px 4px;font-size:12px">✎</button></span>'
-      +'<span style="font-family:var(--mono);font-size:11px;color:var(--text3)">'+(amt>0?Math.round(amt/pctDenom*100)+'%':'')+'</span>'
+      +catPctDisplay
       +'<span style="font-family:var(--mono);font-size:13px;color:var(--text2);margin-left:6px">'+(amt>0?fmt(amt):'—')+'</span>'
       +'<button class="arch-btn-sm" data-action="archive-cat" data-id="'+c.id+'" title="'+(c.archived?'Restaurar':'Archivar')+'">'
       +(c.archived?'↺':'⊙')+'</button>'
