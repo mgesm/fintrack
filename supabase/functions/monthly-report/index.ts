@@ -2,7 +2,13 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 import { PDFDocument, StandardFonts, rgb } from "https://esm.sh/pdf-lib@1.17.1";
 const euro = (n: number) => new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(n);
-const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-backup-cron-token",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Content-Type": "application/json"
+};
+const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: corsHeaders });
 const sha256 = async (s: string) => Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s))), b => b.toString(16).padStart(2, "0")).join("");
 const base64 = (bytes: Uint8Array) => { let out = ""; for (let i = 0; i < bytes.length; i += 0x8000) out += String.fromCharCode(...bytes.subarray(i, i + 0x8000)); return btoa(out); };
 const median = (values: number[]) => { const v = values.slice().sort((a,b)=>a-b), m = Math.floor(v.length / 2); return v.length ? (v.length % 2 ? v[m] : (v[m-1]+v[m])/2) : 0; };
@@ -58,8 +64,8 @@ async function sendMonthlyReportForUser(db: any, targetUserId: string, targetEma
     db.rpc("get_fintrack_resend_api_key")
   ]);
   if (txError || !resendKey) throw new Error(txError?.message || "Email sender not configured");
-  const voided = new Set((voids??[]).map(x=>x.transaction_id)), active=(tx??[]).filter(x=>!voided.has(x.id)&&x.type!=="transfer"), expensesTx=active.filter(x=>x.type==="expense");
-  const income=active.filter(x=>x.type==="income").reduce((s,x)=>s+Number(x.amount),0), expense=expensesTx.reduce((s,x)=>s+Number(x.amount),0), previousExpense=(previousTx??[]).filter(x=>x.type==="expense").reduce((s,x)=>s+Number(x.amount),0);
+  const voided = new Set((voids??[]).map(x=>x.transaction_id)), active=(tx??[]).filter(x=>!voided.has(x.id)&&x.type!=="transfer"&&!x.is_balance_adjustment), expensesTx=active.filter(x=>x.type==="expense");
+  const income=active.filter(x=>x.type==="income").reduce((s,x)=>s+Number(x.amount),0), expense=expensesTx.reduce((s,x)=>s+Number(x.amount),0), previousExpense=(previousTx??[]).filter(x=>x.type==="expense"&&!x.is_balance_adjustment).reduce((s,x)=>s+Number(x.amount),0);
   const names=new Map((cats??[]).map(x=>[x.id,x.name])), budgetByCategory=new Map((budgets??[]).filter(x=>x.category_id).map(x=>[x.category_id,Number(x.amount)])), totals=new Map<string,number>();
   expensesTx.forEach(x=>totals.set(x.category,(totals.get(x.category)??0)+Number(x.amount)));
   const categories=Array.from(new Set([...totals.keys(),...budgetByCategory.keys()])).map(id=>({name:names.get(id)??"Sin categoría",spent:totals.get(id)??0,budget:budgetByCategory.get(id)??0}));
@@ -74,6 +80,7 @@ async function sendMonthlyReportForUser(db: any, targetUserId: string, targetEma
 }
 
 Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return json({ error:"Method not allowed" },405);
   const db = createClient(Deno.env.get("SUPABASE_URL") ?? "", Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "", { auth:{persistSession:false,autoRefreshToken:false} });
   const body = await req.json().catch(() => ({}));

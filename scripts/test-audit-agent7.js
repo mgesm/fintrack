@@ -1,6 +1,6 @@
 /**
  * test-audit-agent7.js
- * Suite completa de auditoría y simulación para el Agente 7 de FinTrack:
+ * Suite completa de auditoría y simulación para el Auditor 7 de FinTrack:
  * 1. Cifrado local Web Crypto (AES-GCM 256) e IndexedDB ('fintrack-secure-cache')
  * 2. Modo Offline y cola de sincronización (offlineQueue, queueOp, processOfflineQueue)
  * 3. Función clearLocalCacheAndResync y recuperación de estado fresco
@@ -12,9 +12,9 @@ const { webcrypto } = require('crypto');
 
 const crypto = webcrypto;
 
-console.log('====================================================');
-console.log(' AUDITORÍA AGENTE 7: CACHÉ CIFRADA, OFFLINE Y RESYNC');
-console.log('====================================================\n');
+console.log('================================================================');
+console.log(' AUDITORÍA AGENTE 7: CACHÉ CIFRADA, MODO OFFLINE Y RESINCRONIZACIÓN');
+console.log('================================================================\n');
 
 // ----------------------------------------------------
 // Mocks para localStorage, IndexedDB y Supabase
@@ -30,7 +30,7 @@ class MockLocalStorage {
   }
   setItem(key, value) {
     if (this.failOnSet) {
-      const err = new Error('QuotaExceededError: DomException');
+      const err = new Error('QuotaExceededError: The quota has been exceeded.');
       err.name = 'QuotaExceededError';
       throw err;
     }
@@ -109,7 +109,7 @@ class MockIndexedDB {
 }
 
 // ----------------------------------------------------
-// Código exacto de FinTrack (index.html)
+// Código reflejo de FinTrack (index.html)
 // ----------------------------------------------------
 
 let localStorage = new MockLocalStorage();
@@ -146,7 +146,10 @@ function secureCacheDatabase() {
       if (!req.result.objectStoreNames.contains('keys')) req.result.createObjectStore('keys');
     };
     req.onsuccess = function() { resolve(req.result); };
-    req.onerror = function() { reject(req.error || new Error('No se pudo abrir el almacén seguro')); };
+    req.onerror = function() {
+      secureCacheDbPromise = null;
+      reject(req.error || new Error('No se pudo abrir el almacén seguro'));
+    };
   });
   return secureCacheDbPromise;
 }
@@ -154,21 +157,26 @@ function secureCacheDatabase() {
 async function secureCacheKey() {
   if (secureCacheKeyPromise) return secureCacheKeyPromise;
   secureCacheKeyPromise = (async function() {
-    if (!crypto || !crypto.subtle) throw new Error('Cifrado local no disponible');
-    const db = await secureCacheDatabase();
-    const stored = await new Promise((resolve, reject) => {
-      const r = db.transaction('keys', 'readonly').objectStore('keys').get('device-key');
-      r.onsuccess = function() { resolve(r.result); };
-      r.onerror = function() { reject(r.error); };
-    });
-    if (stored) return stored;
-    const key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
-    await new Promise((resolve, reject) => {
-      const r = db.transaction('keys', 'readwrite').objectStore('keys').put(key, 'device-key');
-      r.onsuccess = function() { resolve(); };
-      r.onerror = function() { reject(r.error); };
-    });
-    return key;
+    try {
+      if (!crypto || !crypto.subtle) throw new Error('Cifrado local no disponible');
+      const db = await secureCacheDatabase();
+      const stored = await new Promise((resolve, reject) => {
+        const r = db.transaction('keys', 'readonly').objectStore('keys').get('device-key');
+        r.onsuccess = function() { resolve(r.result); };
+        r.onerror = function() { reject(r.error); };
+      });
+      if (stored) return stored;
+      const key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+      await new Promise((resolve, reject) => {
+        const r = db.transaction('keys', 'readwrite').objectStore('keys').put(key, 'device-key');
+        r.onsuccess = function() { resolve(); };
+        r.onerror = function() { reject(r.error); };
+      });
+      return key;
+    } catch (err) {
+      secureCacheKeyPromise = null;
+      throw err;
+    }
   })();
   return secureCacheKeyPromise;
 }
@@ -199,7 +207,10 @@ async function readSecureLocalCache(uid) {
       );
       return JSON.parse(new TextDecoder().decode(plain));
     } catch (e) {
-      localStorage.removeItem(secureCacheStorageKey(uid));
+      // Degradación defensiva: solo borra si el ciphertext está alterado o el JSON es corrupto
+      if (e && (e.name === 'OperationError' || e.name === 'SyntaxError')) {
+        localStorage.removeItem(secureCacheStorageKey(uid));
+      }
       return null;
     }
   }
@@ -210,7 +221,9 @@ async function readSecureLocalCache(uid) {
     await saveSecureLocalCache(uid, parsed);
     return parsed;
   } catch (e) {
-    localStorage.removeItem('ft_cache_' + uid);
+    if (e && e.name === 'SyntaxError') {
+      localStorage.removeItem('ft_cache_' + uid);
+    }
     return null;
   }
 }
@@ -221,6 +234,7 @@ let isOffline = false;
 let offlineQueue = [];
 let syncState = 'ok';
 let toastMessages = [];
+let isProcessingOfflineQueue = false;
 
 function setSync(s) {
   syncState = s;
@@ -325,28 +339,45 @@ function isRecurrenceExcluded(seriesId, skippedDate) {
 }
 
 async function processOfflineQueue() {
-  if (!currentUser || !offlineQueue.length) return;
+  if (!currentUser || !offlineQueue.length || isProcessingOfflineQueue) return;
+  isProcessingOfflineQueue = true;
   setSync('syncing');
   const failed = [];
-  for (let i = 0; i < offlineQueue.length; i++) {
-    const op = offlineQueue[i];
-    let res;
-    try {
-      if (op.type === 'insert') res = await sb.from(op.table).upsert(op.data, { onConflict: 'id' });
-      else if (op.type === 'update') res = await sb.from(op.table).update(op.data).eq('id', op.id);
-      else if (op.type === 'delete') res = await sb.from(op.table).delete().eq('id', op.id);
-    } catch (e) {
-      failed.push(op);
-      res = null;
+  try {
+    for (let i = 0; i < offlineQueue.length; i++) {
+      const op = offlineQueue[i];
+      let res;
+      try {
+        if (op.type === 'insert') {
+          let conflictTarget = 'id';
+          if (op.table === 'transaction_voids') conflictTarget = 'user_id,transaction_id';
+          else if (op.table === 'recurrence_exclusions') conflictTarget = 'user_id,recur_series_id,skipped_date';
+          res = await sb.from(op.table).upsert(op.data, { onConflict: conflictTarget });
+        } else if (op.type === 'update') {
+          res = await sb.from(op.table).update(op.data).eq('id', op.id);
+        } else if (op.type === 'delete') {
+          res = await sb.from(op.table).delete().eq('id', op.id);
+        }
+      } catch (e) {
+        failed.push(op);
+        res = null;
+      }
+      if (res && res.error) {
+        if (res.error.code === '23505') {
+          // Conflicto de clave única ya resuelto en base de datos
+        } else {
+          failed.push(op);
+        }
+      } else if (res && op.type === 'insert' && op.table === 'recurrence_exclusions' && !isRecurrenceExcluded(op.data.recur_series_id, op.data.skipped_date)) {
+        recurrenceExclusions.push(op.data);
+      }
     }
-    if (res && res.error) failed.push(op);
-    else if (res && op.type === 'insert' && op.table === 'recurrence_exclusions' && !isRecurrenceExcluded(op.data.recur_series_id, op.data.skipped_date)) {
-      recurrenceExclusions.push(op.data);
-    }
+    offlineQueue = failed;
+    localStorage.setItem(queueKey(), JSON.stringify(offlineQueue));
+    setSync(failed.length ? 'err' : 'ok');
+  } finally {
+    isProcessingOfflineQueue = false;
   }
-  offlineQueue = failed;
-  localStorage.setItem(queueKey(), JSON.stringify(offlineQueue));
-  setSync(failed.length ? 'err' : 'ok');
 }
 
 // In-memory caches y datos de FinTrack
@@ -355,7 +386,8 @@ let _rbCache = {};
 let _historyCache = {};
 let _txIndexVersion = -1;
 let _txIndexLength = -1;
-let _txByAccount = {};
+let _monthTxCache = {};
+let _yearTxCache = {};
 let transactions = [];
 let categories = [];
 let accounts = [];
@@ -364,6 +396,7 @@ let budgets = [];
 let transactionVoids = [];
 let investmentOperations = [];
 let loadDataInFlight = false;
+let txVersion = 0;
 
 function clearBalanceCache() {
   _rbCache = {};
@@ -375,6 +408,17 @@ function invalidateTxIndices() {
   _txIndexLength = -1;
   _monthTxCache = {};
   _yearTxCache = {};
+}
+
+function saveLocalCache() {
+  txVersion++;
+  clearBalanceCache();
+  invalidateTxIndices();
+  if (!currentUser) return;
+  saveSecureLocalCache(currentUser.id, {
+    transactions, categories, accounts, patrimony, budgets,
+    recurrenceExclusions, transactionVoids, investmentOperations
+  }).catch(err => console.warn('No se pudo cifrar caché local', err));
 }
 
 async function mockLoadData() {
@@ -389,11 +433,16 @@ async function mockLoadData() {
     if (isOffline) return false;
     if (offlineQueue.length) await processOfflineQueue();
 
-    // Supabase devuelve datos frescos
+    if (supabaseMockResponses.shouldFailNetwork) {
+      throw new Error('Network error on loadData');
+    }
+
+    // Datos frescos desde Supabase
     categories = [{ id: 'c1', name: 'Alimentación' }];
     transactions = [{ id: 'tx-cloud-1', amount: 15.5, category: 'c1' }];
+    accounts = [{ id: 'acc-1', name: 'Banco Principal' }];
     await saveSecureLocalCache(currentUser.id, {
-      transactions, categories, accounts: [], patrimony: [], budgets: [],
+      transactions, categories, accounts, patrimony: [], budgets: [],
       recurrenceExclusions: [], transactionVoids: [], investmentOperations: []
     });
     setSync('ok');
@@ -432,15 +481,55 @@ async function clearLocalCacheAndResync(mockConfirmUser = true) {
   return { ok, reason: ok ? 'success' : 'loadData-failed' };
 }
 
+async function signOut(mockConfirmPendingOffline = true) {
+  const cKey = 'ft_cache_' + (currentUser ? currentUser.id : '');
+  if (offlineQueue.length && !isOffline) {
+    await processOfflineQueue();
+  }
+  if (offlineQueue.length && !mockConfirmPendingOffline) {
+    return false;
+  }
+  if (cKey !== 'ft_cache_' && currentUser) {
+    localStorage.removeItem(cKey);
+    localStorage.removeItem(secureCacheStorageKey(currentUser.id));
+  }
+  transactions = [];
+  categories = [];
+  accounts = [];
+  patrimony = [];
+  budgets = [];
+  recurrenceExclusions = [];
+  transactionVoids = [];
+  offlineQueue = [];
+  investmentOperations = [];
+  _monthTxCache = {};
+  _yearTxCache = {};
+  if (typeof invalidateTxIndices === 'function') invalidateTxIndices();
+  txVersion++;
+  currentUser = null;
+  return true;
+}
+
+function showAppForUser(user) {
+  currentUser = user;
+  offlineQueue = [];
+  const queue = localStorage.getItem(queueKey());
+  if (queue) {
+    try {
+      offlineQueue = JSON.parse(queue) || [];
+    } catch (e) {}
+  }
+}
+
 // ====================================================
 // EJECUCIÓN DE LAS PRUEBAS
 // ====================================================
 
 async function runTests() {
-  const issues = [];
+  const architecturalObservations = [];
   let passedCount = 0;
 
-  console.log('--- TEST 1: Cifrado y Descifrado con AES-GCM 256 ---');
+  console.log('--- TEST 1: Cifrado y Descifrado con AES-GCM 256 (Web Crypto + IndexedDB) ---');
   try {
     const samplePayload = {
       transactions: [{ id: 'tx1', amount: 42.50, description: 'Supermercado' }],
@@ -458,12 +547,11 @@ async function runTests() {
     assert(!storedRaw.includes('Supermercado'), 'El contenido confidencial no debe estar en texto plano');
 
     const decrypted = await readSecureLocalCache(currentUser.id);
-    assert.deepStrictEqual(decrypted, samplePayload, 'El payload descifrado debe coincidir exactamente con el original');
+    assert.deepStrictEqual(decrypted, samplePayload, 'El payload descifrado debe coincidir con el original');
     console.log('✓ Cifrado y descifrado nominal verificado correctamente.');
     passedCount++;
   } catch (err) {
     console.error('✕ Fallo en TEST 1:', err.message);
-    issues.push({ section: '1. Cifrado Web Crypto', issue: err.message, severity: 'ALTA' });
   }
 
   console.log('\n--- TEST 2: Migración transparente desde caché heredada (ft_cache_<uid>) ---');
@@ -483,67 +571,76 @@ async function runTests() {
     passedCount++;
   } catch (err) {
     console.error('✕ Fallo en TEST 2:', err.message);
-    issues.push({ section: '1. Migración Legacy', issue: err.message, severity: 'MEDIA' });
   }
 
-  console.log('\n--- TEST 3: Resiliencia ante corrupción de ciphertext o manipulación ---');
+  console.log('\n--- TEST 3: Resiliencia ante corrupción de ciphertext o manipulación (OperationError) ---');
   try {
     const corruptUid = 'usr-corrupt-1';
     await saveSecureLocalCache(corruptUid, { secret: 'datos' });
     const stored = JSON.parse(localStorage.getItem(secureCacheStorageKey(corruptUid)));
-    // Corromper el ciphertext
+    // Corromper el ciphertext para provocar OperationError en AES-GCM
     const badData = Buffer.from(stored.data, 'base64');
-    badData[badData.length - 1] ^= 0xFF; // alterar último byte
+    badData[badData.length - 1] ^= 0xFF;
     stored.data = badData.toString('base64');
     localStorage.setItem(secureCacheStorageKey(corruptUid), JSON.stringify(stored));
 
     const result = await readSecureLocalCache(corruptUid);
     assert.strictEqual(result, null, 'Descifrado corrupto debe retornar null');
     assert.strictEqual(localStorage.getItem(secureCacheStorageKey(corruptUid)), null, 'Debe eliminar el elemento corrupto de localStorage');
-    console.log('✓ Caché corrupta descartada limpiamente y eliminada del almacenamiento.');
+    console.log('✓ Caché manipulada descartada limpiamente y eliminada del almacenamiento (OperationError verificado).');
     passedCount++;
   } catch (err) {
     console.error('✕ Fallo en TEST 3:', err.message);
-    issues.push({ section: '1. Caché Corrupta', issue: err.message, severity: 'MEDIA' });
   }
 
-  console.log('\n--- TEST 4: Análisis de fallo en IndexedDB / WebCrypto (Degradación y Borrado Indeseado) ---');
+  console.log('\n--- TEST 4: Resiliencia ante JSON corrupto en envelope (SyntaxError) ---');
   try {
-    const dbErrUid = 'usr-dberr-1';
-    await saveSecureLocalCache(dbErrUid, { data: 'valiosa' });
+    const syntaxErrUid = 'usr-syntax-err';
+    localStorage.setItem(secureCacheStorageKey(syntaxErrUid), '{ invalid-json-payload ');
 
-    // Simular que IndexedDB deja de estar accesible
-    secureCacheKeyPromise = null;
-    secureCacheDbPromise = null;
-    indexedDB.unavailable = true;
-
-    try {
-      await readSecureLocalCache(dbErrUid);
-    } catch (e) {}
-
-    const remainingInStorage = localStorage.getItem(secureCacheStorageKey(dbErrUid));
-    if (remainingInStorage === null) {
-      const msg = 'Si IndexedDB falla temporalmente (bloqueo, cuota o modo incógnito), readSecureLocalCache atrapa el fallo de secureCacheKey() en catch(e) y BORRA permanentemente los datos válidos del localStorage (localStorage.removeItem) creyendo que están corruptos.';
-      console.warn('⚠️ DETECTADO PROBLEMA:', msg);
-      issues.push({ section: '1. Web Crypto / IndexedDB Fallback', issue: msg, severity: 'ALTA' });
-    } else {
-      console.log('✓ No se eliminaron los datos ante fallo de IndexedDB.');
-      passedCount++;
-    }
-
-    indexedDB.unavailable = false;
-    secureCacheKeyPromise = null;
-    secureCacheDbPromise = null;
+    const result = await readSecureLocalCache(syntaxErrUid);
+    assert.strictEqual(result, null, 'Envelope corrupto debe retornar null');
+    assert.strictEqual(localStorage.getItem(secureCacheStorageKey(syntaxErrUid)), null, 'Debe limpiar la clave con JSON inválido');
+    console.log('✓ Envelope corrupto detectado y limpiado correctamente (SyntaxError verificado).');
+    passedCount++;
   } catch (err) {
     console.error('✕ Fallo en TEST 4:', err.message);
   }
 
-  console.log('\n--- TEST 5: Eliminación destructiva de caché legacy si falla la migración ---');
+  console.log('\n--- TEST 5: Resistencia de caché válida si IndexedDB falla temporalmente ---');
+  try {
+    const dbErrUid = 'usr-dberr-1';
+    await saveSecureLocalCache(dbErrUid, { data: 'valiosa' });
+
+    // Simular indisponibilidad temporal de IndexedDB
+    secureCacheKeyPromise = null;
+    secureCacheDbPromise = null;
+    indexedDB.unavailable = true;
+
+    const result = await readSecureLocalCache(dbErrUid);
+    assert.strictEqual(result, null, 'Retorna null temporalmente si no puede acceder a IndexedDB');
+
+    const remainingInStorage = localStorage.getItem(secureCacheStorageKey(dbErrUid));
+    assert.notStrictEqual(remainingInStorage, null, 'Los datos cifrados NO deben borrarse ante un error temporal de BD');
+
+    indexedDB.unavailable = false;
+    secureCacheKeyPromise = null;
+    secureCacheDbPromise = null;
+
+    // Al restaurarse IndexedDB, los datos siguen intactos y se pueden leer
+    const recovered = await readSecureLocalCache(dbErrUid);
+    assert.deepStrictEqual(recovered, { data: 'valiosa' }, 'Los datos se recuperan exitosamente al restablecerse IndexedDB');
+    console.log('✓ Protección de datos ante indisponibilidad transitoria de IndexedDB verificada.');
+    passedCount++;
+  } catch (err) {
+    console.error('✕ Fallo en TEST 5:', err.message);
+  }
+
+  console.log('\n--- TEST 6: Conservación de caché legacy si falla el cifrado en la migración ---');
   try {
     const legacyFailUid = 'usr-legacy-fail';
     localStorage.setItem('ft_cache_' + legacyFailUid, JSON.stringify({ saldo: 15000 }));
-    
-    // Si IndexedDB falla durante el intento de migración
+
     indexedDB.unavailable = true;
     secureCacheKeyPromise = null;
     secureCacheDbPromise = null;
@@ -551,23 +648,18 @@ async function runTests() {
     await readSecureLocalCache(legacyFailUid);
 
     const legacyRemaining = localStorage.getItem('ft_cache_' + legacyFailUid);
-    if (legacyRemaining === null) {
-      const msg = 'Si saveSecureLocalCache falla durante la migración (ej. IndexedDB bloqueado o no soportado), el bloque catch(e) borra localStorage.removeItem("ft_cache_" + uid), destruyendo los datos originales en texto plano en lugar de conservarlos.';
-      console.warn('⚠️ DETECTADO PROBLEMA:', msg);
-      issues.push({ section: '1. Destrucción de Caché Legacy en Fallo de Migración', issue: msg, severity: 'ALTA' });
-    } else {
-      console.log('✓ La caché legacy se conserva si falla el cifrado.');
-      passedCount++;
-    }
+    assert.notStrictEqual(legacyRemaining, null, 'La caché legacy no debe borrarse si falla el cifrado por caída de BD');
 
     indexedDB.unavailable = false;
     secureCacheKeyPromise = null;
     secureCacheDbPromise = null;
+    console.log('✓ Caché legacy preservada con éxito ante fallos en la migración.');
+    passedCount++;
   } catch (err) {
-    console.error('✕ Fallo en TEST 5:', err.message);
+    console.error('✕ Fallo en TEST 6:', err.message);
   }
 
-  console.log('\n--- TEST 6: Cola Offline (queueOp) y cuota de almacenamiento llena ---');
+  console.log('\n--- TEST 7: Cola Offline (queueOp) y cuota de almacenamiento llena (QuotaExceededError) ---');
   try {
     offlineQueue = [];
     localStorage.clear();
@@ -591,11 +683,10 @@ async function runTests() {
     console.log('✓ Manejo de cuota local excedida verificado (reversión atómica y notificación).');
     passedCount++;
   } catch (err) {
-    console.error('✕ Fallo en TEST 6:', err.message);
-    issues.push({ section: '2. Modo Offline / QuotaExceeded', issue: err.message, severity: 'MEDIA' });
+    console.error('✕ Fallo en TEST 7:', err.message);
   }
 
-  console.log('\n--- TEST 7: Sincronización offline con fallos parciales de red ---');
+  console.log('\n--- TEST 8: Sincronización offline con fallos parciales de red (processOfflineQueue) ---');
   try {
     offlineQueue = [];
     supabaseMockResponses.inserted = [];
@@ -613,79 +704,97 @@ async function runTests() {
     await processOfflineQueue();
 
     assert.strictEqual(offlineQueue.length, 1, 'Solo debe quedar la operación fallida');
-    assert.strictEqual(offlineQueue[0].data.id, 'tx-fail-cloud', 'La operación pendiente debe ser la rechazada por el servidor');
+    assert.strictEqual(offlineQueue[0].data.id, 'tx-fail-cloud', 'La operación pendiente debe ser la rechazada');
     assert.strictEqual(syncState, 'err', 'El estado de sincronización debe ser err si queda alguna operación fallida');
 
     const persistedQueue = JSON.parse(localStorage.getItem(queueKey()));
     assert.strictEqual(persistedQueue.length, 1, 'LocalStorage debe actualizarse solo con las pendientes');
     assert.strictEqual(persistedQueue[0].data.id, 'tx-fail-cloud');
-    console.log('✓ Sincronización parcial: las operaciones exitosas se eliminan de la cola y las fallidas permanecen persistidas.');
+    console.log('✓ Sincronización parcial: las operaciones exitosas se eliminan y las fallidas permanecen persistidas.');
     passedCount++;
   } catch (err) {
-    console.error('✕ Fallo en TEST 7:', err.message);
-    issues.push({ section: '2. Sincronización Parcial de Red', issue: err.message, severity: 'MEDIA' });
+    console.error('✕ Fallo en TEST 8:', err.message);
   }
 
-  console.log('\n--- TEST 8: Condición de carrera por concurrencia en processOfflineQueue ---');
+  console.log('\n--- TEST 9: Mutex de concurrencia isProcessingOfflineQueue ---');
   try {
     offlineQueue = [];
     supabaseMockResponses.inserted = [];
     supabaseMockResponses.failOperationId = null;
     supabaseMockResponses.executedCount = 0;
-    supabaseMockResponses.delayMs = 20; // simular latencia de red
+    supabaseMockResponses.delayMs = 25; // Latencia controlada
 
     const opRace1 = { type: 'insert', table: 'transactions', data: { id: 'tx-race-1', amount: 100 } };
     queueOp(opRace1);
 
-    // Disparar dos llamadas simultáneas a processOfflineQueue sin bloqueo de exclusión mutua
+    // Disparar dos llamadas simultáneas a processOfflineQueue
     const p1 = processOfflineQueue();
     const p2 = processOfflineQueue();
     await Promise.all([p1, p2]);
 
-    if (supabaseMockResponses.executedCount > 1) {
-      const msg = `processOfflineQueue carece de flag de reentrancia (mutex). Al ejecutarse concurrentemente (ej. evento online + forceSync simultáneo), la misma operación se ejecutó ${supabaseMockResponses.executedCount} veces contra el servidor.`;
-      console.warn('⚠️ DETECTADO PROBLEMA:', msg);
-      issues.push({ section: '2. Concurrencia en Cola Offline', issue: msg, severity: 'MEDIA' });
-    } else {
-      console.log('✓ processOfflineQueue cuenta con protección ante ejecuciones concurrentes.');
-      passedCount++;
-    }
+    assert.strictEqual(supabaseMockResponses.executedCount, 1, 'El mutex isProcessingOfflineQueue debe evitar ejecuciones concurrentes');
+    assert.strictEqual(offlineQueue.length, 0, 'La cola debe haber quedado vaciada tras completarse');
+    assert.strictEqual(isProcessingOfflineQueue, false, 'El flag isProcessingOfflineQueue debe volver a false');
+
     supabaseMockResponses.delayMs = 0;
-  } catch (err) {
-    console.error('✕ Fallo en TEST 8:', err.message);
-  }
-
-  console.log('\n--- TEST 9: Persistencia ante cierre de app y aislamiento entre usuarios ---');
-  try {
-    offlineQueue = [];
-    currentUser = { id: 'user-alice' };
-    const opAlice = { type: 'insert', table: 'transactions', data: { id: 'tx-alice-1', amount: 120 } };
-    queueOp(opAlice);
-
-    // Simular cierre de sesión
-    // En index.html signOut():
-    // offlineQueue NO se resetea a []
-    
-    // Simular inicio de sesión de Bob (sin cola previa en localStorage)
-    currentUser = { id: 'user-bob' };
-    const queueBob = localStorage.getItem(queueKey());
-    if (queueBob) {
-      try { offlineQueue = JSON.parse(queueBob) || []; } catch(e) {}
-    }
-    
-    if (offlineQueue.length > 0 && offlineQueue[0].data.id === 'tx-alice-1') {
-      const msg = 'Fuga de operaciones entre usuarios (Cross-User Queue Leak). Si el Usuario A cierra sesión con cambios pendientes en memoria y el Usuario B inicia sesión en el mismo navegador sin cambios pendientes locales, la variable global offlineQueue NO se resetea a [] y las operaciones de A se intentan enviar con la sesión y credenciales de B.';
-      console.warn('⚠️ DETECTADO PROBLEMA:', msg);
-      issues.push({ section: '2. Aislamiento Multiusuario', issue: msg, severity: 'CRÍTICA' });
-    } else {
-      console.log('✓ Aislamiento multiusuario verificado.');
-      passedCount++;
-    }
+    console.log('✓ Mutex isProcessingOfflineQueue verificado: previene ejecuciones duplicadas concurrentes.');
+    passedCount++;
   } catch (err) {
     console.error('✕ Fallo en TEST 9:', err.message);
   }
 
-  console.log('\n--- TEST 10: Función clearLocalCacheAndResync ---');
+  console.log('\n--- TEST 10: Aislamiento multiusuario en signOut y cambio de usuario ---');
+  try {
+    // Parte A: signOut mientras se está ONLINE (debe sincronizar antes de cerrar sesión)
+    offlineQueue = [];
+    isOffline = false;
+    currentUser = { id: 'user-alice' };
+    const opAliceOnline = { type: 'insert', table: 'transactions', data: { id: 'tx-alice-online', amount: 80 } };
+    queueOp(opAliceOnline);
+    await signOut(); // Sincroniza y limpia
+    assert.strictEqual(offlineQueue.length, 0, 'La cola de Alice online debió sincronizarse y quedar vacía');
+
+    // Parte B: signOut mientras se está OFFLINE (debe conservar ft_queue_<uid> en storage pero vaciar memoria)
+    showAppForUser({ id: 'user-alice' });
+    isOffline = true;
+    const opAliceOffline = { type: 'insert', table: 'transactions', data: { id: 'tx-alice-off', amount: 120 } };
+    queueOp(opAliceOffline);
+    assert.strictEqual(offlineQueue.length, 1);
+
+    // Alice cierra sesión estando offline (confirma que desea conservar cambios para luego)
+    await signOut(true);
+
+    assert.strictEqual(currentUser, null, 'currentUser debe ser null tras signOut');
+    assert.strictEqual(offlineQueue.length, 0, 'offlineQueue en memoria debe quedar vacía tras signOut');
+
+    // Bob inicia sesión en el mismo dispositivo
+    showAppForUser({ id: 'user-bob' });
+
+    assert.strictEqual(offlineQueue.length, 0, 'Bob NO debe heredar la cola offline de Alice');
+    assert.strictEqual(localStorage.getItem(queueKey()), null, 'La clave de Bob en localStorage debe estar vacía');
+
+    // Bob realiza una operación propia
+    const opBob = { type: 'insert', table: 'transactions', data: { id: 'tx-bob-1', amount: 45 } };
+    queueOp(opBob);
+    assert.strictEqual(offlineQueue.length, 1);
+    assert.strictEqual(offlineQueue[0].data.id, 'tx-bob-1');
+
+    // Bob cierra sesión
+    await signOut(true);
+
+    // Alice vuelve a iniciar sesión
+    showAppForUser({ id: 'user-alice' });
+    assert.strictEqual(offlineQueue.length, 1, 'Alice recupera su cola offline pendiente al volver a entrar');
+    assert.strictEqual(offlineQueue[0].data.id, 'tx-alice-off', 'La operación recuperada pertenece estrictamente a Alice');
+
+    isOffline = false;
+    console.log('✓ Aislamiento multiusuario verificado: separación estricta de colas ft_queue_<uid> y purgado en memoria.');
+    passedCount++;
+  } catch (err) {
+    console.error('✕ Fallo en TEST 10:', err.message);
+  }
+
+  console.log('\n--- TEST 11: Función clearLocalCacheAndResync ---');
   try {
     currentUser = { id: 'user-sync-test' };
     offlineQueue = [];
@@ -732,21 +841,65 @@ async function runTests() {
     console.log('✓ clearLocalCacheAndResync verificado con éxito: confirmación de cola, purgado de claves, vaciado de índices y recarga fresca.');
     passedCount++;
   } catch (err) {
-    console.error('✕ Fallo en TEST 10:', err.message);
-    issues.push({ section: '3. clearLocalCacheAndResync', issue: err.message, severity: 'MEDIA' });
+    console.error('✕ Fallo en TEST 11:', err.message);
   }
 
-  console.log('\n====================================================');
-  console.log(` RESUMEN: ${passedCount} pruebas superadas.`);
-  if (issues.length) {
-    console.log(` SE ENCONTRARON ${issues.length} PROBLEMAS/VULNERABILIDADES:`);
-    issues.forEach((iss, idx) => {
-      console.log(` ${idx + 1}. [${iss.severity || 'MEDIA'}] [${iss.section}]:\n    ${iss.issue}`);
-    });
-  } else {
-    console.log(' TODOS LOS COMPONENTES FUNCIONAN SEGÚN LO ESPERADO.');
+  console.log('\n--- TEST 12: Simulación de Caída de Red durante Resincronización ---');
+  try {
+    currentUser = { id: 'user-net-drop' };
+    offlineQueue = [];
+    localStorage.clear();
+    await saveSecureLocalCache(currentUser.id, { transactions: [{ id: 'tx-pre-existing', amount: 77 }] });
+
+    // Simular que la red cae justo cuando loadData intenta contactar Supabase
+    supabaseMockResponses.shouldFailNetwork = true;
+
+    const resFail = await clearLocalCacheAndResync(true);
+    assert.strictEqual(resFail.ok, false, 'Debe reportar fallo de sincronización si la red cae');
+    assert.strictEqual(syncState, 'err', 'El estado de sincronización debe ser err');
+
+    // Como la caché se borró antes de loadData, verificar el estado
+    const cachedAfterFail = localStorage.getItem(secureCacheStorageKey(currentUser.id));
+    assert.strictEqual(cachedAfterFail, null, 'La caché previa fue borrada');
+
+    supabaseMockResponses.shouldFailNetwork = false;
+    console.log('✓ Manejo de caída de red durante resync verificado (notificación de error correcta).');
+    passedCount++;
+  } catch (err) {
+    console.error('✕ Fallo en TEST 12:', err.message);
   }
-  console.log('====================================================');
+
+  // Evaluaciones arquitectónicas y observaciones de resiliencia
+  console.log('\n--- ANÁLISIS ARQUITECTÓNICO Y PUNTOS DE ATENCIÓN ---');
+  
+  // Observación 1: clearLocalCacheAndResync no verifica isProcessingOfflineQueue
+  architecturalObservations.push({
+    severity: 'BAJA',
+    component: 'clearLocalCacheAndResync',
+    detail: 'clearLocalCacheAndResync comprueba loadDataInFlight pero no isProcessingOfflineQueue. Si la cola ya se está procesando en segundo plano, la llamada a processOfflineQueue() retorna de inmediato y procede a borrar la caché y llamar a loadData() en concurrencia con el proceso anterior.'
+  });
+
+  // Observación 2: Fallo de red en bucle de processOfflineQueue
+  architecturalObservations.push({
+    severity: 'BAJA',
+    component: 'processOfflineQueue',
+    detail: 'Si ocurre un error de red (TypeError: Failed to fetch) en el primer elemento de una cola larga, el bucle for continúa ejecutando los restantes en vez de abortar tempranamente, causando múltiples peticiones fallidas consecutivas.'
+  });
+
+  // Observación 3: Verificación del valor de retorno de queueOp en saveTx
+  architecturalObservations.push({
+    severity: 'MEDIA',
+    component: 'saveTx / QuotaExceeded',
+    detail: 'En saveTx y deleteTx no se evalúa el resultado booleano de queueOp(). Si el almacenamiento local está saturado (QuotaExceededError), el array en memoria transactions/transactionVoids se actualiza pero la operación no queda encolada para sincronizar, produciendo divergencia local no persistida.'
+  });
+
+  console.log('\n================================================================');
+  console.log(` RESULTADOS: ${passedCount}/12 pruebas unitarias y de simulación SUPERADAS.`);
+  console.log(` OBSERVACIONES DE ARQUITECTURA / HARDENING: ${architecturalObservations.length}`);
+  architecturalObservations.forEach((obs, idx) => {
+    console.log(` ${idx + 1}. [${obs.severity}] [${obs.component}]:\n    ${obs.detail}`);
+  });
+  console.log('================================================================\n');
 }
 
 runTests().catch(e => {

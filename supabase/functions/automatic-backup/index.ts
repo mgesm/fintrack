@@ -9,7 +9,7 @@ const headers = {
   "Access-Control-Allow-Methods": "POST, OPTIONS"
 };
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers });
-const tables = ["accounts","categories","transactions","patrimony","budgets","recurrence_exclusions","transaction_voids","investment_operations","audit_log"];
+const tables = ["accounts","categories","transactions","patrimony","budgets","recurrence_exclusions","transaction_voids","investment_operations"];
 
 async function sha256(value: string) {
   const bytes = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value)));

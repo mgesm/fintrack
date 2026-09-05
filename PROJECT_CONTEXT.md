@@ -1,7 +1,7 @@
 # FinTrack — contexto técnico y operativo
 
-> **Versión del documento:** 2.9  
-> **Última actualización:** 2026-09-04  
+> **Versión del documento:** 2.10  
+> **Última actualización:** 2026-09-05  
 > **Repositorio:** `mgesm/fintrack` (rama `main`)  
 > **Producción:** https://mgesm.github.io/fintrack/  
 > **Supabase:** proyecto `sswktibdpxqrumsqsegi`
@@ -398,6 +398,8 @@ Las entradas son acumulativas. Toda entrada nueva debe incluir fecha, cambio, ar
 
 | 2026-09-04 | Se restauraron los logos corporativos en la ficha de producto de Inversión: se sustituyó la API Clearbit (caída en diciembre 2025) por `assets.parqet.com/logos/symbol/{SYMBOL}` como fuente primaria (SVG limpio sin fondo para todas las acciones y ETFs con ticker), y `t2.gstatic.com/faviconV2` como fuente secundaria para gestoras de fondos cuyos tickers no estén en Parqet (Vanguard, iShares, BlackRock, Amundi, Fidelity…). `ASSET_LOGO_DOMAINS` ahora contiene únicamente los dominios de gestoras de respaldo; todos los tickers estándar van directamente a Parqet. El fallback final es la primera letra del símbolo. | `index.html`, `serviceworker.js`. | `node scripts/validate-syntax.js` (0 errores); versión `2026.09.04.5`, caché `v138`. |
 
+| 2026-09-05 | Remediación integral masiva de hallazgos de auditoría (19 puntos corregidos de una tajada): 1) Backend y SQL: nueva migración `20260905140000_fix_replace_fintrack_data_investment_columns.sql` corrigiendo `transaction_id` (antes `linked_transaction_id`) e incorporando `investment_account_id` con fallback en `replace_fintrack_data`, cabeceras CORS completas y preflight `OPTIONS` en `monthly-report/index.ts`, exclusión de `is_balance_adjustment` en el informe mensual, y eliminación de tabla inexistente `audit_log` en `automatic-backup/index.ts`; 2) Motor financiero y transacciones: solución a regresión de cuotas recurrentes en `processRecurring` tomando valores de `latest` en vez de `root`, mitigación de pérdida de decimales con coma europea en `saveTx`, selección de cuenta obligatoria cuando existen múltiples cuentas, filtrado de categorías por `kind` en formularios y recarga en `setType`, y blindaje de código muerto en `dtQuickAdd`; 3) Visualizaciones y Dashboard: corrección del bug en canales `00` en `donutRgb` evitando desaturación a 140, cálculo exacto de porcentajes del donut sobre `chartTotal`, límite inferior `Math.max(0, ...)` en barra de presupuesto ante meses con ajustes positivos de tesorería, y precedencia de filtros de fecha sobre modo anual en `getDashboardTx`; 4) Privacidad, búsqueda y resiliencia: protección del importe en `editTx` bloqueando exposición si el modo privado está activo, encolado previo de borrado de `budgets` en `deleteCat` offline previniendo colisiones de claves foráneas, borrado por clave compuesta `(user_id, recur_series_id, skipped_date)` en `undoRecurringOccurrenceDelete`, y búsqueda numérica optimizada con formato euro y decimales con punto; 5) Accesibilidad: contraste WCAG AA mejorado en banner offline (`#1A1814` sobre fondo ámbar), comprobación de `prefers-reduced-motion` en `shouldAnimateNumbers`, y áreas táctiles de 44x44px con pseudo-elementos `::after` en controles pequeños. Se descartó expresamente añadir botón de borrado en móvil para transacciones, manteniéndose swipe por diseño. | `index.html`, `serviceworker.js`, `supabase/migrations/20260905140000_fix_replace_fintrack_data_investment_columns.sql`, `supabase/functions/monthly-report/index.ts`, `supabase/functions/automatic-backup/index.ts`, `PROJECT_CONTEXT.md`. | Validación sintáctica con `node scripts/validate-syntax.js` (0 errores); batería de suites de auditoría ejecutada con éxito (Agente 8: 17/17, Agente 4: 100%, Agente 3: 17/17); versión `2026.09.05.1`, caché `v139`. |
+
 ## 12. Decisiones descartadas (no volver a proponer sin petición expresa)
 
 Este registro es vinculante para futuras sesiones. Cada vez que Miguel rechace una funcionalidad o una alternativa de diseño propuesta, añadir aquí una entrada concreta con fecha, alcance y motivo si lo indicó. No volver a sugerirla por iniciativa propia; solo reconsiderarla si Miguel la pide expresamente o modifica su decisión.
@@ -416,6 +418,7 @@ Este registro es vinculante para futuras sesiones. Cada vez que Miguel rechace u
 | 2026-09-04 | Módulo o función de objetivos/metas de ahorro. | Descartado por petición expresa. |
 | 2026-09-04 | Swipe actions hacia la derecha para editar o interactuar con transacciones. | Descartado por petición expresa. |
 | 2026-09-04 | Bloqueo biométrico nativo (WebAuthn / Face ID / Touch ID). | Descartado: probado previamente y no compatible con la PWA instalada en iOS. |
+| 2026-09-05 | Botón visible de eliminación de transacciones en móvil o en modal de edición. | Descartado por diseño: en dispositivos móviles el borrado se efectúa exclusivamente mediante el gesto swipe hacia la izquierda. |
 
 ## 13. Ideas futuras priorizadas (no implementadas todavía)
 
