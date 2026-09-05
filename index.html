@@ -1415,7 +1415,7 @@ button:not(:disabled):active{transform:scale(.975);}
 </div>
 
 <script>
-var APP_VERSION='2026.09.05.2';
+var APP_VERSION='2026.09.05.3';
 var APP_PUBLISHED_AT='04/09/2026 12:47 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
@@ -1432,7 +1432,7 @@ var donutChart=null,activeCatId=null,chartYear=new Date().getFullYear();
 var barChart=null,lineChart=null,authMode='login';
 var txTags=[],isRecurring=false;
 var TX_PAGE_SIZE=50,txLimit=50,txLimitSig='',filtersOpen=false;
-var searchQuery='',filterType='all',filterCat='',sortOrder='date-desc',filterDateFrom='',filterDateTo='',searchScope='month';
+var searchQuery='',filterType='all',filterCat='',filterAccount='',sortOrder='date-desc',filterDateFrom='',filterDateTo='',searchScope='month';
 var homeAnnualMode=false;
 var isOffline=navigator.onLine===false,offlineQueue=[];
 var syncState=isOffline?'offline':'syncing';
@@ -1653,7 +1653,7 @@ function setAccent(color){
   el.style.setProperty('--accent',color);
   el.style.setProperty('--accent-grad','linear-gradient(135deg,'+color+','+color+'cc)');
   try{localStorage.setItem('ft_accent',color);}catch(e){}
-  if(typeof refreshTab==='function'&&currentUser)refreshTab();
+  if(typeof refreshTab==='function'&&currentUser&&!loadDataInFlight)refreshTab();
 }
 function setTheme(mode){
   if(mode==='system'){document.documentElement.removeAttribute('data-theme');localStorage.removeItem('ft_theme');}
@@ -1985,29 +1985,33 @@ function showApp(){
   }
   // PIN/biometric lock disabled — clear any previously stored credentials
   try{localStorage.removeItem('ft_pin');localStorage.removeItem('ft_bio');}catch(e){}
-  restoreUiState();
-  var accent=localStorage.getItem('ft_accent');if(accent)setAccent(accent);
-  offlineQueue=[];
-  var queue=localStorage.getItem(queueKey());if(queue)try{offlineQueue=JSON.parse(queue)||[];}catch(e){}
-  IS_DESKTOP=window.innerWidth>=768;
-  if(IS_DESKTOP){
-    document.getElementById('dtLayout').style.display='flex';
-    ['appHeader','mainChart','bottomNav','tabContent'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});
-    document.getElementById('fabBtn').classList.add('fab-hidden');
-    if(currentUser){var em=currentUser.email||'';var av=document.getElementById('dtAvatar');if(av)av.textContent=em[0]?em[0].toUpperCase():'?';var de=document.getElementById('dtEmail');if(de)de.textContent=activeTab===5?em:maskEmail(em);}
-  } else {
-    document.getElementById('dtLayout').style.display='none';
-    document.getElementById('appHeader').style.display='flex';
-    document.getElementById('mainChart').style.display=(activeTab===0||activeTab===1)?'block':'none';
-    document.getElementById('bottomNav').style.display='flex';
-    document.getElementById('tabContent').style.display='flex';
-    document.getElementById('fabBtn').classList.toggle('fab-hidden',activeTab!==0);
-    for(var _bi=0;_bi<5;_bi++){var _bn=document.getElementById('bn'+_bi);if(_bn)_bn.classList.toggle('active',_bi===activeTab);}
-    updatePeriodToolbar();
-    setTimeout(function(){movePill(activeTab);},100);
+  try{
+    restoreUiState();
+    var accent=localStorage.getItem('ft_accent');if(accent)setAccent(accent);
+    offlineQueue=[];
+    var queue=localStorage.getItem(queueKey());if(queue)try{offlineQueue=JSON.parse(queue)||[];}catch(e){}
+    IS_DESKTOP=window.innerWidth>=768;
+    if(IS_DESKTOP){
+      document.getElementById('dtLayout').style.display='flex';
+      ['appHeader','mainChart','bottomNav','tabContent'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});
+      document.getElementById('fabBtn').classList.add('fab-hidden');
+      if(currentUser){var em=currentUser.email||'';var av=document.getElementById('dtAvatar');if(av)av.textContent=em[0]?em[0].toUpperCase():'?';var de=document.getElementById('dtEmail');if(de)de.textContent=activeTab===5?em:maskEmail(em);}
+    } else {
+      document.getElementById('dtLayout').style.display='none';
+      document.getElementById('appHeader').style.display='flex';
+      document.getElementById('mainChart').style.display=(activeTab===0||activeTab===1)?'block':'none';
+      document.getElementById('bottomNav').style.display='flex';
+      document.getElementById('tabContent').style.display='flex';
+      document.getElementById('fabBtn').classList.toggle('fab-hidden',activeTab!==0);
+      for(var _bi=0;_bi<5;_bi++){var _bn=document.getElementById('bn'+_bi);if(_bn)_bn.classList.toggle('active',_bi===activeTab);}
+      updatePeriodToolbar();
+      setTimeout(function(){movePill(activeTab);},100);
+    }
+  }catch(initUiError){
+    console.error('Error preparando interfaz inicial en showApp',initUiError);
   }
   if(!loadingAlready)loadData();
-  subscribeRealtime();
+  try{subscribeRealtime();}catch(rtError){}
 }
 function showAuth(){
   document.getElementById('loadingOverlay').classList.add('hidden');
@@ -2141,9 +2145,9 @@ async function loadData(){
     saveLocalCache();setSync('ok');loadSucceeded=true;
   }catch(e){setSync('err');}
   finally{
+    loadDataInFlight=false;loadDataPromise=null;
+    hideLoading();
     if(isActiveLoad(uid,generation)){
-      loadDataInFlight=false;loadDataPromise=null;
-      hideLoading();
       try{if(IS_DESKTOP){if(typeof dtRender==='function')dtRender();}else{render();}}catch(renderError){setSync('err');}
       try{scheduleAutoBackup();}catch(backupError){}
     }
@@ -2619,7 +2623,7 @@ function switchTab(i){
   hideChartTip();
   activeTab=i;
   saveUiState();
-  searchQuery='';filterType='all';filterCat='';sortOrder='date-desc';filterDateFrom='';filterDateTo='';
+  searchQuery='';filterType='all';filterCat='';filterAccount='';sortOrder='date-desc';filterDateFrom='';filterDateTo='';
   if(IS_DESKTOP){
     // Desktop: update sidebar active state and re-render
     document.querySelectorAll('.dt-nav-item').forEach(function(btn){btn.classList.toggle('active',parseInt(btn.getAttribute('data-tab'))===i);});
@@ -3428,7 +3432,7 @@ async function deleteAccount(id){
   var r=await sb.rpc('delete_fintrack_account',{target_id:id});
   if(!r.error){
     await sb.from('patrimony').delete().eq('account_id',id);
-    accounts=accounts.filter(function(a){return a.id!==id;});
+    accounts=accounts.filter(function(a){return a.id!==id;});if(filterAccount===id)filterAccount='';
     patrimony=patrimony.filter(function(p){return p.account_id!==id;});
     saveLocalCache();setSync('ok');refreshTab();
     showUndoToast('Cuenta eliminada',function(){restoreAccount(acc,pats);});
@@ -5435,6 +5439,17 @@ sb.auth.onAuthStateChange(function(event,session){
     currentUser=null;transactions=[];categories=[];accounts=[];patrimony=[];budgets=[];recurrenceExclusions=[];transactionVoids=[];offlineQueue=[];investmentOperations=[];_monthTxCache={};_yearTxCache={};if(typeof invalidateTxIndices==='function')invalidateTxIndices();showAuth();
   }
 });
+// Watchdog de seguridad: garantiza que loadingOverlay NUNCA atrape la UI indefinidamente
+setTimeout(function(){
+  var ov=document.getElementById('loadingOverlay');
+  if(ov&&!ov.classList.contains('hidden')){
+    console.warn('FinTrack: Watchdog de arranque forzó la ocultación del loadingOverlay');
+    ov.classList.add('hidden');
+    if(!currentUser){showAuth();}
+    else{try{if(IS_DESKTOP){if(typeof dtRender==='function')dtRender();}else{render();}}catch(e){}}
+  }
+},5000);
+
 
 </script>
 </body>
