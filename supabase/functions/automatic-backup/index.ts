@@ -19,7 +19,7 @@ async function fetchAllRows(client: any, table: string, userId: string) {
   const rows: any[] = [];
   const pageSize = 1000;
   for (let from = 0; ; from += pageSize) {
-    const { data, error } = await client.from(table).select("*").eq("user_id", userId).range(from, from + pageSize - 1);
+    const { data, error } = await client.from(table).select("*").eq("user_id", userId).order("id").range(from, from + pageSize - 1);
     if (error) throw new Error(table + ": " + error.message);
     if (!data || !data.length) break;
     rows.push(...data);

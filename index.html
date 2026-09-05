@@ -26,7 +26,7 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;}
   --glass-hi:rgba(255,255,255,0.7);
   --glass-edge:rgba(255,255,255,0.35);
   --glass-inner:0 1px 0 rgba(255,255,255,0.6) inset,0 -0.5px 0 rgba(0,0,0,0.04) inset;
-  --text:#1C1C1E;--text2:#3C3C43;--text3:#8E8E93;--text4:#C7C7CC;
+  --text:#1C1C1E;--text2:#3C3C43;--text3:#6E6E73;--text4:#C7C7CC;
   --separator:rgba(60,60,67,0.12);--separator2:rgba(60,60,67,0.06);
   --green:#34C759;--red:#FF3B30;--amber:#FF9500;--blue:#007AFF;
   --shadow:0 12px 34px rgba(30,30,60,0.10),0 2px 6px rgba(30,30,60,0.05);
@@ -579,10 +579,10 @@ body{display:flex;flex-direction:column;width:100%;max-width:430px;margin:0 auto
 .arch-btn-sm:hover{color:var(--amber);}
 .del-btn-sm{background:none;border:none;cursor:pointer;color:var(--text4);font-size:14px;padding:3px 6px;border-radius:6px;transition:all 0.15s;margin-left:auto;}
 .del-btn-sm:hover{color:var(--red);background:rgba(255,59,48,0.08);}
-.del-btn-sm, .arch-btn-sm, .pat-hist-del, .pat-acc-star, .nav-btn, .dt-nav-btn, .tx-btn {
+.del-btn-sm, .arch-btn-sm, .pat-hist-del, .pat-acc-star, .nav-btn, .dt-nav-btn, .tx-btn, .cat-color-swatch, .invest-operation-delete, .budget-icon-btn {
   position: relative;
 }
-.del-btn-sm::after, .arch-btn-sm::after, .pat-hist-del::after, .pat-acc-star::after, .nav-btn::after, .dt-nav-btn::after, .tx-btn::after {
+.del-btn-sm::after, .arch-btn-sm::after, .pat-hist-del::after, .pat-acc-star::after, .nav-btn::after, .dt-nav-btn::after, .tx-btn::after, .cat-color-swatch::after, .invest-operation-delete::after, .budget-icon-btn::after {
   content: '';
   position: absolute;
   top: 50%;
@@ -1040,7 +1040,7 @@ html[data-theme="light"]{
   --bg-grouped:#FFFFFF;--card-border:rgba(255,255,255,0.65);
   --glass-hi:rgba(255,255,255,0.7);--glass-edge:rgba(255,255,255,0.35);
   --glass-inner:0 1px 0 rgba(255,255,255,0.6) inset,0 -0.5px 0 rgba(0,0,0,0.04) inset;
-  --text:#1C1C1E;--text2:#3C3C43;--text3:#8E8E93;--text4:#C7C7CC;
+  --text:#1C1C1E;--text2:#3C3C43;--text3:#6E6E73;--text4:#C7C7CC;
   --separator:rgba(60,60,67,0.12);--separator2:rgba(60,60,67,0.06);
   --shadow:0 12px 34px rgba(30,30,60,0.10),0 2px 6px rgba(30,30,60,0.05);
   --shadow-sm:0 6px 18px rgba(30,30,60,0.07),0 1px 2px rgba(30,30,60,0.04);
@@ -1074,7 +1074,7 @@ html[data-theme="light"] .dt-user{border-top-color:rgba(0,0,0,0.06);}
 html[data-theme="dark"] .dt-user{border-top-color:rgba(255,255,255,0.08);}
 
 /* Investment workspace refresh */
-.invest-wrap{max-width:760px;margin:auto;padding:14px 16px 34px;position:relative}.invest-allocation{background:var(--bg2);border:1px solid var(--card-border);border-radius:20px;padding:14px 16px;margin-bottom:20px;box-shadow:var(--shadow-sm);transition:border-color var(--motion-fast) ease,box-shadow var(--motion-base) ease}.invest-allocation:hover{border-color:var(--interactive-border)}.invest-alloc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.invest-alloc-head span{font-size:12px;font-weight:700;color:var(--text);letter-spacing:-.01em}.invest-alloc-head small{font-size:11px;color:var(--text3)}.invest-alloc-bar{display:flex;height:8px;border-radius:999px;overflow:hidden;background:var(--bg3);margin-bottom:10px;gap:2px}.invest-alloc-seg{height:100%;transition:width .25s ease;min-width:3px}.invest-alloc-legend{display:flex;flex-wrap:wrap;gap:6px 12px}.invest-alloc-item{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}.invest-alloc-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}.invest-alloc-item strong{font-weight:600;color:var(--text);margin-left:1px}.invest-alloc-item small{color:var(--text3);font-size:10px;margin-left:2px}.invest-head{display:flex;justify-content:space-between;align-items:flex-end;margin:2px 0 18px}.invest-kicker{font:700 11px var(--mono);letter-spacing:.09em;color:var(--brand-green);text-transform:uppercase;margin-bottom:5px}.invest-title{font-size:30px;margin:0}.invest-head-note{font-size:12px;color:var(--text3);padding-bottom:4px}.portfolio-card{border-radius:24px;padding:20px 18px 17px;background:linear-gradient(138deg,color-mix(in srgb,var(--brand-green) 17%,var(--bg2)),var(--bg2) 62%);position:relative;overflow:hidden}.portfolio-card:after{content:'';position:absolute;width:155px;height:155px;border:1px solid color-mix(in srgb,var(--brand-green) 22%,transparent);border-radius:50%;right:-75px;top:-95px}.portfolio-card .portfolio-empty{color:var(--text3);font-size:13px;margin-top:8px}.invest-stats{margin-bottom:22px}.invest-stats>div{border-radius:17px}.invest-section-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 10px}.invest-section-head h3{margin:0}.invest-section-head small{font-size:12px;color:var(--text3)}.invest-explore{margin:24px 0 20px}.invest-explore-label{font-size:12px;color:var(--text3);margin-bottom:9px}.invest-chips{display:flex;gap:8px;overflow:auto;padding:1px 1px 5px}.invest-chip{border:1px solid var(--card-border);background:var(--bg2);color:var(--text);border-radius:14px;padding:9px 12px;white-space:nowrap;font:700 13px var(--font);text-align:left}.invest-chip span{display:block;color:var(--text3);font-size:10px;font-weight:500;margin-top:2px}.invest-search{border:1px solid var(--card-border);background:var(--bg2);box-shadow:var(--shadow-sm);padding:14px 15px;margin-bottom:1px}.positions{border-radius:20px}.invest-empty{padding:32px 18px}.asset-sheet{padding:14px 16px 92px;z-index:2;border-radius:24px;box-shadow:0 18px 55px rgba(0,0,0,.22)}.asset-sheet-top{display:flex;align-items:center;justify-content:space-between}.asset-sheet-close{border-radius:12px;width:38px;height:34px}.asset-sheet-label{font:700 11px var(--mono);letter-spacing:.08em;color:var(--text3);text-transform:uppercase}.asset-identity{display:flex;align-items:center;gap:11px;margin:18px 0 2px}.asset-logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(140deg,color-mix(in srgb,var(--brand-green) 24%,var(--bg2)),var(--bg3));display:grid;place-items:center;color:var(--brand-green);font-weight:800;font-size:17px}.asset-sheet h2{font-size:23px;margin:0}.asset-type{font-size:13px;margin-top:3px}.asset-price-row{display:flex;align-items:end;justify-content:space-between;margin:22px 0 5px}.asset-price{margin:0}.asset-change{padding:6px 9px;border-radius:999px;background:color-mix(in srgb,var(--green) 13%,transparent)}.asset-change.negative{background:color-mix(in srgb,var(--red) 12%,transparent);color:var(--red)}.asset-sheet-chart{border:1px solid var(--card-border);background:linear-gradient(145deg,var(--bg2),color-mix(in srgb,var(--brand-green) 6%,var(--bg2)));min-height:180px}.asset-sheet-chart svg{display:block!important;height:142px!important}.asset-chart-caption{display:flex;justify-content:space-between;color:var(--text3);font-size:11px;margin-bottom:5px}.asset-range{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;padding:3px;background:var(--bg3);border-radius:13px}.asset-range button.active{background:var(--bg2);box-shadow:var(--shadow-sm)}.asset-data div{border:1px solid var(--card-border);border-radius:17px}.asset-actions{position:absolute;bottom:0;left:0;right:0;margin:0;padding:12px 16px max(15px,env(safe-area-inset-bottom));background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(12px);border-top:1px solid var(--card-border)}.asset-actions button{border-radius:16px}
+.invest-wrap{max-width:760px;margin:auto;padding:14px 16px 34px;position:relative}.invest-allocation{background:var(--bg2);border:1px solid var(--card-border);border-radius:20px;padding:14px 16px;margin-bottom:20px;box-shadow:var(--shadow-sm);transition:border-color var(--motion-fast) ease,box-shadow var(--motion-base) ease}.invest-allocation:hover{border-color:var(--interactive-border)}.invest-alloc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.invest-alloc-head span{font-size:12px;font-weight:700;color:var(--text);letter-spacing:-.01em}.invest-alloc-head small{font-size:11px;color:var(--text3)}.invest-alloc-bar{display:flex;height:8px;border-radius:999px;overflow:hidden;background:var(--bg3);margin-bottom:10px;gap:2px}.invest-alloc-seg{height:100%;transition:width .25s ease;min-width:3px}.invest-alloc-legend{display:flex;flex-wrap:wrap;gap:6px 12px}.invest-alloc-item{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}.invest-alloc-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}.invest-alloc-item strong{font-weight:600;color:var(--text);margin-left:1px}.invest-alloc-item small{color:var(--text3);font-size:10px;margin-left:2px}.portfolio-card{border-radius:24px;padding:20px 18px 17px;background:linear-gradient(138deg,color-mix(in srgb,var(--brand-green) 17%,var(--bg2)),var(--bg2) 62%);position:relative;overflow:hidden}.portfolio-card:after{content:'';position:absolute;width:155px;height:155px;border:1px solid color-mix(in srgb,var(--brand-green) 22%,transparent);border-radius:50%;right:-75px;top:-95px}.portfolio-card .portfolio-empty{color:var(--text3);font-size:13px;margin-top:8px}.invest-stats{margin-bottom:22px}.invest-stats>div{border-radius:17px}.invest-section-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 10px}.invest-section-head h3{margin:0}.invest-section-head small{font-size:12px;color:var(--text3)}.invest-explore{margin:24px 0 20px}.invest-explore-label{font-size:12px;color:var(--text3);margin-bottom:9px}.invest-chips{display:flex;gap:8px;overflow:auto;padding:1px 1px 5px}.invest-chip{border:1px solid var(--card-border);background:var(--bg2);color:var(--text);border-radius:14px;padding:9px 12px;white-space:nowrap;font:700 13px var(--font);text-align:left}.invest-chip span{display:block;color:var(--text3);font-size:10px;font-weight:500;margin-top:2px}.invest-search{border:1px solid var(--card-border);background:var(--bg2);box-shadow:var(--shadow-sm);padding:14px 15px;margin-bottom:1px}.positions{border-radius:20px}.invest-empty{padding:32px 18px}.asset-sheet{padding:14px 16px 92px;z-index:2;border-radius:24px;box-shadow:0 18px 55px rgba(0,0,0,.22)}.asset-sheet-top{display:flex;align-items:center;justify-content:space-between}.asset-sheet-close{border-radius:12px;width:38px;height:34px}.asset-sheet-label{font:700 11px var(--mono);letter-spacing:.08em;color:var(--text3);text-transform:uppercase}.asset-identity{display:flex;align-items:center;gap:11px;margin:18px 0 2px}.asset-logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(140deg,color-mix(in srgb,var(--brand-green) 24%,var(--bg2)),var(--bg3));display:grid;place-items:center;color:var(--brand-green);font-weight:800;font-size:17px}.asset-sheet h2{font-size:23px;margin:0}.asset-type{font-size:13px;margin-top:3px}.asset-price-row{display:flex;align-items:end;justify-content:space-between;margin:22px 0 5px}.asset-price{margin:0}.asset-change{padding:6px 9px;border-radius:999px;background:color-mix(in srgb,var(--green) 13%,transparent)}.asset-change.negative{background:color-mix(in srgb,var(--red) 12%,transparent);color:var(--red)}.asset-sheet-chart{border:1px solid var(--card-border);background:linear-gradient(145deg,var(--bg2),color-mix(in srgb,var(--brand-green) 6%,var(--bg2)));min-height:180px}.asset-sheet-chart svg{display:block!important;height:142px!important}.asset-chart-caption{display:flex;justify-content:space-between;color:var(--text3);font-size:11px;margin-bottom:5px}.asset-range{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;padding:3px;background:var(--bg3);border-radius:13px}.asset-range button.active{background:var(--bg2);box-shadow:var(--shadow-sm)}.asset-data div{border:1px solid var(--card-border);border-radius:17px}.asset-actions{position:absolute;bottom:0;left:0;right:0;margin:0;padding:12px 16px max(15px,env(safe-area-inset-bottom));background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(12px);border-top:1px solid var(--card-border)}.asset-actions button{border-radius:16px}
 </style>
 <style>.asset-sheet-chart{position:relative;touch-action:none;user-select:none}.asset-sheet-chart.is-inspecting{cursor:crosshair}.asset-chart-tooltip{position:absolute;z-index:2;pointer-events:none;transform:translate(-50%,-100%);padding:7px 9px;background:var(--text);color:var(--bg);border-radius:10px;box-shadow:var(--shadow-sm);font:700 12px var(--mono);white-space:nowrap;opacity:0;transition:opacity .12s}.asset-chart-tooltip small{display:block;opacity:.68;font:500 10px var(--font);margin-top:2px}</style>
 <style>.investment-trade-modal{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.42);display:flex;align-items:flex-end;justify-content:center;padding:16px}.investment-trade-card{width:min(500px,100%);background:var(--bg);border:1px solid var(--card-border);border-radius:26px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.32)}.investment-trade-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:18px}.investment-trade-head h3{margin:3px 0 0;font-size:21px}.investment-trade-kicker{font-size:12px;color:var(--text3)}.investment-trade-close{border:0;background:var(--bg3);color:var(--text);border-radius:11px;width:38px;height:38px;min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px}.investment-trade-mode{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;background:var(--bg3);border-radius:14px;margin-bottom:14px}.investment-trade-mode button{border:0;background:transparent;border-radius:10px;padding:9px;color:var(--text3);font:700 13px var(--font)}.investment-trade-mode button.active{background:var(--bg2);color:var(--text);box-shadow:var(--shadow-sm)}.investment-trade-field{display:block;margin:11px 0}.investment-trade-field span{display:block;font-size:12px;color:var(--text3);margin:0 0 6px}.investment-trade-field input,.investment-trade-field select{width:100%;background:var(--bg2);border:1px solid var(--card-border);border-radius:13px;padding:12px;color:var(--text);font:600 15px var(--font)}.investment-trade-summary{font:700 13px var(--mono);padding:11px 0;color:var(--text2)}.investment-trade-submit{width:100%;border:0;border-radius:15px;background:var(--accent);color:white;padding:14px;font:800 15px var(--font)}.investment-trade-submit.sell{background:var(--red)}@keyframes tradeSheetIn{from{transform:translateY(28px);opacity:0}to{transform:translateY(0);opacity:1}}.investment-trade-modal{background:rgba(0,0,0,.32);backdrop-filter:blur(4px);padding:0;align-items:flex-end}.investment-trade-card{max-width:430px;border-radius:34px 34px 0 0;padding:8px 20px calc(32px + var(--safe-bottom));background:var(--bg2);box-shadow:0 -20px 60px rgba(0,0,0,.18);animation:tradeSheetIn .32s cubic-bezier(.32,.72,0,1) both}.investment-trade-card:before{content:'';display:block;width:36px;height:4px;margin:4px auto 18px;border-radius:99px;background:var(--bg4)}.investment-trade-field input,.investment-trade-field select{background:var(--bg3);border-radius:18px;padding:12px 14px;font-size:16px}.investment-trade-field input:focus,.investment-trade-field select:focus{outline:0;box-shadow:0 0 0 3px rgba(52,199,89,.25)}.investment-trade-mode{border-radius:18px;padding:3px}.investment-trade-mode button{border-radius:12px}.investment-trade-submit{border-radius:18px}</style>
@@ -1311,6 +1311,8 @@ button:not(:disabled):active{transform:scale(.975);}
       <select class="field-input" id="recurInterval">
         <option value="weekly">Cada semana</option>
         <option value="monthly" selected>Cada mes</option>
+        <option value="quarterly">Cada 3 meses (trimestral)</option>
+        <option value="semiannual">Cada 6 meses (semestral)</option>
         <option value="yearly">Cada año</option>
       </select>
       <div class="field-label">Fecha de fin <span style="color:var(--text4);font-size:12px;font-weight:400">(opcional)</span></div>
@@ -1413,7 +1415,7 @@ button:not(:disabled):active{transform:scale(.975);}
 </div>
 
 <script>
-var APP_VERSION='2026.09.05.1';
+var APP_VERSION='2026.09.05.2';
 var APP_PUBLISHED_AT='04/09/2026 12:47 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
@@ -1560,16 +1562,14 @@ function autoRecurBudgetBreakdown(catId,year,month){
     var root=group[0];
     group.forEach(function(t){if(new Date(t.date+'T12:00:00')<new Date(root.date+'T12:00:00'))root=t;});
     var interval=root.recur_interval||'monthly';
-    var anchorSource=root.recur_anchor_date||root.date;
-    var anchorDay=parseInt(anchorSource.slice(8,10),10);
-    var endDate=root.recur_end_date?new Date(root.recur_end_date+'T12:00:00'):null;
+    var latestCandidate=group[0]; group.forEach(function(t){if(new Date(t.date+'T12:00:00')>new Date(latestCandidate.date+'T12:00:00'))latestCandidate=t;}); var interval=latestCandidate.recur_interval||root.recur_interval||'monthly'; var anchorSource=latestCandidate.recur_anchor_date||latestCandidate.date||root.recur_anchor_date||root.date; var anchorDay=parseInt(anchorSource.slice(8,10),10); var effectiveEndDate=latestCandidate.recur_end_date||root.recur_end_date; var endDate=effectiveEndDate?new Date(effectiveEndDate+'T12:00:00'):null;
     var rootDate=new Date(root.date+'T12:00:00');
     var monthStart=new Date(year,month,1,12,0,0);
     var monthEnd=new Date(year,month+1,0,12,0,0);
     if(rootDate>monthEnd)return;
     if(endDate&&endDate<monthStart)return;
     var occ=rootDate,guard=0,count=0;
-    while(occ<=monthEnd&&guard<600){
+    while(occ<=monthEnd&&guard<5000){
       var occDate=occ.getFullYear()+'-'+pad(occ.getMonth()+1)+'-'+pad(occ.getDate());
       if(occ>=monthStart&&occ<=monthEnd&&(!endDate||occ<=endDate)&&!isRecurrenceExcluded(key,occDate))count++;
       occ=addInterval(occ,interval,anchorDay);
@@ -1663,40 +1663,64 @@ function setTheme(mode){
 
 window.addEventListener('online',function(){isOffline=false;document.getElementById('offlineBanner').classList.remove('show');setSync('syncing');loadData();});
 window.addEventListener('offline',function(){isOffline=true;document.getElementById('offlineBanner').classList.add('show');setSync('err');});
-var isProcessingOfflineQueue=false;
-async function processOfflineQueue(){
-  if(!currentUser||!offlineQueue.length||isProcessingOfflineQueue)return;
-  isProcessingOfflineQueue=true;
-  setSync('syncing');
-  var failed=[];
-  try{
-    for(var i=0;i<offlineQueue.length;i++){
-      var op=offlineQueue[i];
-      var res;
-      try{
-        if(op.type==='insert'){
-          var conflictTarget='id';
-          if(op.table==='transaction_voids')conflictTarget='user_id,transaction_id';
-          else if(op.table==='recurrence_exclusions')conflictTarget='user_id,recur_series_id,skipped_date';
-          res=await sb.from(op.table).upsert(op.data,{onConflict:conflictTarget});
+var isProcessingOfflineQueue=false, offlineQueuePromise=null;
+function processOfflineQueue(){
+  if(offlineQueuePromise)return offlineQueuePromise;
+  if(!currentUser||!offlineQueue.length)return Promise.resolve();
+  offlineQueuePromise=(async function(){
+    isProcessingOfflineQueue=true;
+    setSync('syncing');
+    var batch=offlineQueue.slice();
+    var processedOps=new Set();
+    var failed=[];
+    try{
+      for(var i=0;i<batch.length;i++){
+        var op=batch[i];
+        var res=null;
+        var networkDown=false;
+        try{
+          if(!navigator.onLine){networkDown=true;}
+          else if(op.type==='insert'){
+            var conflictTarget='id';
+            if(op.table==='transaction_voids')conflictTarget='user_id,transaction_id';
+            else if(op.table==='recurrence_exclusions')conflictTarget='user_id,recur_series_id,skipped_date';
+            res=await sb.from(op.table).upsert(op.data,{onConflict:conflictTarget});
+          }
+          else if(op.type==='update')res=await sb.from(op.table).update(op.data).eq('id',op.id);
+          else if(op.type==='delete')res=await sb.from(op.table).delete().eq('id',op.id);
+        }catch(e){
+          res=null;
+          if(!navigator.onLine||(e&&(e.name==='TypeError'||(e.message&&e.message.includes('fetch'))))){
+            networkDown=true;
+          }
         }
-        else if(op.type==='update')res=await sb.from(op.table).update(op.data).eq('id',op.id);
-        else if(op.type==='delete')res=await sb.from(op.table).delete().eq('id',op.id);
-      }catch(e){failed.push(op);res=null;}
-      if(res&&res.error){
-        if(res.error.code==='23505'){
-          // Conflicto de clave única ya resuelto en base de datos
+        if(networkDown){
+          // Mejora 8: Detección anticipada de falta de red
+          for(var j=i;j<batch.length;j++)failed.push(batch[j]);
+          break;
+        }
+        if(res&&res.error){
+          if(res.error.code==='23505'){
+            processedOps.add(op);
+          }else{
+            failed.push(op);
+          }
+        }else if(res){
+          processedOps.add(op);
+          if(op.type==='insert'&&op.table==='recurrence_exclusions'&&!isRecurrenceExcluded(op.data.recur_series_id,op.data.skipped_date))recurrenceExclusions.push(op.data);
         }else{
           failed.push(op);
         }
       }
-      else if(res&&op.type==='insert'&&op.table==='recurrence_exclusions'&&!isRecurrenceExcluded(op.data.recur_series_id,op.data.skipped_date))recurrenceExclusions.push(op.data);
+      offlineQueue=offlineQueue.filter(function(op){return !processedOps.has(op);});
+      try{localStorage.setItem(queueKey(),JSON.stringify(offlineQueue));}catch(e){}
+      setSync(offlineQueue.length?'err':'ok');
+    }finally{
+      isProcessingOfflineQueue=false;
+      offlineQueuePromise=null;
     }
-    offlineQueue=failed;localStorage.setItem(queueKey(),JSON.stringify(offlineQueue));
-    setSync(failed.length?'err':'ok');
-  }finally{
-    isProcessingOfflineQueue=false;
-  }
+  })();
+  return offlineQueuePromise;
 }
 function queueKey(){return 'ft_queue_'+(currentUser?currentUser.id:'anon');}
 function queueOp(op){
@@ -2056,7 +2080,7 @@ async function readSecureLocalCache(uid){
       var envelope=JSON.parse(stored),key=await secureCacheKey(),plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:cacheB64ToBytes(envelope.iv)},key,cacheB64ToBytes(envelope.data));
       return JSON.parse(new TextDecoder().decode(plain));
     }catch(e){
-      if(e&&(e.name==='OperationError'||e.name==='SyntaxError'))localStorage.removeItem(secureCacheStorageKey(uid));
+      localStorage.removeItem(secureCacheStorageKey(uid));
       return null;
     }
   }
@@ -2141,7 +2165,10 @@ function addInterval(d,interval,anchorDay){
   if(interval==='biweekly'){nd.setDate(nd.getDate()+14);return nd;}
   var targetDay=anchorDay||nd.getDate();
   nd.setDate(1);
-  if(interval==='yearly')nd.setFullYear(nd.getFullYear()+1);else nd.setMonth(nd.getMonth()+1);
+  if(interval==='yearly')nd.setFullYear(nd.getFullYear()+1);
+  else if(interval==='quarterly')nd.setMonth(nd.getMonth()+3);
+  else if(interval==='semiannual')nd.setMonth(nd.getMonth()+6);
+  else nd.setMonth(nd.getMonth()+1);
   var dim=new Date(nd.getFullYear(),nd.getMonth()+1,0).getDate();
   nd.setDate(Math.min(targetDay,dim));
   return nd;
@@ -2180,8 +2207,7 @@ async function processRecurring(){
       await Promise.all(oldExclusions.map(function(x){return sb.from('recurrence_exclusions').update({recur_series_id:legacySeriesId}).eq('id',x.id);}));
       root.recur_series_id=legacySeriesId;root.recur_anchor_date=root.date;seriesKey=legacySeriesId;processed[legacySeriesId]=true;
     }
-    var anchorDay=parseInt((root.recur_anchor_date||root.date).slice(8,10),10);
-    var endDate=root.recur_end_date?new Date(root.recur_end_date+'T12:00:00'):null;
+    var anchorDateStr=latest.recur_anchor_date||latest.date||root.recur_anchor_date||root.date; var anchorDay=parseInt(anchorDateStr.slice(8,10),10); var effectiveEndDate=latest.recur_end_date||root.recur_end_date; var endDate=effectiveEndDate?new Date(effectiveEndDate+'T12:00:00'):null;
     var lastDate=new Date(root.date+'T12:00:00');
     related.forEach(function(tx){var d=new Date(tx.date+'T12:00:00');if(d>lastDate)lastDate=d;});
     var next=addInterval(lastDate,interval,anchorDay);
@@ -2262,6 +2288,9 @@ function invalidateTxIndices(){
   _txIndexLength=-1;
   _monthTxCache={};
   _yearTxCache={};
+  _txByAccount={};
+  _txByMonthStr={};
+  _txByYearStr={};
 }
 
 function ensureTxIndices(){
@@ -2492,9 +2521,9 @@ function toggleFlip(innerId){
   setFlipHeight(innerId);
 }
 function onFrontClick(ev){if(ev.target.closest('.donut-container'))return;toggleFlip('homeFlipInner');}
-function onBackClick(ev){if(ev.target.closest('.hm-cell'))return;toggleFlip('homeFlipInner');}
+function onBackClick(ev){if(ev.target.closest('.hm-cell, .heatmap-detail, .heatmap-head'))return;toggleFlip('homeFlipInner');}
 function dtOnFrontClick(ev){if(ev.target.closest('#dtDonutWrap'))return;toggleFlip('dtFlipInner');}
-function dtOnBackClick(ev){if(ev.target.closest('.hm-cell'))return;toggleFlip('dtFlipInner');}
+function dtOnBackClick(ev){if(ev.target.closest('.hm-cell, .heatmap-detail, .heatmap-head'))return;toggleFlip('dtFlipInner');}
 var HM_MOBILE={grid:'heatmapGrid',detail:'heatmapDetail',title:'hmTitle',tot:'hmTot',inner:'homeFlipInner'};
 var HM_DESKTOP={grid:'dtHeatmapGrid',detail:'dtHeatmapDetail',title:'dtHmTitle',tot:'dtHmTot',inner:'dtFlipInner'};
 var hmSelDay=null;
@@ -2502,11 +2531,30 @@ var _lastHmExps=null,_lastHmByDay=null;
 function renderHeatmap(exps,cfg){
   cfg=cfg||HM_MOBILE;
   var grid=document.getElementById(cfg.grid);if(!grid)return;
-  if(homeAnnualMode){grid.innerHTML='';var tEl2=document.getElementById(cfg.title);if(tEl2)tEl2.textContent='';var b2=document.getElementById(cfg.detail);if(b2)b2.innerHTML='';return;}
+  if(homeAnnualMode){
+    var tEl2=document.getElementById(cfg.title);if(tEl2)tEl2.textContent='Resumen Anual '+viewYear;
+    var toEl2=document.getElementById(cfg.tot);if(toEl2)toEl2.textContent='';
+    grid.innerHTML='';
+    var b2=document.getElementById(cfg.detail);
+    if(b2){
+      var yTxs=getYearTx().filter(function(t){return !t.is_balance_adjustment;});
+      var yExp=yTxs.filter(function(t){return t.type==='expense';}).reduce(function(s,t){return s+t.amount;},0);
+      var yInc=yTxs.filter(function(t){return t.type==='income';}).reduce(function(s,t){return s+t.amount;},0);
+      var ySav=yInc-yExp,savRate=yInc>0?Math.round((ySav/yInc)*100):0;
+      b2.innerHTML='<div class="annual-flip-kpi" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 2px;">'
+        +'<div style="background:var(--bg3);padding:10px;border-radius:12px;"><small style="color:var(--text3);display:block;font-size:11px;">Gastos</small><strong style="font-size:15px;color:var(--red);">−'+fmt(yExp)+'</strong></div>'
+        +'<div style="background:var(--bg3);padding:10px;border-radius:12px;"><small style="color:var(--text3);display:block;font-size:11px;">Ingresos</small><strong style="font-size:15px;color:var(--green);">+'+fmt(yInc)+'</strong></div>'
+        +'<div style="background:var(--bg3);padding:10px;border-radius:12px;"><small style="color:var(--text3);display:block;font-size:11px;">Ahorro</small><strong style="font-size:15px;color:'+(ySav>=0?'var(--green)':'var(--red)')+';">'+(ySav>=0?'+':'')+fmt(ySav)+'</strong></div>'
+        +'<div style="background:var(--bg3);padding:10px;border-radius:12px;"><small style="color:var(--text3);display:block;font-size:11px;">Tasa ahorro</small><strong style="font-size:15px;color:var(--brand-green);">'+savRate+' %</strong></div>'
+        +'</div>';
+    }
+    setFlipHeight(cfg.inner);
+    return;
+  }
   // group expenses of the viewed month by day-of-month (cached by array reference)
   var byDay;
   if(exps===_lastHmExps){byDay=_lastHmByDay;}
-  else{byDay={};exps.forEach(function(t){var d=new Date(t.date+'T12:00:00').getDate();byDay[d]=(byDay[d]||0)+t.amount;});_lastHmExps=exps;_lastHmByDay=byDay;}
+  else{byDay={};exps.forEach(function(t){var dt=new Date(t.date+'T12:00:00');if(dt.getFullYear()===viewYear&&dt.getMonth()===viewMonth){var d=dt.getDate();byDay[d]=(byDay[d]||0)+t.amount;}});_lastHmExps=exps;_lastHmByDay=byDay;}
   var daysInMonth=new Date(viewYear,viewMonth+1,0).getDate();
   var firstDow=(new Date(viewYear,viewMonth,1).getDay()+6)%7; // Mon=0
   var max=0;for(var k in byDay)if(byDay[k]>max)max=byDay[k];
@@ -2694,6 +2742,13 @@ document.addEventListener('touchmove',function(e){
     txSwipe.item.style.transition='none';
     txSwipe.item.style.transform='translateX('+dx+'px)';
     txSwipe.bg.style.opacity=Math.min(1,Math.abs(dx)/80);
+    var threshold=txSwipe.item.offsetWidth*0.38;
+    if(!txSwipe.vibrated&&Math.abs(dx)>=threshold){
+      if(navigator.vibrate)navigator.vibrate(10);
+      txSwipe.vibrated=true;
+    }else if(txSwipe.vibrated&&Math.abs(dx)<threshold){
+      txSwipe.vibrated=false;
+    }
     e.preventDefault();
   }
 },{passive:false});
@@ -2732,7 +2787,7 @@ function applySort(txs){
     return 0;
   });
 }
-function activeFilterCount(){var n=0;if(filterType!=='all')n++;if(filterCat)n++;if(filterDateFrom||filterDateTo)n++;if(sortOrder!=='date-desc')n++;if(searchScope==='all')n++;return n;}
+function activeFilterCount(){var n=0;if(filterType!=='all')n++;if(filterCat)n++;if(filterAccount)n++;if(filterDateFrom||filterDateTo)n++;if(sortOrder!=='date-desc')n++;if(searchScope==='all')n++;return n;}
 function renderTxTab(el){
   // Controls are built once here; the list re-renders independently so the
   // native date pickers / search input are never destroyed mid-interaction.
@@ -2761,6 +2816,7 @@ function renderTxTab(el){
     +'<option value="cat"'+(sortOrder==='cat'?' selected':'')+'>Categoría</option>'
     +'</select>'
     +'<select class="sort-select" onchange="filterCat=this.value;updateFilterCount();renderTxList()">'+catOptions+'</select>'
+    +'<select class="sort-select" onchange="filterAccount=this.value;updateFilterCount();renderTxList()"><option value="">Todas las cuentas</option>'+accounts.map(function(a){return '<option value="'+htmlEscape(a.id)+'"'+(filterAccount===a.id?' selected':'')+'>'+htmlEscape(a.name)+'</option>';}).join('')+'</select>'
     +'</div>'
     +'<div class="filter-row date-range-row">'
     +'<input type="date" id="txDateFrom" class="date-range-input" value="'+filterDateFrom+'" onchange="filterDateFrom=this.value;updateFilterCount();renderTxList()" title="desde">'
@@ -2801,15 +2857,22 @@ function renderTxList(){
         var toAcc=accounts.find(function(a){return a.id===t.to_account_id;});
         if(fromAcc&&normStr(fromAcc.name).includes(q))return true;
         if(toAcc&&normStr(toAcc.name).includes(q))return true;
+      } else if(t.account_id){
+        var accObj=accounts.find(function(a){return a.id===t.account_id;});
+        if(accObj&&normStr(accObj.name).includes(q))return true;
       }
-      if(isNumSearch&&(String(t.amount).includes(qNum)||Number(t.amount).toFixed(2).includes(qNum)))return true;
-      var fVal=fmt(t.amount).replace(/[\s€]/g,'').toLowerCase();
-      if(fVal.includes(qClean))return true;
+      var hideAmount=portfolioValueHidden()&&(isAccountInvestment(t.account_id)||isAccountInvestment(t.to_account_id));
+      if(!hideAmount){
+        if(isNumSearch&&(String(t.amount).includes(qNum)||Number(t.amount).toFixed(2).includes(qNum)))return true;
+        var fVal=fmt(t.amount).replace(/[\s€]/g,'').toLowerCase();
+        if(fVal.includes(qClean))return true;
+      }
       return false;
     });
   }
   if(filterType!=='all')txs=txs.filter(function(t){return t.type===filterType;});
   if(filterCat)txs=txs.filter(function(t){return t.category===filterCat;});
+  if(filterAccount)txs=txs.filter(function(t){return t.account_id===filterAccount||t.to_account_id===filterAccount;});
   txs=applySort(txs);
   var sig=[searchQuery,filterType,filterCat,sortOrder,filterDateFrom,filterDateTo,viewMonth,viewYear,homeAnnualMode,searchScope].join('|');
   if(sig!==txLimitSig){txLimit=TX_PAGE_SIZE;txLimitSig=sig;}
@@ -2984,7 +3047,7 @@ function renderCatTab(el,prefix){
     if(budget>0){
       var used=Math.round(amt/budget*100);
       var alertCol=used>=100?'var(--red)':budgetGradientColor(used);
-      if(amt>budget)budgetAlert='<div class="budget-alert" style="color:'+alertCol+'">⚠ quedan -'+fmt(amt-budget)+' ('+used+'% usado)</div>';
+      if(amt>budget)budgetAlert='<div class="budget-alert" style="color:'+alertCol+'">⚠ Excedido en '+fmt(amt-budget)+' ('+used+'% usado)</div>';
       else budgetAlert='<div class="budget-alert" style="color:'+alertCol+'">quedan '+fmt(budget-amt)+' ('+used+'% usado)</div>';
     }
     var subcatHtml='';
@@ -3125,7 +3188,7 @@ function renderPatTab(el){
           // de partida y el desfase saldría siempre 0.
           var th=isLockedAdjust(p)?null:snapshotTheoreticalAmount(p,a.id);
           var d=th===null?(p.amount-0):(p.amount-th);
-          var desfaseStr=th===null?'—':((Math.abs(d)>0.01?(d>0?'+':'')+fmt(d):'sin desfase'));
+          var desfaseStr=th===null?'—':((Math.abs(d)>=0.005?(d>0?'+':'')+fmt(d):'sin desfase'));
           return '<div class="pat-hist-row">'
             +'<span>'+new Date((p.reset_date||(p.year+'-'+pad(p.month)+'-01'))+'T12:00:00').toLocaleDateString('es-ES')+'</span>'
             +'<span>'+(isPrivateInvestmentBalance?'••••••':fmt(p.amount))+'</span>'
@@ -3281,7 +3344,7 @@ async function applyBalanceAdjustment(accountId){
   if(laterExists&&!confirm('Ya existe un ajuste posterior a esta fecha. Este nuevo ajuste no afectará al saldo actual mostrado, solo al histórico. ¿Continuar?'))return;
   var yr=parseInt(date.slice(0,4)),mo=parseInt(date.slice(5,7));
   var theoretical=accountCalcTheoreticalAsOf(accountId,date);
-  var diff=real-theoretical;
+  var diff=Math.round((real-theoretical)*100)/100;
   setSync('syncing');var s=document.getElementById('patStatus');if(s){s.textContent='guardando...';s.className='status-msg';}
   // El snapshot guarda el saldo real observado y su desfase frente al teórico.
   // En fechas posteriores pasa a ser el nuevo punto de partida, pero el
@@ -3290,7 +3353,7 @@ async function applyBalanceAdjustment(accountId){
   var adjustment=null;
   if(Math.abs(diff)>0.005){
     var adjustmentType=diff<0?'expense':'income';
-    adjustment={id:'txbal_'+item.id,type:adjustmentType,amount:Math.abs(diff),category:balanceAdjustmentCategorySpec(adjustmentType).id,subcategory:null,note:'Actualización de saldo',date:date,recurring:false,recur_interval:null,recur_end_date:null,recur_series_id:null,recur_anchor_date:null,tags:[],account_id:accountId,to_account_id:null,is_balance_adjustment:true,balance_adjustment_patrimony_id:item.id,user_id:currentUser.id};
+    adjustment={id:'txbal_'+item.id,type:adjustmentType,amount:Math.round(Math.abs(diff)*100)/100,category:balanceAdjustmentCategorySpec(adjustmentType).id,subcategory:null,note:'Actualización de saldo',date:date,recurring:false,recur_interval:null,recur_end_date:null,recur_series_id:null,recur_anchor_date:null,tags:[],account_id:accountId,to_account_id:null,is_balance_adjustment:true,balance_adjustment_patrimony_id:item.id,user_id:currentUser.id};
   }
   if(isOffline){
     patrimony.push(item);if(!queueOp({type:'insert',table:'patrimony',data:item})){patrimony.pop();return;}
@@ -3318,7 +3381,7 @@ async function applyBalanceAdjustment(accountId){
   patrimony.push(saved);
   if(r.transaction)transactions.unshift(r.transaction);
   saveLocalCache();setSync('ok');
-  var diffMsg=Math.abs(diff)>0.01?(diff>0?'+':'')+fmt(diff)+' de desfase':'sin desfase';
+  var diffMsg=Math.abs(diff)>=0.005?(diff>0?'+':'')+fmt(diff)+' de desfase':'sin desfase';
   if(s){s.textContent='✓ saldo actualizado · '+diffMsg;s.className='status-msg status-ok';}
   refreshTab();
 }
@@ -3546,17 +3609,17 @@ function renderAnnualTab(el){
   var expCutoff=Math.min(todayDay,curDaysInMonth);
   var prevExpCutoff=Math.min(todayDay,prevDaysInMonth);
   function dayOf(dateStr){return parseInt(String(dateStr).slice(8,10),10)||0;}
-  var curExp=curTxs.filter(function(t){return t.type==='expense'&&dayOf(t.date)<=expCutoff;}).reduce(function(s,t){return s+t.amount;},0);
-  var prevExp=prevTxs.filter(function(t){return t.type==='expense'&&dayOf(t.date)<=prevExpCutoff;}).reduce(function(s,t){return s+t.amount;},0);
-  var curInc=curTxs.filter(function(t){return t.type==='income'&&dayOf(t.date)<=expCutoff;}).reduce(function(s,t){return s+t.amount;},0);
-  var prevInc=prevTxs.filter(function(t){return t.type==='income'&&dayOf(t.date)<=prevExpCutoff;}).reduce(function(s,t){return s+t.amount;},0);
+  var curExp=curTxs.filter(function(t){return !t.is_balance_adjustment&&t.type==='expense'&&dayOf(t.date)<=expCutoff;}).reduce(function(s,t){return s+t.amount;},0);
+  var prevExp=prevTxs.filter(function(t){return !t.is_balance_adjustment&&t.type==='expense'&&dayOf(t.date)<=prevExpCutoff;}).reduce(function(s,t){return s+t.amount;},0);
+  var curInc=curTxs.filter(function(t){return !t.is_balance_adjustment&&t.type==='income'&&dayOf(t.date)<=expCutoff;}).reduce(function(s,t){return s+t.amount;},0);
+  var prevInc=prevTxs.filter(function(t){return !t.is_balance_adjustment&&t.type==='income'&&dayOf(t.date)<=prevExpCutoff;}).reduce(function(s,t){return s+t.amount;},0);
   var expDiff=curExp-prevExp,incDiff=curInc-prevInc;
   function legItem(c,l){return '<span class="chart-legend-item"><span class="chart-legend-dot" style="background:'+c+'"></span>'+l+'</span>';}
   var visibleAccounts=accounts.filter(function(a){return !(portfolioValueHidden()&&a.is_investment);});
   var lineLegend=visibleAccounts.length?visibleAccounts.map(function(a){return legItem(a.color,capEsc(a.name));}).join(''):legItem('#8E8E93','Sin datos');
   var incData=Array(12).fill(0),expData=Array(12).fill(0),savData=[];
   var yearTxs=_txByYearStr[String(chartYear)]||[];
-  yearTxs.forEach(function(t){var m=parseInt(String(t.date).slice(5,7),10)-1;if(m>=0&&m<12){if(t.type==='income')incData[m]+=Number(t.amount)||0;else if(t.type==='expense')expData[m]+=Number(t.amount)||0;}});
+  yearTxs.forEach(function(t){if(t.is_balance_adjustment)return;var m=parseInt(String(t.date).slice(5,7),10)-1;if(m>=0&&m<12){if(t.type==='income')incData[m]+=Number(t.amount)||0;else if(t.type==='expense')expData[m]+=Number(t.amount)||0;}});
   for(var m=0;m<12;m++)savData.push(incData[m]-expData[m]);
   var statsHtml='';
   var realNow=new Date(),realY=realNow.getFullYear(),realM=realNow.getMonth();
@@ -3686,7 +3749,8 @@ function portfolioValueText(value){return portfolioValueHidden()?'••••�
 function recentAssets(){try{var values=JSON.parse(localStorage.getItem(investmentPrefsKey('recent_assets'))||'[]');return Array.isArray(values)?values.slice(0,3):[];}catch(e){return [];}}
 function rememberRecentAsset(name,type,symbol){try{var row={name:name,type:type||'Producto',symbol:symbol};var values=recentAssets().filter(function(x){return x&&x.symbol!==symbol;});values.unshift(row);localStorage.setItem(investmentPrefsKey('recent_assets'),JSON.stringify(values.slice(0,3)));}catch(e){}}
 
-function investmentUnits(symbol){return investmentOperations.filter(function(o){return o.symbol===symbol;}).reduce(function(total,o){return total+(o.side==='buy'?1:-1)*Number(o.units);},0);}
+function investmentUnits(symbol){var u=investmentOperations.filter(function(o){return o.symbol===symbol;}).reduce(function(total,o){return total+(o.side==='buy'?1:-1)*Number(o.units);},0);return u>0.0000001?u:0;}
+function getAssetPositionDisplay(sym,quotePrice){var pos=investmentPositionList().find(function(p){return p.symbol===sym;});if(!pos||pos.units<=0.0000001)return '0 €';var val=(Number.isFinite(quotePrice)&&quotePrice>0)?(pos.units*quotePrice):pos.cost;return portfolioValueHidden()?'••••••':fmt(val);}
 function openInvestmentTradeModal(side){
   var asset=assetDetailState;if(!asset)return;
   var cashAccounts=accounts.filter(function(a){return !a.is_investment;});if(!cashAccounts.length){alert('Crea primero una cuenta desde Cuentas para poder operar.');return;}
@@ -3695,12 +3759,21 @@ function openInvestmentTradeModal(side){
   modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');modal.setAttribute('aria-labelledby','tradeModalTitle');
   modal.innerHTML='<div class="investment-trade-card"><div class="investment-trade-head"><div><div class="investment-trade-kicker">'+htmlEscape(asset.symbol)+' · '+htmlEscape(asset.type||'Producto')+'</div><h3 id="tradeModalTitle">'+ (side==='buy'?'Comprar ':'Vender ')+htmlEscape(asset.name)+'</h3></div><button class="investment-trade-close" type="button" aria-label="Cerrar">×</button></div><div class="investment-trade-mode"><button class="active" data-mode="money">Por importe</button><button data-mode="units">Por participaciones</button></div><label class="investment-trade-field"><span id="tradeAmountLabel">Importe a '+(side==='buy'?'invertir':'retirar')+'</span><input id="tradeAmount" inputmode="decimal" type="number" min="0.01" step="0.01" placeholder="0,00"></label><label class="investment-trade-field"><span>Precio por participación</span><input id="tradePrice" inputmode="decimal" type="number" min="0.000001" step="any" placeholder="Consultando precio de mercado…"></label><label class="investment-trade-field"><span>Cuenta '+(side==='buy'?'de origen':'de destino')+'</span><select id="tradeAccount">'+cashAccounts.map(function(a){return '<option value="'+htmlEscape(a.id)+'">'+htmlEscape(a.name)+'</option>';}).join('')+'</select></label><label class="investment-trade-field"><span>Fecha de la operación</span><input id="tradeDate" type="date" value="'+new Date().toISOString().slice(0,10)+'"></label><div class="investment-trade-summary" id="tradeSummary">Cargando cotización actual…</div><button class="investment-trade-submit '+(side==='sell'?'sell':'')+'" type="button">'+(side==='buy'?'Confirmar compra':'Confirmar venta')+'</button></div>';
   document.body.appendChild(modal);var mode='money',amount=modal.querySelector('#tradeAmount'),price=modal.querySelector('#tradePrice'),summary=modal.querySelector('#tradeSummary');
-  function closeModal(){
+  function trapFocus(container,e){
+  if(e.key!=='Tab')return;
+  var focusables=container.querySelectorAll('button:not([disabled]),[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])');
+  if(!focusables.length)return;
+  var first=focusables[0],last=focusables[focusables.length-1];
+  if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+  else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+}
+function closeModal(){
+
     window.removeEventListener('keydown',onModalKeyDown);
     modal.remove();
     if(lastTrigger&&typeof lastTrigger.focus==='function')try{lastTrigger.focus();}catch(e){}
   }
-  function onModalKeyDown(e){if(e.key==='Escape'){e.preventDefault();closeModal();}}
+  function onModalKeyDown(e){if(e.key==='Escape'){e.preventDefault();closeModal();}else if(e.key==='Tab'){trapFocus(modal,e);}}
   window.addEventListener('keydown',onModalKeyDown);
   function update(){var v=Number(amount.value),p=Number(price.value),units=mode==='money'?v/p:v,total=mode==='money'?v:v*p;if(v>0&&p>0&&units>0)summary.textContent=(mode==='money'?units.toLocaleString('es-ES',{maximumFractionDigits:6})+' participaciones':fmt(total))+(side==='sell'?' · disponibles: '+available.toLocaleString('es-ES',{maximumFractionDigits:6}):'');else summary.textContent='Introduce el importe y el precio ejecutado.';}
   modal.querySelectorAll('[data-mode]').forEach(function(b){b.onclick=function(){mode=b.dataset.mode;modal.querySelectorAll('[data-mode]').forEach(function(x){x.classList.toggle('active',x===b);});modal.querySelector('#tradeAmountLabel').textContent=mode==='money'?'Importe a '+(side==='buy'?'invertir':'retirar'):'Participaciones';amount.placeholder=mode==='money'?'0,00':'0,000000';update();};});amount.oninput=price.oninput=update;
@@ -3710,7 +3783,7 @@ function openInvestmentTradeModal(side){
 }
 document.addEventListener('click',function(e){var button=e.target.closest&&e.target.closest('.asset-actions .buy,.asset-actions .sell');if(button){e.preventDefault();openInvestmentTradeModal(button.classList.contains('buy')?'buy':'sell');}});
 function closeAssetSheet(sheet){assetDetailState=null;saveUiState();if(sheet)sheet.remove();}
-async function openAssetSheet(name,type,symbol){rememberRecentAsset(name,type,symbol);assetDetailState={name:name,type:type,symbol:symbol,range:(assetDetailState&&assetDetailState.symbol===symbol&&assetDetailState.range)||'m'};saveUiState();var el=document.querySelector('.invest-wrap');if(!el)return;el.insertAdjacentHTML('beforeend','<div class="asset-sheet"><div class="asset-sheet-top"><div class="asset-sheet-label">Detalle del producto</div><button class="asset-sheet-close" onclick="closeAssetSheet(this.parentElement.parentElement)">×</button></div><div class="asset-identity"><div class="asset-logo">'+htmlEscape(symbol.slice(0,1))+'</div><div><h2>'+htmlEscape(name)+'</h2><div class="asset-type">'+htmlEscape(symbol)+' · '+htmlEscape(type)+'</div></div></div><div class="asset-price-row"><div class="asset-price" id="assetPrice">Cargando…</div><div class="asset-change" id="assetChange">—</div></div><div class="asset-sheet-chart" id="assetChart"><div class="search-status">Cargando gráfica…</div></div><div class="asset-range" id="assetRanges">'+[['d','1D'],['m','1M'],['m6','6M'],['ytd','YTD'],['y','1A'],['y5','5A']].map(function(x){return '<button data-range="'+x[0]+'">'+x[1]+'</button>';}).join('')+'</div><div class="asset-data" id="assetData"><div><small>Último cierre</small><strong>—</strong></div><div><small>Variación diaria</small><strong>—</strong></div><div><small>Volumen</small><strong>—</strong></div><div><small>Tu posición</small><strong>0 €</strong></div></div><div class="asset-actions"><button class="sell">Vender</button><button class="buy">Comprar</button></div></div>');var sheet=el.lastElementChild;async function loadRange(range){sheet.querySelectorAll('#assetRanges button').forEach(function(b){b.classList.toggle('active',b.dataset.range===range);});var chart=sheet.querySelector('#assetChart'),key=symbol+'_'+range,cached=assetHistoryCache[key];if(cached&&Date.now()-cached.time<300000){chart.innerHTML=cached.html;return;}chart.innerHTML='<div class="search-status">Cargando gráfica…</div>';var cfg=assetRangeConfig(range),hist=await sb.functions.invoke('market-data',{body:{action:'history',symbol:symbol,interval:cfg.interval,outputsize:cfg.outputsize}}),data=hist.data&&hist.data.data,html=assetGraph(data&&data.values||[]);assetHistoryCache[key]={time:Date.now(),html:html};if(document.contains(sheet))chart.innerHTML=html;}sheet.querySelectorAll('#assetRanges button').forEach(function(b){b.onclick=function(){assetDetailState.range=b.dataset.range;saveUiState();loadRange(b.dataset.range);};});var quotePromise=getCachedQuote(symbol,300000);loadRange((assetDetailState&&assetDetailState.range)||'m');var q=await quotePromise;if(q&&document.contains(sheet)){var p=Number(q.price||q.close),pc=Number(q.percent_change||0),price=Number.isFinite(p)?p.toLocaleString('es-ES',{style:'currency',currency:q.currency||'USD'}):'—',change=(pc>=0?'+':'')+pc.toLocaleString('es-ES',{maximumFractionDigits:2})+' %';sheet.querySelector('#assetPrice').textContent=price;sheet.querySelector('#assetChange').textContent=change;sheet.querySelector('#assetChange').classList.toggle('negative',pc<0);sheet.querySelector('#assetData').innerHTML='<div><small>Último cierre</small><strong>'+price+'</strong></div><div><small>Variación diaria</small><strong class="'+(pc<0?'negative':'positive')+'">'+change+'</strong></div><div><small>Volumen</small><strong>'+(q.volume?Number(q.volume).toLocaleString('es-ES'):'—')+'</strong></div><div><small>Tu posición</small><strong>0 €</strong></div>';}}
+async function openAssetSheet(name,type,symbol){rememberRecentAsset(name,type,symbol);assetDetailState={name:name,type:type,symbol:symbol,range:(assetDetailState&&assetDetailState.symbol===symbol&&assetDetailState.range)||'m'};saveUiState();var el=document.querySelector('.invest-wrap');if(!el)return;el.insertAdjacentHTML('beforeend','<div class="asset-sheet" role="dialog" aria-modal="true" aria-label="Detalle del producto"><div class="asset-sheet-top"><div class="asset-sheet-label">Detalle del producto</div><button class="asset-sheet-close" aria-label="Cerrar" onclick="closeAssetSheet(this.parentElement.parentElement)">×</button></div><div class="asset-identity"><div class="asset-logo">'+htmlEscape(symbol.slice(0,1))+'</div><div><h2>'+htmlEscape(name)+'</h2><div class="asset-type">'+htmlEscape(symbol)+' · '+htmlEscape(type)+'</div></div></div><div class="asset-price-row"><div class="asset-price" id="assetPrice">Cargando…</div><div class="asset-change" id="assetChange">—</div></div><div class="asset-sheet-chart" id="assetChart"><div class="search-status">Cargando gráfica…</div></div><div class="asset-range" id="assetRanges">'+[['d','1D'],['m','1M'],['m6','6M'],['ytd','YTD'],['y','1A'],['y5','5A']].map(function(x){return '<button data-range="'+x[0]+'">'+x[1]+'</button>';}).join('')+'</div><div class="asset-data" id="assetData"><div><small>Último cierre</small><strong>—</strong></div><div><small>Variación diaria</small><strong>—</strong></div><div><small>Volumen</small><strong>—</strong></div><div><small>Tu posición</small><strong>'+getAssetPositionDisplay(symbol)+'</strong></div></div><div class="asset-actions"><button class="sell">Vender</button><button class="buy">Comprar</button></div></div>');var sheet=el.lastElementChild; function onSheetKeyDown(e){if(e.key==='Escape'){e.preventDefault();closeAssetSheet(sheet);window.removeEventListener('keydown',onSheetKeyDown);}} window.addEventListener('keydown',onSheetKeyDown);async function loadRange(range){sheet.querySelectorAll('#assetRanges button').forEach(function(b){b.classList.toggle('active',b.dataset.range===range);});var chart=sheet.querySelector('#assetChart'),key=symbol+'_'+range,cached=assetHistoryCache[key];if(cached&&Date.now()-cached.time<300000){chart.innerHTML=cached.html;return;}chart.innerHTML='<div class="search-status">Cargando gráfica…</div>';var cfg=assetRangeConfig(range),hist=await sb.functions.invoke('market-data',{body:{action:'history',symbol:symbol,interval:cfg.interval,outputsize:cfg.outputsize}}),data=hist.data&&hist.data.data,html=assetGraph(data&&data.values||[]);assetHistoryCache[key]={time:Date.now(),html:html};if(document.contains(sheet))chart.innerHTML=html;}sheet.querySelectorAll('#assetRanges button').forEach(function(b){b.onclick=function(){assetDetailState.range=b.dataset.range;saveUiState();loadRange(b.dataset.range);};});var quotePromise=getCachedQuote(symbol,300000);loadRange((assetDetailState&&assetDetailState.range)||'m');var q=await quotePromise;if(q&&document.contains(sheet)){var p=Number(q.price||q.close),pc=Number(q.percent_change||0),price=Number.isFinite(p)?p.toLocaleString('es-ES',{style:'currency',currency:q.currency||'USD'}):'—',change=(pc>=0?'+':'')+pc.toLocaleString('es-ES',{maximumFractionDigits:2})+' %';sheet.querySelector('#assetPrice').textContent=price;sheet.querySelector('#assetChange').textContent=change;sheet.querySelector('#assetChange').classList.toggle('negative',pc<0);sheet.querySelector('#assetData').innerHTML='<div><small>Último cierre</small><strong>'+price+'</strong></div><div><small>Variación diaria</small><strong class="'+(pc<0?'negative':'positive')+'">'+change+'</strong></div><div><small>Volumen</small><strong>'+(q.volume?Number(q.volume).toLocaleString('es-ES'):'—')+'</strong></div><div><small>Tu posición</small><strong>'+getAssetPositionDisplay(symbol)+'</strong></div>';}}
 function renderSearchResults(container,items){
   if(!items.length){container.innerHTML='<div class="search-status">No se han encontrado productos.</div>';return;}
   container.innerHTML=items.slice(0,8).map(function(item){var name=htmlEscape(item.instrument_name||item.symbol||'Producto'),symbol=htmlEscape(item.symbol||''),type=htmlEscape(item.instrument_type||item.type||'Producto de inversión');return '<button class="search-result" data-symbol="'+symbol+'" data-name="'+name+'" data-type="'+type+'"><i>'+symbol.slice(0,1)+'</i><span><strong>'+name+'</strong><small>'+symbol+' · '+type+'</small></span></button>';}).join('');
@@ -3744,7 +3817,7 @@ function normalizeAssetType(raw){
   if(t.indexOf('etf')!==-1)return 'ETFs';
   if(t.indexOf('fondo')!==-1||t.indexOf('fund')!==-1)return 'Fondos';
   if(t.indexOf('acci')!==-1||t.indexOf('stock')!==-1||t.indexOf('equity')!==-1||t.indexOf('share')!==-1)return 'Acciones';
-  if(t.indexOf('cripto')!==-1||t.indexOf('crypto')!==-1||t.indexOf('btc')!==-1||t.indexOf('eth')!==-1||t.indexOf('digital currency')!==-1)return 'Cripto';
+  if(t.indexOf('cripto')!==-1||t.indexOf('crypto')!==-1||t.indexOf('btc')!==-1||t.indexOf('bitcoin')!==-1||t.indexOf('eth')!==-1||t.indexOf('digital currency')!==-1)return 'Cripto';
   if(t.indexOf('bono')!==-1||t.indexOf('bond')!==-1||t.indexOf('renta fija')!==-1)return 'Renta fija';
   return 'Otros';
 }
@@ -3796,7 +3869,7 @@ function renderInvestmentOperations(wrap){
   else html+=rows.map(function(o){var buy=o.side==='buy',date=new Date(o.operation_date+'T12:00:00').toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'}),units=Number(o.units).toLocaleString('es-ES',{maximumFractionDigits:6}),account=accNameById(o.cash_account_id);var valStr=portfolioValueHidden()?'••••••':fmt(o.amount);var unitsStr=portfolioValueHidden()?'••••••':(units+' part.');return '<div class="invest-operation-row" data-operation-id="'+htmlEscape(o.id)+'"><div class="invest-operation-side '+(buy?'':'sell')+'">'+(buy?'↓':'↑')+'</div><div class="invest-operation-main"><strong>'+htmlEscape(o.product_name||o.symbol)+'</strong><small>'+htmlEscape(o.symbol)+' · '+date+' · '+htmlEscape(account)+'</small></div><div class="invest-operation-value">'+valStr+'<small>'+unitsStr+'</small></div><button class="invest-operation-delete" title="Eliminar operación" data-operation-id="'+htmlEscape(o.id)+'">×</button></div>';}).join('');
   html+='</section>';var portfolio=wrap.querySelector('.portfolio-card');if(portfolio)portfolio.insertAdjacentHTML('afterend',html);wrap.querySelectorAll('.invest-operation-delete').forEach(function(button){button.onclick=function(){deleteInvestmentOperation(this.dataset.operationId);};});wrap.querySelectorAll('.invest-operation-row').forEach(function(row){row.onclick=function(e){if(!e.target.closest('.invest-operation-delete'))openInvestmentOperationEdit(this.dataset.operationId);};});
 }
-function openInvestmentOperationEdit(id){var o=investmentOperations.find(function(x){return x.id===id;});if(!o)return;assetDetailState={name:o.product_name,type:o.product_type||'Producto',symbol:o.symbol};openInvestmentTradeModal(o.side);var m=document.querySelector('.investment-trade-modal');if(!m)return;var amount=m.querySelector('#tradeAmount'),price=m.querySelector('#tradePrice'),account=m.querySelector('#tradeAccount'),date=m.querySelector('#tradeDate'),submit=m.querySelector('.investment-trade-submit');amount.value=o.amount;price.value=o.unit_price;account.value=o.cash_account_id;date.value=o.operation_date;amount.dispatchEvent(new Event('input'));submit.textContent='Guardar cambios';submit.onclick=async function(){var total=Number(amount.value),p=Number(price.value),units=total/p,d=date.value,acc=account.value;if(!d||!total||!p||!units){alert('Revisa los datos');return;}submit.disabled=true;var del=await sb.rpc('delete_investment_operation',{p_operation_id:o.id});if(del.error){alert(del.error.message);submit.disabled=false;return;}var r=await sb.rpc('record_investment_operation',{p_side:o.side,p_symbol:o.symbol,p_product_name:o.product_name,p_product_type:o.product_type||null,p_units:units,p_unit_price:p,p_amount:total,p_operation_date:d,p_cash_account_id:acc});if(r.error){alert('No se pudo guardar: '+r.error.message);submit.disabled=false;return;}m.remove();await loadData();showSuccessToast('Operación actualizada');};}
+function openInvestmentOperationEdit(id){if(portfolioValueHidden()){showUndoToast('Desactiva el modo privado para ver o editar operaciones de inversión');return;}var o=investmentOperations.find(function(x){return x.id===id;});if(!o)return;assetDetailState={name:o.product_name,type:o.product_type||'Producto',symbol:o.symbol};openInvestmentTradeModal(o.side);var m=document.querySelector('.investment-trade-modal');if(!m)return;var amount=m.querySelector('#tradeAmount'),price=m.querySelector('#tradePrice'),account=m.querySelector('#tradeAccount'),date=m.querySelector('#tradeDate'),submit=m.querySelector('.investment-trade-submit');amount.value=o.amount;price.value=o.unit_price;account.value=o.cash_account_id;date.value=o.operation_date;amount.dispatchEvent(new Event('input'));submit.textContent='Guardar cambios';submit.onclick=async function(){var isUnitsMode=m.querySelector('[data-mode="units"]')&&m.querySelector('[data-mode="units"]').classList.contains('active');var v=Number(amount.value),p=Number(price.value),units=isUnitsMode?v:v/p,total=isUnitsMode?v*p:v,d=date.value,acc=account.value;if(!d||!total||!p||!units){alert('Revisa los datos');return;}submit.disabled=true;var del=await sb.rpc('delete_investment_operation',{p_operation_id:o.id});if(del.error){alert(del.error.message);submit.disabled=false;return;}var r=await sb.rpc('record_investment_operation',{p_side:o.side,p_symbol:o.symbol,p_product_name:o.product_name,p_product_type:o.product_type||null,p_units:units,p_unit_price:p,p_amount:total,p_operation_date:d,p_cash_account_id:acc});if(r.error){alert('No se pudo guardar: '+r.error.message);submit.disabled=false;return;}m.remove();await loadData();showSuccessToast('Operación actualizada');};}
 async function deleteInvestmentOperation(id){
   var op=investmentOperations.find(function(x){return x.id===id;});if(!op)return;if(!confirm('¿Eliminar esta '+(op.side==='buy'?'compra':'venta')+'? También se eliminará el traspaso asociado y se recalculará el saldo de la cuenta.'))return;
   var r=await sb.rpc('delete_investment_operation',{p_operation_id:id});if(r.error){alert('No se pudo eliminar la operación: '+r.error.message);return;}investmentOperations=investmentOperations.filter(function(x){return x.id!==id;});transactions=transactions.filter(function(t){return t.id!==op.transaction_id;});saveLocalCache();await loadData();showSuccessToast('Operación eliminada');
@@ -3887,6 +3960,8 @@ async function signOut(){
   // La cola se conserva por usuario; la caché visible se elimina antes de
   // esperar a la red para no dejar datos financieros en este dispositivo.
   if(cKey!=='ft_cache_'){localStorage.removeItem(cKey);localStorage.removeItem(secureCacheStorageKey(currentUser.id));}
+  if(ftRealtimeChannel&&sb.removeChannel){try{sb.removeChannel(ftRealtimeChannel);}catch(e){}ftRealtimeChannel=null;}
+  clearTimeout(ftRealtimeTimer);clearBalanceCache();_quoteCache={};
   transactions=[];categories=[];accounts=[];patrimony=[];budgets=[];recurrenceExclusions=[];transactionVoids=[];offlineQueue=[];investmentOperations=[];_monthTxCache={};_yearTxCache={};if(typeof invalidateTxIndices==='function')invalidateTxIndices();txVersion++;
   try{await sb.auth.signOut();}catch(e){}
   showAuth();
@@ -3957,6 +4032,7 @@ function openModal(){
 function editTx(id){
   lastModalTrigger=document.activeElement;
   var tx=transactions.find(function(t){return t.id===id;});if(!tx)return;
+  if(tx.is_balance_adjustment){showUndoToast('Las actualizaciones de saldo se gestionan desde la pestaña Cuentas');return;}
   if(portfolioValueHidden()&&(isAccountInvestment(tx.account_id)||isAccountInvestment(tx.to_account_id)||investmentOperations.some(function(op){return op.transaction_id===tx.id;}))){
     showUndoToast('Desactiva el modo privado para ver o editar movimientos de inversión');
     return;
@@ -3981,7 +4057,16 @@ function editTx(id){
   document.getElementById('modalBg').classList.add('visible');
   document.getElementById('modalBg').setAttribute('aria-hidden','false');
 }
-function closeModal(){document.getElementById('modalBg').classList.remove('visible');document.getElementById('modalBg').setAttribute('aria-hidden','true');document.getElementById('fabBtn').classList.remove('open');if(lastModalTrigger&&document.contains(lastModalTrigger))lastModalTrigger.focus();editingTxId=null;}
+function trapFocus(container,e){
+  if(e.key!=='Tab')return;
+  var focusables=container.querySelectorAll('button:not([disabled]),[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])');
+  if(!focusables.length)return;
+  var first=focusables[0],last=focusables[focusables.length-1];
+  if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+  else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+}
+function closeModal(){
+document.getElementById('modalBg').classList.remove('visible');document.getElementById('modalBg').setAttribute('aria-hidden','true');document.getElementById('fabBtn').classList.remove('open');if(lastModalTrigger&&document.contains(lastModalTrigger))lastModalTrigger.focus();editingTxId=null;}
 function setType(t){
   txType=t;
   document.getElementById('typeExp').className='type-btn'+(t==='expense'?' active-exp':'');
@@ -4054,7 +4139,7 @@ async function syncRecurSeries(seriesId,editedId,fromDate,fields){
 var isSaving=false;
 async function saveTx(){
   if(isSaving)return;isSaving=true;
-  var rawAmtStr=String(document.getElementById('txAmount').value||'').trim().replace(',','.');
+  var rawAmtStr=String(document.getElementById('txAmount').value||'').trim().replace(/,/g,'.');
   var amount=parseFloat(rawAmtStr);
   var note=document.getElementById('txNote').value.trim()||null;
   var date=document.getElementById('txDate').value;
@@ -4108,7 +4193,7 @@ async function saveTx(){
     if(seriesIdForSync){
       var applyFuture=confirm('¿Aplicar estos cambios también a las ocurrencias futuras de esta recurrencia?\n\nAceptar: esta y futuras. Cancelar: solo esta.');
       if(applyFuture){
-        var seriesFields={type:payload.type,amount:payload.amount,category:payload.category,subcategory:payload.subcategory,note:payload.note,tags:payload.tags,account_id:payload.account_id,to_account_id:payload.to_account_id,recurring:payload.recurring,recur_interval:payload.recurring?payload.recur_interval:null,recur_end_date:payload.recurring?payload.recur_end_date:null};
+        payload.recur_anchor_date=payload.recurring?payload.date:null; var seriesFields={type:payload.type,amount:payload.amount,category:payload.category,subcategory:payload.subcategory,note:payload.note,tags:payload.tags,account_id:payload.account_id,to_account_id:payload.to_account_id,recurring:payload.recurring,recur_interval:payload.recurring?payload.recur_interval:null,recur_end_date:payload.recurring?payload.recur_end_date:null,recur_anchor_date:payload.recurring?payload.date:null}; if(!payload.recurring){payload.recur_series_id=null;seriesFields.recur_series_id=null;}
         try{await syncRecurSeries(seriesIdForSync,editingTxId,payload.date,seriesFields);}catch(ex){}
       }
     }
@@ -4140,6 +4225,7 @@ function resetTxSwipeFor(id){
 function requestDeleteTx(id){
   var tx=transactions.find(function(t){return t.id===id;});
   if(!tx)return;
+  if(tx.is_balance_adjustment){resetTxSwipeFor(id);showUndoToast('Las actualizaciones de saldo se gestionan o eliminan desde Cuentas');return;}
   if(!tx.recurring){deleteTx(id);return;}
   resetTxSwipeFor(id);
   pendingRecurringDeleteId=id;
@@ -4651,7 +4737,7 @@ function validateImportData(d){
   });
   checkDupIds(d.categories,'categoría');
   var validTypes=['expense','income','transfer'];
-  var validIntervals=['weekly','biweekly','monthly','yearly'];
+  var validIntervals=['weekly','biweekly','monthly','quarterly','semiannual','yearly'];
   d.transactions.forEach(function(t,i){
     if(!t||!isId(t.id))throw new Error('transacción #'+i+': id inválido');
     if(validTypes.indexOf(t.type)===-1)throw new Error('transacción #'+i+': tipo inválido');
@@ -4673,6 +4759,7 @@ function validateImportData(d){
     d.accounts.forEach(function(a,i){
       if(!a||!isId(a.id))throw new Error('cuenta #'+i+': id inválido');
       if(!isStr(a.name,80)||!a.name)throw new Error('cuenta #'+i+': nombre inválido');
+      if(a.is_investment!==undefined&&typeof a.is_investment!=='boolean')throw new Error('cuenta #'+i+': is_investment debe ser booleano');
       if(a.color!=null&&!isColor(a.color))throw new Error('cuenta #'+i+': color inválido');
     });
     checkDupIds(d.accounts,'cuenta');
@@ -4710,6 +4797,24 @@ function validateImportData(d){
     if(!Array.isArray(d.transactionVoids))throw new Error('anulaciones: formato inválido');
     d.transactionVoids.forEach(function(v,i){if(!v||!isId(v.id)||!isId(v.transaction_id)||!v.transaction_data||typeof v.transaction_data!=='object'||!isStr(v.voided_at,40))throw new Error('anulación #'+i+': datos inválidos');});
     checkDupIds(d.transactionVoids,'anulación');
+  }
+  if(d.investmentOperations!==undefined){
+    if(!Array.isArray(d.investmentOperations))throw new Error('operaciones de inversión: formato inválido');
+    var validSides=['buy','sell'];
+    d.investmentOperations.forEach(function(op,i){
+      if(!op||!isId(op.id))throw new Error('operación de inversión #'+i+': id inválido');
+      if(!isStr(op.symbol,20)||!op.symbol.trim())throw new Error('operación de inversión #'+i+': símbolo inválido');
+      if(op.product_name!=null&&!isStr(op.product_name,120))throw new Error('operación de inversión #'+i+': nombre de producto demasiado largo');
+      if(validSides.indexOf(op.side)===-1)throw new Error('operación de inversión #'+i+': tipo de operación inválido (debe ser compra o venta)');
+      if(!isNum(op.units)||op.units<=0)throw new Error('operación de inversión #'+i+': número de títulos debe ser mayor que 0');
+      if(!isNum(op.unit_price)||op.unit_price<=0)throw new Error('operación de inversión #'+i+': precio unitario debe ser mayor que 0');
+      if(!isNum(op.amount)||op.amount<=0)throw new Error('operación de inversión #'+i+': importe total debe ser mayor que 0');
+      if(!isDate(op.operation_date))throw new Error('operación de inversión #'+i+': fecha de operación inválida');
+      if(op.cash_account_id!=null&&!isId(op.cash_account_id))throw new Error('operación de inversión #'+i+': cuenta de efectivo inválida');
+      if(op.investment_account_id!=null&&!isId(op.investment_account_id))throw new Error('operación de inversión #'+i+': cuenta de inversión inválida');
+      if(op.transaction_id!=null&&!isId(op.transaction_id))throw new Error('operación de inversión #'+i+': transacción vinculada inválida');
+    });
+    checkDupIds(d.investmentOperations,'operación de inversión');
   }
 }
 function readBackupFile(file){
@@ -4753,6 +4858,7 @@ function normalizeImportedBackup(data){
 }
 async function importJSON(rawInput,statusEl){
   var raw=typeof rawInput==='string'?rawInput.trim():'';var s=statusEl||document.getElementById('importStatus');
+  if(isOffline){if(s){s.textContent='✗ No puedes importar datos mientras estás sin conexión. Conéctate a Internet para generar el respaldo previo de seguridad.';s.className='status-msg status-err';}return;}
   function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
   try{
     if(raw.length>10485760)throw new Error('la copia supera el tamaño máximo de 10 MB');
@@ -5204,7 +5310,7 @@ function dtSetType(t){
 
 async function dtQuickAdd(){
   var qAmtEl=document.getElementById('dtQAmount');if(!qAmtEl)return;
-  var rawAmount=parseFloat(qAmtEl.value);
+  var rawAmount=parseFloat(String(qAmtEl.value||'').trim().replace(/,/g,'.'));
   var amount=Math.round(rawAmount*100)/100;
   var cat=document.getElementById('dtQCat').value;
   var note=document.getElementById('dtQNote').value.trim()||null;
