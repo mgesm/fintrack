@@ -9,9 +9,11 @@ const isIsin = (value: string) => /^[A-Z]{2}[A-Z0-9]{9}[0-9]$/i.test(value);
 // Algunas clases de fondos se negocian en mercados con un símbolo distinto al ISIN.
 // La búsqueda de Yahoo cubre el resto; estos alias hacen la resolución inmediata.
 const knownFunds: Record<string, { symbol: string; twelveSymbol: string; name: string; lastPublishedNav: number; navDate: string }> = {
-  // El NAV publicado el 31/08/2026 se usa únicamente si los proveedores no
-  // responden. Así nunca se confunde una ausencia de datos con un valor cero.
-  IE00BYX5MX67: { symbol: "IE00BYX5MX67.SG", twelveSymbol: "FEP7:GER", name: "Fidelity S&P 500 Index Fund P-ACC-EUR", lastPublishedNav: 16.40037595, navDate: "2026-09-03" },
+  // En Yahoo Finance, los fondos europeos tienen sus series de NAV y cotizaciones diarias
+  // bajo el ticker de Morningstar (0P...). Stuttgart (.SG) no publica cierres diarios.
+  IE00BYX5MX67: { symbol: "0P0001CLDM.F", twelveSymbol: "FEP7:GER", name: "Fidelity S&P 500 Index Fund P-ACC-EUR", lastPublishedNav: 16.4232, navDate: "2026-09-04" },
+  IE00BYX5NX33: { symbol: "0P0001CLDK.F", twelveSymbol: "", name: "Fidelity MSCI World Index Fund P-ACC-EUR", lastPublishedNav: 14.2305, navDate: "2026-09-04" },
+  IE00B03HCZ61: { symbol: "0P00000RQC.F", twelveSymbol: "", name: "Vanguard Global Stock Index Inv EUR Acc", lastPublishedNav: 53.12, navDate: "2026-09-04" },
 };
 
 async function getYahooSearch(query: string) {
@@ -22,16 +24,18 @@ async function getYahooSearch(query: string) {
 async function yahooSymbolFor(input: string) {
   const upper = input.toUpperCase();
   if (knownFunds[upper]) return knownFunds[upper].symbol;
-  if (!isIsin(upper)) return upper;
+  if (!isIsin(upper) && !upper.startsWith("0P")) return upper;
   const data = await getYahooSearch(upper);
-  const match = (data?.quotes || []).find((q: any) => q?.symbol && (q?.quoteType === "MUTUALFUND" || q?.quoteType === "ETF" || q?.isYahooFinance));
+  const quotes = data?.quotes || [];
+  // Priorizar identificador Morningstar (0P...) de Yahoo ya que contiene el NAV real y serie diaria
+  const morningstarMatch = quotes.find((q: any) => q?.symbol && String(q.symbol).startsWith("0P"));
+  const match = morningstarMatch || quotes.find((q: any) => q?.symbol && (q?.quoteType === "MUTUALFUND" || q?.quoteType === "ETF" || q?.isYahooFinance));
   if (!match?.symbol) throw new Error("No se ha encontrado una cotización para este ISIN");
   return String(match.symbol);
 }
 const yahooHeaders = {
   "Accept": "application/json, text/plain, */*",
-  // Yahoo rechaza algunas peticiones de servidores si no se identifica un navegador.
-  "User-Agent": "Mozilla/5.0 (compatible; FinTrack/1.0; +https://mgesm.github.io/fintrack/)",
+  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
 };
 async function yahooChart(symbol: string, range: string, interval: string) {
   const path = "/v8/finance/chart/" + encodeURIComponent(symbol) + "?range=" + encodeURIComponent(range) + "&interval=" + encodeURIComponent(interval) + "&includePrePost=false&events=div%2Csplits";
@@ -112,21 +116,30 @@ function yahooSearchItems(data: any, input: string) {
   }));
 }
 async function yahooQuote(input: string) {
-  // Este fondo cotiza durante la sesión a través del símbolo de Twelve Data.
-  // Yahoo puede exponer solo un cierre secundario atrasado, que distorsiona la
-  // valoración aunque las participaciones y el coste registrados sean correctos.
-  if (input.toUpperCase() === "IE00BYX5MX67") {
-    try { return await twelveFundQuote(input); }
-    catch { try { return await investingFundQuote(input); }
-    catch { return publishedFundNav(input); } }
-  }
   const symbol = await yahooSymbolFor(input);
   try {
     const result = await yahooChart(symbol, "7d", "1d");
     const closes = (result?.indicators?.quote?.[0]?.close || []).filter((v: unknown) => Number.isFinite(Number(v))).map(Number);
-    const close = closes[closes.length - 1], previous = closes[closes.length - 2] || result?.meta?.previousClose || close;
+    let close = closes[closes.length - 1];
+    let previous = closes[closes.length - 2] || result?.meta?.previousClose || close;
+    if (!Number.isFinite(close)) {
+      const metaPrice = Number(result?.meta?.regularMarketPrice);
+      if (Number.isFinite(metaPrice)) {
+        close = metaPrice;
+        previous = Number(result?.meta?.chartPreviousClose || result?.meta?.previousClose || metaPrice);
+      }
+    }
     if (!Number.isFinite(close)) throw new Error("El fondo todavía no tiene un valor liquidativo disponible");
-    return { symbol, close, price: close, previous_close: previous, percent_change: previous ? (close - previous) / previous * 100 : 0, currency: result?.meta?.currency || "EUR", volume: null, source: "yahoo-fund" };
+    return {
+      symbol: input.toUpperCase(),
+      close,
+      price: close,
+      previous_close: previous,
+      percent_change: previous ? (close - previous) / previous * 100 : 0,
+      currency: result?.meta?.currency || "EUR",
+      volume: null,
+      source: "yahoo-fund"
+    };
   } catch (error) {
     if (isIsin(input)) {
       try { return await twelveFundQuote(input); }
@@ -149,7 +162,7 @@ async function yahooHistory(input: string, interval: string, outputsize: number)
     const iso = new Date(ts * 1000).toISOString();
     return { datetime: isIntraday ? iso.slice(0, 16) : iso.slice(0, 10), close: String(close) };
   }).filter(Boolean).slice(-Math.max(2, Math.min(outputsize, 5000)));
-  return { meta: { symbol, currency: result?.meta?.currency || "EUR", source: "yahoo-fund" }, values };
+  return { meta: { symbol: input.toUpperCase(), currency: result?.meta?.currency || "EUR", source: "yahoo-fund" }, values };
 }
 
 Deno.serve(async (req: Request) => {
@@ -160,8 +173,8 @@ Deno.serve(async (req: Request) => {
     const input = safe(action === "search" ? body?.query : body?.symbol, 64);
     if (!input) throw new Error(action === "search" ? "Query required" : "Symbol required");
 
-    // Los ISIN se resuelven por la fuente especializada de fondos.
-    if (isIsin(input)) {
+    // Los ISIN y códigos de fondos Morningstar (0P...) se resuelven por la fuente especializada de fondos.
+    if (isIsin(input) || input.toUpperCase().startsWith("0P")) {
       if (action === "search") {
         const known = knownFunds[input.toUpperCase()];
         if (known) return Response.json({ data: { data: [{ symbol: input.toUpperCase(), instrument_name: known.name, instrument_type: "Fondo de inversión" }] } }, { headers: corsHeaders });

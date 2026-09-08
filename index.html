@@ -1650,8 +1650,8 @@ button:not(:disabled):active{transform:scale(.975);}
 </div>
 
 <script>
-var APP_VERSION='2026.09.08.5';
-var APP_PUBLISHED_AT='08/09/2026 12:48 CEST';
+var APP_VERSION='2026.09.08.6';
+var APP_PUBLISHED_AT='08/09/2026 13:00 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
 var sb=window.supabase.createClient(SB_URL,SB_KEY);
@@ -1671,8 +1671,8 @@ var searchQuery='',filterType='all',filterCat='',filterAccount='',sortOrder='dat
 var homeAnnualMode=false;
 var isOffline=navigator.onLine===false,offlineQueue=[];
 var syncState=isOffline?'offline':'syncing';
-var _quoteCache={}; // caché con TTL de 10 min para cotizaciones
-function getCachedQuote(symbol,maxAgeMs){var s=String(symbol||'').toUpperCase(),entry=_quoteCache[s];if(entry&&(Date.now()-entry.ts)<(maxAgeMs||600000))return Promise.resolve(entry.data);return sb.functions.invoke('market-data',{body:{action:'quote',symbol:s}}).then(function(r){if(r&&r.data&&r.data.data){_quoteCache[s]={ts:Date.now(),data:r.data.data};}return r.data&&r.data.data;});}
+var _quoteCache={}; // caché con TTL de 5 min para cotizaciones
+function getCachedQuote(symbol,maxAgeMs){var s=String(symbol||'').toUpperCase(),entry=_quoteCache[s];if(entry&&(Date.now()-entry.ts)<(maxAgeMs||300000))return Promise.resolve(entry.data);return sb.functions.invoke('market-data',{body:{action:'quote',symbol:s}}).then(function(r){if(r&&r.data&&r.data.data){_quoteCache[s]={ts:Date.now(),data:r.data.data};}return r.data&&r.data.data;});}
 var DEFAULT_CATS=[
   {id:'c1',name:'alimentación',color:'#34C759',icon:'🛒',subcats:['supermercado','mercado','alimentación online'],position:0},
   {id:'c2',name:'transporte',color:'#007AFF',icon:'🚗',subcats:['gasolina','taxi/uber','transporte público','parking'],position:1},
@@ -4004,7 +4004,19 @@ function recentAssets(){try{var values=JSON.parse(localStorage.getItem(investmen
 function rememberRecentAsset(name,type,symbol){try{var row={name:name,type:type||'Producto',symbol:symbol};var values=recentAssets().filter(function(x){return x&&x.symbol!==symbol;});values.unshift(row);localStorage.setItem(investmentPrefsKey('recent_assets'),JSON.stringify(values.slice(0,3)));}catch(e){}}
 
 function investmentUnits(symbol){var u=investmentOperations.filter(function(o){return o.symbol===symbol;}).reduce(function(total,o){return total+(o.side==='buy'?1:-1)*Number(o.units);},0);return u>0.0000001?u:0;}
-function getAssetPositionDisplay(sym,quotePrice){var pos=investmentPositionList().find(function(p){return p.symbol===sym;});if(!pos||pos.units<=0.0000001)return '0 €';var val=(Number.isFinite(quotePrice)&&quotePrice>0)?(pos.units*quotePrice):pos.cost;return portfolioValueHidden()?'••••••':fmt(val);}
+function getAssetPositionDisplay(sym,quotePrice){
+  var pos=investmentPositionList().find(function(p){return p.symbol===sym;});
+  if(!pos||pos.units<=0.0000001)return '0 €';
+  var hasQuote=Number.isFinite(quotePrice)&&quotePrice>0;
+  var val=hasQuote?(pos.units*quotePrice):pos.cost;
+  if(portfolioValueHidden())return '••••••';
+  if(hasQuote&&pos.cost){
+    var posPct=(val-pos.cost)/pos.cost*100;
+    var sign=posPct>=0?'+':'';
+    return fmt(val)+' <small style="font-weight:700;color:'+(posPct<0?'var(--red)':'var(--brand-green)')+'">('+sign+posPct.toFixed(2)+'%)</small>';
+  }
+  return fmt(val);
+}
 function openInvestmentTradeModal(side){
   var asset=assetDetailState;if(!asset)return;
   var cashAccounts=accounts.filter(function(a){return !a.is_investment;});if(!cashAccounts.length){alert('Crea primero una cuenta desde Cuentas para poder operar.');return;}
@@ -4100,7 +4112,7 @@ async function openAssetSheet(name,type,symbol){
     sheet.querySelector('#assetPrice').textContent=price;
     sheet.querySelector('#assetChange').textContent=change;
     sheet.querySelector('#assetChange').classList.toggle('negative',pc<0);
-    sheet.querySelector('#assetData').innerHTML='<div><small>Último cierre</small><strong>'+price+'</strong></div><div><small>Variación diaria</small><strong class="'+(pc<0?'negative':'positive')+'">'+change+'</strong></div><div><small>Volumen</small><strong>'+(q.volume?Number(q.volume).toLocaleString('es-ES'):'—')+'</strong></div><div><small>Tu posición</small><strong>'+getAssetPositionDisplay(symbol)+'</strong></div>';
+    sheet.querySelector('#assetData').innerHTML='<div><small>Último cierre</small><strong>'+price+'</strong></div><div><small>Variación diaria</small><strong class="'+(pc<0?'negative':'positive')+'">'+change+'</strong></div><div><small>Volumen</small><strong>'+(q.volume?Number(q.volume).toLocaleString('es-ES'):'—')+'</strong></div><div><small>Tu posición</small><strong>'+getAssetPositionDisplay(symbol,p)+'</strong></div>';
   }
 }
 function renderSearchResults(container,items){
@@ -4178,9 +4190,50 @@ function renderAssetAllocationHtml(positions,validQuotes){
   return '<div class="invest-allocation"><div class="invest-alloc-head"><span>Distribución de cartera</span><small>Por tipo de activo</small></div><div class="invest-alloc-bar">'+segs+'</div><div class="invest-alloc-legend">'+legend+'</div></div>';
 }
 function refreshInvestmentMarketValue(){
-  var wrap=document.querySelector('.invest-wrap'),positions=investmentPositionList();if(!wrap)return;var totalEl=wrap.querySelector('.portfolio-card>strong'),stats=wrap.querySelectorAll('.invest-stats strong');if(!positions.length){if(totalEl)totalEl.textContent=portfolioValueText('—');return;}
-  if(totalEl)totalEl.textContent=portfolioValueHidden()?'••••••':'Actualizando…';if(stats[2])stats[2].textContent=portfolioValueText(String(positions.length));
-  Promise.all(positions.map(function(p){return getCachedQuote(p.symbol,300000).then(function(q){var price=Number(q&&(q.price||q.close));return Number.isFinite(price)?{p:p,value:p.units*price}:null;}).catch(function(){return null;});})).then(function(rows){if(!document.contains(wrap))return;var valid=rows.filter(Boolean),value=valid.reduce(function(s,r){return s+r.value;},0),cost=positions.reduce(function(s,p){return s+p.cost;},0),pct=cost?(value-cost)/cost*100:0;if(totalEl)totalEl.textContent=portfolioValueText(valid.length?fmt(value):fmt(cost));if(stats[0])stats[0].textContent=portfolioValueText(fmt(cost));if(stats[1])stats[1].textContent=portfolioValueHidden()?'••••••':(valid.length?(pct>=0?'+':'')+pct.toLocaleString('es-ES',{maximumFractionDigits:2})+' %':'—');var allocEl=wrap.querySelector('.invest-allocation');if(allocEl&&valid.length){var newHtml=renderAssetAllocationHtml(positions,valid);if(newHtml)allocEl.outerHTML=newHtml;}});
+  var wrap=document.querySelector('.invest-wrap'),positions=investmentPositionList();if(!wrap)return;
+  var totalEl=wrap.querySelector('.portfolio-card>strong'),stats=wrap.querySelectorAll('.invest-stats strong');
+  if(!positions.length){if(totalEl)totalEl.textContent=portfolioValueText('—');return;}
+  if(totalEl)totalEl.textContent=portfolioValueHidden()?'••••••':'Actualizando…';
+  if(stats[2])stats[2].textContent=portfolioValueText(String(positions.length));
+  var posEl=wrap.querySelector('.positions');
+  Promise.all(positions.map(function(p){
+    return getCachedQuote(p.symbol,300000).then(function(q){
+      var price=Number(q&&(q.price||q.close));
+      return Number.isFinite(price)?{p:p,value:p.units*price,price:price}:null;
+    }).catch(function(){return null;});
+  })).then(function(rows){
+    if(!document.contains(wrap))return;
+    var valid=rows.filter(Boolean);
+    var value=positions.reduce(function(s,p,i){return s+(rows[i]?rows[i].value:p.cost);},0);
+    var cost=positions.reduce(function(s,p){return s+p.cost;},0);
+    var pct=cost?(value-cost)/cost*100:0;
+    if(totalEl)totalEl.textContent=portfolioValueText(valid.length?fmt(value):fmt(cost));
+    if(stats[0])stats[0].textContent=portfolioValueText(fmt(cost));
+    if(stats[1])stats[1].textContent=portfolioValueHidden()?'••••••':(valid.length?(pct>=0?'+':'')+pct.toLocaleString('es-ES',{maximumFractionDigits:2})+' %':'—');
+    if(posEl&&valid.length){
+      var rowEls=posEl.querySelectorAll('.position');
+      positions.forEach(function(p,i){
+        var row=rowEls[i],r=rows[i];if(!row||!r)return;
+        var valEl=row.querySelector('.position-value'),sparkEl=row.querySelector('.position-spark');
+        if(valEl){
+          var valStr=portfolioValueHidden()?'••••••':fmt(r.value);
+          var posPct=p.cost?(r.value-p.cost)/p.cost*100:0;
+          var posPctStr=(posPct>=0?'+':'')+posPct.toLocaleString('es-ES',{maximumFractionDigits:2})+' %';
+          var isNeg=posPct<0;
+          valEl.innerHTML='<strong>'+valStr+'</strong><b style="color:'+(isNeg?'var(--red)':'var(--brand-green)')+';font-weight:700">'+posPctStr+'</b>';
+          if(sparkEl){
+            sparkEl.style.color=isNeg?'var(--red)':'var(--brand-green)';
+            sparkEl.style.transform=isNeg?'rotate(16deg) scaleY(-1)':'rotate(-16deg)';
+          }
+        }
+      });
+    }
+    var allocEl=wrap.querySelector('.invest-allocation');
+    if(allocEl&&valid.length){
+      var newHtml=renderAssetAllocationHtml(positions,valid);
+      if(newHtml)allocEl.outerHTML=newHtml;
+    }
+  });
 }
 function renderInvestmentOperations(wrap){
   if(!wrap)return;var rows=investmentOperations.slice().sort(function(a,b){return String(b.operation_date).localeCompare(String(a.operation_date));}),html='<section class="invest-operations"><div class="invest-operations-head"><h3>Operaciones</h3><small>'+rows.length+' '+(rows.length===1?'movimiento':'movimientos')+'</small></div>';
