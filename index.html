@@ -665,8 +665,6 @@ html[data-theme="light"] .bnav-pill{
 
 /* CHARTS */
 .annual-wrap{width:100%;max-width:760px;margin:0 auto;padding:12px 0 40px;display:flex;flex-direction:column;gap:12px;}
-.annual-kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:2px;}
-@media(min-width:768px){.annual-kpi-grid{grid-template-columns:repeat(4,1fr);}}
 .annual-kpi-card{background:var(--bg2);border:1px solid var(--card-border);border-radius:var(--radius-md);padding:13px 15px;box-shadow:var(--glass-inner),var(--shadow-sm);display:flex;flex-direction:column;gap:3px;-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);}
 .annual-kpi-card small{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;}
 .annual-kpi-card strong{font-family:var(--mono);font-size:17px;font-weight:700;letter-spacing:-0.4px;}
@@ -1477,8 +1475,8 @@ button:not(:disabled):active{transform:scale(.975);}
 </div>
 
 <script>
-var APP_VERSION='2026.09.08.1';
-var APP_PUBLISHED_AT='08/09/2026 11:30 CEST';
+var APP_VERSION='2026.09.08.2';
+var APP_PUBLISHED_AT='08/09/2026 12:05 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
 var sb=window.supabase.createClient(SB_URL,SB_KEY);
@@ -3756,21 +3754,10 @@ function renderAnnualTab(el){
       +savRateHtml
       +'</div>';
   }
-  var totYearInc=incData.reduce(function(s,v){return s+v;},0);
-  var totYearExp=expData.reduce(function(s,v){return s+v;},0);
-  var totYearSav=totYearInc-totYearExp;
-  var totYearRate=totYearInc>0?Math.round((totYearSav/totYearInc)*100):0;
-  var kpiGridHtml='<div class="annual-kpi-grid">'
-    +'<div class="annual-kpi-card"><small>Total Ingresos</small><strong style="color:var(--green);">+'+fmt(totYearInc)+'</strong></div>'
-    +'<div class="annual-kpi-card"><small>Total Gastos</small><strong style="color:var(--red);">−'+fmt(totYearExp)+'</strong></div>'
-    +'<div class="annual-kpi-card"><small>Ahorro Neto</small><strong style="color:'+(totYearSav>=0?'var(--green)':'var(--red)')+';">'+(totYearSav>=0?'+':'')+fmt(totYearSav)+'</strong></div>'
-    +'<div class="annual-kpi-card"><small>Tasa de Ahorro</small><strong style="color:var(--brand-green);">'+totYearRate+' %</strong></div>'
-    +'</div>';
   var prevIcon='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>';
   var nextIcon='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
   el.innerHTML='<div class="annual-wrap">'
     +'<div class="chart-year-nav"><button class="nav-btn" onclick="chartYear--;switchTab(3)" aria-label="Año anterior">'+prevIcon+'</button><div class="chart-year-label">'+chartYear+'</div><button class="nav-btn" onclick="chartYear++;switchTab(3)" aria-label="Año siguiente">'+nextIcon+'</button></div>'
-    +kpiGridHtml
     +'<div style="padding:0 0 4px"><div style="font-size:11px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Comparativa con el mes anterior</div>'
     +'<div class="compare-grid">'
     +'<div class="compare-card"><div class="compare-label">Gastos</div><div class="compare-val" style="color:var(--red)">'+fmt(curExp)+'</div><div class="compare-diff" style="color:'+(expDiff>0?'var(--red)':'var(--green)')+'">'+( expDiff>0?'▲':'▼')+' '+fmt(Math.abs(expDiff))+' vs día '+prevExpCutoff+' de '+MONTHS_S[prevM]+'</div></div>'
@@ -3780,7 +3767,7 @@ function renderAnnualTab(el){
     +'<div class="chart-card"><div class="chart-card-title">Evolución del patrimonio</div><canvas id="lineChartCanvas"></canvas><div class="chart-legend">'+lineLegend+'</div></div>'
     +statsHtml
     +'</div>';
-  animateTabEntrance(el,'.chart-year-nav,.annual-kpi-grid,.compare-grid,.chart-card,.stat-title,.stat-grid');
+  animateTabEntrance(el,'.chart-year-nav,.compare-grid,.chart-card,.stat-title,.stat-grid');
   drawBarChart(document.getElementById('barChartCanvas'),incData,expData,savData);
   var lineLabels=MONTHS_S.slice();
   var series=visibleAccounts.map(function(a){var hasHistory=accountHistory(a.id).length>0;return {label:capitalize(a.name),color:a.color,data:Array.from({length:12},function(_,m){return hasHistory?accountCalcBalanceAsOf(a.id,lastDayOfMonthStr(chartYear,m+1)):null;})};});
