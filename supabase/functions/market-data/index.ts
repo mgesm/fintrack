@@ -119,23 +119,27 @@ async function yahooQuote(input: string) {
   const symbol = await yahooSymbolFor(input);
   try {
     const result = await yahooChart(symbol, "7d", "1d");
-    const closes = (result?.indicators?.quote?.[0]?.close || []).filter((v: unknown) => Number.isFinite(Number(v))).map(Number);
-    let close = closes[closes.length - 1];
-    let previous = closes[closes.length - 2] || result?.meta?.previousClose || close;
-    if (!Number.isFinite(close)) {
+    const closes = (result?.indicators?.quote?.[0]?.close || [])
+      .filter((v: unknown) => v !== null && v !== undefined && v !== "" && Number.isFinite(Number(v)) && Number(v) > 0)
+      .map(Number);
+    let close = closes.length ? closes[closes.length - 1] : NaN;
+    let previous = closes.length > 1 ? closes[closes.length - 2] : NaN;
+    if (!Number.isFinite(close) || close <= 0) {
       const metaPrice = Number(result?.meta?.regularMarketPrice);
-      if (Number.isFinite(metaPrice)) {
+      if (Number.isFinite(metaPrice) && metaPrice > 0) {
         close = metaPrice;
-        previous = Number(result?.meta?.chartPreviousClose || result?.meta?.previousClose || metaPrice);
       }
     }
-    if (!Number.isFinite(close)) throw new Error("El fondo todavía no tiene un valor liquidativo disponible");
+    if (!Number.isFinite(previous) || previous <= 0) {
+      previous = Number(result?.meta?.chartPreviousClose || result?.meta?.previousClose || close);
+    }
+    if (!Number.isFinite(close) || close <= 0) throw new Error("El fondo todavía no tiene un valor liquidativo disponible");
     return {
       symbol: input.toUpperCase(),
       close,
       price: close,
       previous_close: previous,
-      percent_change: previous ? (close - previous) / previous * 100 : 0,
+      percent_change: (previous && previous > 0) ? (close - previous) / previous * 100 : 0,
       currency: result?.meta?.currency || "EUR",
       volume: null,
       source: "yahoo-fund"
@@ -158,7 +162,7 @@ async function yahooHistory(input: string, interval: string, outputsize: number)
   const result = await yahooChart(symbol, range, yahooInterval);
   const values = (result.timestamp || []).map((ts: number, i: number) => {
     const close = result?.indicators?.quote?.[0]?.close?.[i];
-    if (!Number.isFinite(Number(close))) return null;
+    if (close === null || close === undefined || !Number.isFinite(Number(close)) || Number(close) <= 0) return null;
     const iso = new Date(ts * 1000).toISOString();
     return { datetime: isIntraday ? iso.slice(0, 16) : iso.slice(0, 10), close: String(close) };
   }).filter(Boolean).slice(-Math.max(2, Math.min(outputsize, 5000)));

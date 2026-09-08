@@ -1656,8 +1656,8 @@ button:not(:disabled):active{transform:scale(.975);}
 </div>
 
 <script>
-var APP_VERSION='2026.09.08.7';
-var APP_PUBLISHED_AT='08/09/2026 13:25 CEST';
+var APP_VERSION='2026.09.08.8';
+var APP_PUBLISHED_AT='08/09/2026 13:31 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
 var sb=window.supabase.createClient(SB_URL,SB_KEY);
@@ -1687,7 +1687,8 @@ function getCachedQuote(symbol,maxAgeMs){
   if(entry&&(Date.now()-entry.ts)<(maxAgeMs||300000))return Promise.resolve(entry.data);
   return sb.functions.invoke('market-data',{body:{action:'quote',symbol:s}}).then(function(r){
     var payload=r&&r.data?(r.data.data||r.data):null;
-    if(payload&&(payload.price||payload.close||payload.regularMarketPrice)){
+    var price=Number(payload&&(payload.price||payload.close||payload.regularMarketPrice));
+    if(payload&&Number.isFinite(price)&&price>0){
       _quoteCache[s]={ts:Date.now(),data:payload};
       return payload;
     }
@@ -4093,7 +4094,7 @@ function closeModal(){
   function update(){var v=Number(amount.value),p=Number(price.value),units=mode==='money'?v/p:v,total=mode==='money'?v:v*p;if(v>0&&p>0&&units>0)summary.textContent=(mode==='money'?units.toLocaleString('es-ES',{maximumFractionDigits:6})+' participaciones':fmt(total))+(side==='sell'?' · disponibles: '+available.toLocaleString('es-ES',{maximumFractionDigits:6}):'');else summary.textContent='Introduce el importe y el precio ejecutado.';}
   modal.querySelectorAll('[data-mode]').forEach(function(b){b.onclick=function(){mode=b.dataset.mode;modal.querySelectorAll('[data-mode]').forEach(function(x){x.classList.toggle('active',x===b);});modal.querySelector('#tradeAmountLabel').textContent=mode==='money'?'Importe a '+(side==='buy'?'invertir':'retirar'):'Participaciones';amount.placeholder=mode==='money'?'0,00':'0,000000';update();};});amount.oninput=price.oninput=update;
   modal.querySelector('.investment-trade-close').onclick=function(){closeModal();};modal.onclick=function(e){if(e.target===modal)closeModal();};
-  getCachedQuote(asset.symbol,180000).then(function(q){var p=Number(q&&(q.price||q.close));if(Number.isFinite(p)){price.value=p;update();}else if(!amount.value){summary.textContent='Introduce el importe y el precio ejecutado.';}}).catch(function(){if(!amount.value)summary.textContent='Introduce el importe y el precio ejecutado.';});
+  getCachedQuote(asset.symbol,180000).then(function(q){var p=Number(q&&(q.price||q.close||q.regularMarketPrice));if(Number.isFinite(p)&&p>0){price.value=p;update();}else if(!amount.value){summary.textContent='Introduce el importe y el precio ejecutado.';}}).catch(function(){if(!amount.value)summary.textContent='Introduce el importe y el precio ejecutado.';});
   modal.querySelector('.investment-trade-submit').onclick=async function(){var v=Number(amount.value),p=Number(price.value),units=mode==='money'?v/p:v,total=mode==='money'?v:v*p,date=modal.querySelector('#tradeDate').value,accountId=modal.querySelector('#tradeAccount').value;if(!date||!Number.isFinite(units)||units<=0||!Number.isFinite(p)||p<=0){summary.textContent='Revisa importe, precio y fecha.';return;}if(side==='sell'&&units>available+0.0000001){summary.textContent='No puedes vender más participaciones de las que tienes ('+available.toLocaleString('es-ES',{maximumFractionDigits:6})+').';return;}this.disabled=true;this.textContent='Guardando…';var r=await sb.rpc('record_investment_operation',{p_side:side,p_symbol:asset.symbol,p_product_name:asset.name,p_product_type:asset.type||null,p_units:units,p_unit_price:p,p_amount:total,p_operation_date:date,p_cash_account_id:accountId});if(r.error){summary.textContent='No se pudo guardar: '+r.error.message;this.disabled=false;this.textContent=side==='buy'?'Confirmar compra':'Confirmar venta';return;}closeModal();await loadData();showSuccessToast(side==='buy'?'Compra registrada':'Venta registrada');};
 }
 document.addEventListener('click',function(e){var button=e.target.closest&&e.target.closest('.asset-actions .buy,.asset-actions .sell');if(button){e.preventDefault();openInvestmentTradeModal(button.classList.contains('buy')?'buy':'sell');}});
@@ -4157,7 +4158,7 @@ async function openAssetSheet(name,type,symbol){
   loadRange((assetDetailState&&assetDetailState.range)||'m');
   var q=await quotePromise;
   if(q&&document.contains(sheet)){
-    var p=Number(q.price||q.close),pc=Number(q.percent_change||0),price=Number.isFinite(p)?p.toLocaleString('es-ES',{style:'currency',currency:q.currency||'USD'}):'—',change=(pc>=0?'+':'')+pc.toLocaleString('es-ES',{maximumFractionDigits:2})+' %';
+    var p=Number(q.price||q.close||q.regularMarketPrice),pc=Number(q.percent_change||0),price=(Number.isFinite(p)&&p>0)?p.toLocaleString('es-ES',{style:'currency',currency:q.currency||'USD'}):'—',change=(pc>=0?'+':'')+pc.toLocaleString('es-ES',{maximumFractionDigits:2})+' %';
     sheet.querySelector('#assetPrice').textContent=price;
     sheet.querySelector('#assetChange').textContent=change;
     sheet.querySelector('#assetChange').classList.toggle('negative',pc<0);
@@ -4247,8 +4248,8 @@ function refreshInvestmentMarketValue(){
   var posEl=wrap.querySelector('.positions');
   Promise.all(positions.map(function(p){
     return getCachedQuote(p.symbol,300000).then(function(q){
-      var price=Number(q&&(q.price||q.close));
-      return Number.isFinite(price)?{p:p,value:p.units*price,price:price}:null;
+      var price=Number(q&&(q.price||q.close||q.regularMarketPrice));
+      return (Number.isFinite(price)&&price>0)?{p:p,value:p.units*price,price:price}:null;
     }).catch(function(){return null;});
   })).then(function(rows){
     if(!document.contains(wrap))return;
