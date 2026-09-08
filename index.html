@@ -49,6 +49,12 @@ input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;}
   --accent-grad:linear-gradient(135deg,#34C759,#0FB8AD);
   --nav-glass:rgba(255,255,255,0.05);
 }
+@supports (view-transition-name: root){
+  ::view-transition-old(root){animation:120ms ease-out both vtFadeOut}
+  ::view-transition-new(root){animation:150ms ease-out both vtFadeIn}
+  @keyframes vtFadeOut{from{opacity:1}to{opacity:0}}
+  @keyframes vtFadeIn{from{opacity:0}to{opacity:1}}
+}
 @media(prefers-color-scheme:dark){:root{
   --brand-green:#34C759;
   --bg:#06060A;--bg2:rgba(54,54,60,0.55);--bg3:rgba(255,255,255,0.07);--bg4:rgba(255,255,255,0.12);
@@ -1430,7 +1436,7 @@ button:not(:disabled):active{transform:scale(.975);}
   </div>
 </div>
 <div class="header" id="appHeader" style="display:none">
-  <div class="app-mark" title="fintrack">f<span class="mark-accent">t.</span></div>
+  <div class="app-mark" title="Doble toque para activar/desactivar modo privado" onclick="handleBrandTap(event)" style="cursor:pointer">f<span class="mark-accent">t.</span></div>
   <div class="header-right">
     <div class="period-toolbar" id="periodToolbar">
       <button class="home-annual-toggle" id="homeAnnualBtn" onclick="toggleHomeAnnual()" title="Vista anual" aria-label="Cambiar vista anual"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="16" y1="3" x2="16" y2="7"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
@@ -1603,7 +1609,7 @@ button:not(:disabled):active{transform:scale(.975);}
 <!-- DESKTOP LAYOUT -->
 <div id="dtLayout" style="display:none;width:100%;height:100dvh;flex-direction:row;">
   <div class="dt-sidebar" id="dtSidebar">
-    <div class="dt-logo">fin<span>track</span></div>
+    <div class="dt-logo" title="Doble clic para activar/desactivar modo privado" onclick="handleBrandTap(event)" style="cursor:pointer">fin<span>track</span></div>
     <div class="dt-month-nav">
       <button class="dt-nav-btn" id="dtPrevMonth" aria-label="Mes anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
       <div class="dt-month-label" id="dtMonthLabel"></div>
@@ -1650,8 +1656,8 @@ button:not(:disabled):active{transform:scale(.975);}
 </div>
 
 <script>
-var APP_VERSION='2026.09.08.6';
-var APP_PUBLISHED_AT='08/09/2026 13:00 CEST';
+var APP_VERSION='2026.09.08.7';
+var APP_PUBLISHED_AT='08/09/2026 13:25 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
 var sb=window.supabase.createClient(SB_URL,SB_KEY);
@@ -1671,8 +1677,26 @@ var searchQuery='',filterType='all',filterCat='',filterAccount='',sortOrder='dat
 var homeAnnualMode=false;
 var isOffline=navigator.onLine===false,offlineQueue=[];
 var syncState=isOffline?'offline':'syncing';
+var _lastRemoteSyncTs=0;
+var _lastMarkTap=0;
+function toggleGlobalPrivateMode(){togglePortfolioValue();showSuccessToast(portfolioValueHidden()?'Modo privado activado':'Modo privado desactivado');}
+function handleBrandTap(e){var now=Date.now();if(now-_lastMarkTap<350){if(e)e.preventDefault();toggleGlobalPrivateMode();_lastMarkTap=0;}else{_lastMarkTap=now;}}
 var _quoteCache={}; // caché con TTL de 5 min para cotizaciones
-function getCachedQuote(symbol,maxAgeMs){var s=String(symbol||'').toUpperCase(),entry=_quoteCache[s];if(entry&&(Date.now()-entry.ts)<(maxAgeMs||300000))return Promise.resolve(entry.data);return sb.functions.invoke('market-data',{body:{action:'quote',symbol:s}}).then(function(r){if(r&&r.data&&r.data.data){_quoteCache[s]={ts:Date.now(),data:r.data.data};}return r.data&&r.data.data;});}
+function getCachedQuote(symbol,maxAgeMs){
+  var s=String(symbol||'').toUpperCase(),entry=_quoteCache[s];
+  if(entry&&(Date.now()-entry.ts)<(maxAgeMs||300000))return Promise.resolve(entry.data);
+  return sb.functions.invoke('market-data',{body:{action:'quote',symbol:s}}).then(function(r){
+    var payload=r&&r.data?(r.data.data||r.data):null;
+    if(payload&&(payload.price||payload.close||payload.regularMarketPrice)){
+      _quoteCache[s]={ts:Date.now(),data:payload};
+      return payload;
+    }
+    return null;
+  }).catch(function(err){
+    console.warn('Error al consultar cotización para '+s,err);
+    return null;
+  });
+}
 var DEFAULT_CATS=[
   {id:'c1',name:'alimentación',color:'#34C759',icon:'🛒',subcats:['supermercado','mercado','alimentación online'],position:0},
   {id:'c2',name:'transporte',color:'#007AFF',icon:'🚗',subcats:['gasolina','taxi/uber','transporte público','parking'],position:1},
@@ -2335,9 +2359,12 @@ async function readSecureLocalCache(uid){
   }
 }
 function currentCachePayload(){return {transactions:transactions,categories:categories,accounts:accounts,patrimony:patrimony,budgets:budgets,recurrenceExclusions:recurrenceExclusions,transactionVoids:transactionVoids,investmentOperations:investmentOperations};}
-async function loadData(){
+async function loadData(force){
   if(!currentUser)return false;
   if(loadDataInFlight)return false;
+  if(!force&&!isOffline&&offlineQueue.length===0&&transactions.length>0&&(Date.now()-_lastRemoteSyncTs<25000)){
+    return true;
+  }
   var uid=currentUser.id,generation=++loadGeneration,loadSucceeded=false;
   loadDataInFlight=true;
   setSync(isOffline?'err':'syncing');
@@ -2377,7 +2404,7 @@ async function loadData(){
     // para que processRecurring no regenere la serie ya cancelada.
     await withLoadTimeout(processRecurring(),LOAD_REMOTE_TIMEOUT_MS,'Las recurrencias han tardado demasiado');
     if(!isActiveLoad(uid,generation))return false;
-    saveLocalCache();setSync('ok');loadSucceeded=true;
+    saveLocalCache();_lastRemoteSyncTs=Date.now();setSync('ok');loadSucceeded=true;
   }catch(e){setSync('err');}
   finally{
     loadDataInFlight=false;loadDataPromise=null;
@@ -2506,13 +2533,24 @@ function toggleAutoBackup(){
   localStorage.setItem(key,enabled?'disabled':'enabled');
   refreshTab();
 }
-function downloadBackupNow(){
+async function downloadBackupNow(){
   if(!currentUser)return;
   var now=new Date();
   var json=JSON.stringify({version:4,transactions:transactions,categories:categories,accounts:accounts,patrimony:patrimony,budgets:budgets,recurrenceExclusions:recurrenceExclusions,transactionVoids:transactionVoids,investmentOperations:investmentOperations},null,2);
-  var blob=new Blob([json],{type:'application/json'});
+  var blob,filename='fintrack_autobackup_'+now.toISOString().slice(0,10)+'.json';
+  if(typeof CompressionStream==='function'){
+    try{
+      var stream=new Blob([json]).stream().pipeThrough(new CompressionStream('gzip'));
+      blob=await new Response(stream).blob();
+      filename+='.gz';
+    }catch(err){
+      blob=new Blob([json],{type:'application/json'});
+    }
+  }else{
+    blob=new Blob([json],{type:'application/json'});
+  }
   var a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download='fintrack_autobackup_'+now.toISOString().slice(0,10)+'.json';a.click();
+  a.download=filename;a.click();
   // La descarga puede bloquearse: la fecha sólo se guarda tras la activación
   // explícita o una acción manual del usuario.
   localStorage.setItem('ft_last_backup_'+currentUser.id,now.toISOString());
@@ -2862,27 +2900,38 @@ function switchTab(i){
   activeTab=i;
   saveUiState();
   searchQuery='';filterType='all';filterCat='';filterAccount='';sortOrder='date-desc';filterDateFrom='';filterDateTo='';
-  if(IS_DESKTOP){
-    // Desktop: update sidebar active state and re-render
-    document.querySelectorAll('.dt-nav-item').forEach(function(btn){btn.classList.toggle('active',parseInt(btn.getAttribute('data-tab'))===i);});
-    if(typeof dtRender==='function')dtRender();
+  function updateDom(){
+    if(IS_DESKTOP){
+      document.querySelectorAll('.dt-nav-item').forEach(function(btn){btn.classList.toggle('active',parseInt(btn.getAttribute('data-tab'))===i);});
+      if(typeof dtRender==='function')dtRender();
+    } else {
+      for(var j=0;j<5;j++){var bn=document.getElementById('bn'+j);if(bn)bn.classList.toggle('active',j===i);}
+      document.getElementById('mainChart').style.display=(i===0||i===1)?'block':'none';
+      if(i===0||i===1)setFlipHeight('homeFlipInner');
+      document.getElementById('fabBtn').classList.toggle('fab-hidden',i!==0);
+      updatePeriodToolbar();
+      movePill(i);
+      renderTab();
+      window.scrollTo(0,0);
+    }
+  }
+  if(document.startViewTransition&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    document.startViewTransition(function(){updateDom();});
   } else {
-    // Mobile: update bottom nav
-    for(var j=0;j<5;j++){var bn=document.getElementById('bn'+j);if(bn)bn.classList.toggle('active',j===i);}
-    document.getElementById('mainChart').style.display=(i===0||i===1)?'block':'none';
-    if(i===0||i===1)setFlipHeight('homeFlipInner');
-    document.getElementById('fabBtn').classList.toggle('fab-hidden',i!==0);
-    updatePeriodToolbar();
-    movePill(i);
-    var el=document.getElementById('tabContent');
-    var dir=i>prev?1:-1;
-    el.style.transition='none';el.style.opacity='0';el.style.transform='translateX('+(dir*18)+'px)';
-    renderTab();
-    window.scrollTo(0,0);
-    requestAnimationFrame(function(){requestAnimationFrame(function(){
-      el.style.transition='opacity 0.22s ease, transform 0.25s cubic-bezier(0.25,0.46,0.45,0.94)';
-      el.style.opacity='1';el.style.transform='translateX(0)';
-    });});
+    if(!IS_DESKTOP){
+      var el=document.getElementById('tabContent');
+      var dir=i>prev?1:-1;
+      if(el){el.style.transition='none';el.style.opacity='0';el.style.transform='translateX('+(dir*18)+'px)';}
+      updateDom();
+      if(el){
+        requestAnimationFrame(function(){requestAnimationFrame(function(){
+          el.style.transition='opacity 0.22s ease, transform 0.25s cubic-bezier(0.25,0.46,0.45,0.94)';
+          el.style.opacity='1';el.style.transform='translateX(0)';
+        });});
+      }
+    } else {
+      updateDom();
+    }
   }
 }
 
@@ -4268,7 +4317,7 @@ function renderSettingsTab(el){
     +themeOpts.map(function(o){return '<button class="theme-switch-btn'+(curTheme===o.v?' active':'')+'" onclick="setTheme(\''+o.v+'\')">'+o.label+'</button>';}).join('')
     +'</div></div>'
     +'<div class="settings-section"><div class="settings-title">Exportar datos</div><button class="settings-btn" onclick="openExportModal()">↓ Exportar (PDF · Excel · CSV)<span class="btn-arrow">›</span></button><button class="settings-btn" onclick="exportJSON()">↓ Exportar JSON (copia)</button></div>'
-    +'<div class="settings-section"><div class="settings-title">Copia de Seguridad</div><div class="settings-info">Las copias se crean automáticamente cada cinco días y se conservan las tres últimas.'+(lastBackup?'<br>Última copia local: '+new Date(lastBackup).toLocaleDateString('es-ES'):'')+'<div id="cloudBackupStatus" style="margin-top:6px;font-size:12px;color:var(--text3)">Copia en la nube: consultando…</div></div><button class="settings-btn" onclick="downloadBackupNow()">↓ Descargar copia ahora</button><input id="importJSONFile" type="file" accept=".json,application/json" style="display:none" onchange="importJSONFile(this)"><button class="settings-btn" onclick="document.getElementById(&quot;importJSONFile&quot;).click()">↑ Importar JSON</button><div class="status-msg" id="importStatus"></div><button class="settings-btn" onclick="restoreLatestBackup()">↺ Restaurar última copia</button></div>'
+    +'<div class="settings-section"><div class="settings-title">Copia de Seguridad</div><div class="settings-info">Las copias se crean automáticamente cada cinco días y se conservan las tres últimas.'+(lastBackup?'<br>Última copia local: '+new Date(lastBackup).toLocaleDateString('es-ES'):'')+'<div id="cloudBackupStatus" style="margin-top:6px;font-size:12px;color:var(--text3)">Copia en la nube: consultando…</div></div><button class="settings-btn" onclick="downloadBackupNow()">↓ Descargar copia ahora</button><input id="importJSONFile" type="file" accept=".json,.json.gz,application/json,application/gzip" style="display:none" onchange="importJSONFile(this)"><button class="settings-btn" onclick="document.getElementById(&quot;importJSONFile&quot;).click()">↑ Importar JSON</button><div class="status-msg" id="importStatus"></div><button class="settings-btn" onclick="restoreLatestBackup()">↺ Restaurar última copia</button></div>'
     +'<div class="settings-section"><div class="settings-title">Cuenta</div><div class="settings-info">'+email+'</div><button class="settings-btn danger" onclick="signOut()">Cerrar sesión<span class="btn-arrow">›</span></button></div>'
     +'<div class="settings-section"><div class="settings-title">Zona de peligro</div><button class="settings-btn danger" onclick="clearTxs()">⚠ Borrar todas las transacciones</button></div>'
     +'<div style="text-align:center;padding:16px 0;font-size:11px;font-family:var(--mono);color:var(--text3)">fintrack · '+email+'</div>'
@@ -4338,7 +4387,7 @@ async function forceSync(){
   if(isOffline){if(status){status.textContent='sin conexión · los cambios se guardarán al reconectar';status.className='status-msg status-err';}return;}
   if(loadDataInFlight){if(status){status.textContent='la sincronización ya está en curso';status.className='status-msg';}return;}
   if(status){status.textContent='sincronizando...';status.className='status-msg';}setSync('syncing');
-  var ok=await loadData();
+  var ok=await loadData(true);
   status=document.getElementById('syncStatusMsg')||status;
   if(status){status.textContent=ok?'✓ sincronizado':'No se ha podido sincronizar · reintenta';status.className='status-msg '+(ok?'status-ok':'status-err');}
 }
@@ -4359,8 +4408,9 @@ async function clearLocalCacheAndResync(){
       localStorage.removeItem('ft_cache_'+currentUser.id);
     }catch(e){}
   }
+  _lastRemoteSyncTs=0;
   _quoteCache={};clearBalanceCache();if(typeof invalidateTxIndices==='function')invalidateTxIndices();
-  var ok=await loadData();
+  var ok=await loadData(true);
   status=document.getElementById('syncStatusMsg')||status;
   if(status){
     status.textContent=ok?'✓ caché limpiada y datos resincronizados':'Error al sincronizar tras limpiar caché';
@@ -5184,7 +5234,16 @@ function validateImportData(d){
     checkDupIds(d.investmentOperations,'operación de inversión');
   }
 }
-function readBackupFile(file){
+async function readBackupFile(file){
+  if(file.name.endsWith('.gz')&&typeof DecompressionStream==='function'){
+    try{
+      var ds=new DecompressionStream('gzip');
+      var stream=file.stream().pipeThrough(ds);
+      return await new Response(stream).text();
+    }catch(e){
+      console.warn('Error al descomprimir gzip, intentando lectura directa',e);
+    }
+  }
   return new Promise(function(resolve,reject){
     var reader=new FileReader();
     reader.onerror=function(){reject(new Error('no se pudo leer el archivo seleccionado'));};
