@@ -1662,8 +1662,8 @@ button:not(:disabled):active{transform:scale(.975);}
 </div>
 
 <script>
-var APP_VERSION='2026.09.09.3';
-var APP_PUBLISHED_AT='09/09/2026 10:57 CEST';
+var APP_VERSION='2026.09.09.4';
+var APP_PUBLISHED_AT='09/09/2026 11:06 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
 var sb=window.supabase.createClient(SB_URL,SB_KEY);
@@ -4058,6 +4058,7 @@ function renderAnnualTab(el){
   var curInc=curTxs.filter(function(t){return !t.is_balance_adjustment&&t.type==='income'&&dayOf(t.date)<=expCutoff;}).reduce(function(s,t){return s+t.amount;},0);
   var prevInc=prevTxs.filter(function(t){return !t.is_balance_adjustment&&t.type==='income'&&dayOf(t.date)<=prevExpCutoff;}).reduce(function(s,t){return s+t.amount;},0);
   var expDiff=curExp-prevExp,incDiff=curInc-prevInc;
+  function legItem(c,l){return '<span class="chart-legend-item"><span class="chart-legend-dot" style="background:'+c+'"></span>'+l+'</span>';}
   var hasInvAccount=accounts.some(function(a){return isAccountInvestment(a.id);});
   var hasInvOps=(investmentOperations||[]).length>0||investmentPositionList().length>0;
   var chartAccounts=accounts.slice();
