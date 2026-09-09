@@ -1662,8 +1662,8 @@ button:not(:disabled):active{transform:scale(.975);}
 </div>
 
 <script>
-var APP_VERSION='2026.09.09.1';
-var APP_PUBLISHED_AT='09/09/2026 10:41 CEST';
+var APP_VERSION='2026.09.09.2';
+var APP_PUBLISHED_AT='09/09/2026 10:55 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
 var sb=window.supabase.createClient(SB_URL,SB_KEY);
@@ -3716,8 +3716,14 @@ function investmentPositionsAsOf(accountId,dateStr){
 }
 function investmentPortfolioValueAsOf(accountId,dateStr){
   var pos=investmentPositionsAsOf(accountId,dateStr);
-  if(!pos.length)return null;
   var isCurrentOrFuture=!dateStr||dateStr>=todayStr().slice(0,7);
+  if(!pos.length){
+    var hasPastOps=(investmentOperations||[]).some(function(o){
+      if(accountId&&o.investment_account_id&&o.investment_account_id!==accountId&&o.cash_account_id!==accountId)return false;
+      return !dateStr||o.operation_date<=dateStr;
+    });
+    return hasPastOps?0:null;
+  }
   return pos.reduce(function(total,p){
     var q=_quoteCache[String(p.symbol||'').toUpperCase()];
     var price=Number(q&&(q.data?(q.data.price||q.data.close||q.data.regularMarketPrice):(q.price||q.close||q.regularMarketPrice)));
@@ -4055,7 +4061,20 @@ function renderAnnualTab(el){
   var prevInc=prevTxs.filter(function(t){return !t.is_balance_adjustment&&t.type==='income'&&dayOf(t.date)<=prevExpCutoff;}).reduce(function(s,t){return s+t.amount;},0);
   var expDiff=curExp-prevExp,incDiff=curInc-prevInc;
   function legItem(c,l){return '<span class="chart-legend-item"><span class="chart-legend-dot" style="background:'+c+'"></span>'+l+'</span>';}
-  var visibleAccounts=accounts.filter(function(a){return !(portfolioValueHidden()&&a.is_investment);});
+  var hasInvAccount=accounts.some(function(a){return !!a.is_investment;});
+  var hasInvOps=(investmentOperations||[]).length>0;
+  var chartAccounts=accounts.slice();
+  if(!hasInvAccount&&hasInvOps){
+    var usedColors=accounts.map(function(a){return (a.color||'').toLowerCase();});
+    var invColor=PALETTE.find(function(c){return usedColors.indexOf(c.toLowerCase())===-1;})||'#007AFF';
+    chartAccounts.push({
+      id:'__investments__',
+      name:'Inversión',
+      color:invColor,
+      is_investment:true
+    });
+  }
+  var visibleAccounts=chartAccounts.filter(function(a){return !(portfolioValueHidden()&&a.is_investment);});
   var lineLegend=visibleAccounts.length?visibleAccounts.map(function(a){return legItem(a.color,capEsc(a.name));}).join(''):legItem('#8E8E93','Sin datos');
   var incData=Array(12).fill(0),expData=Array(12).fill(0),savData=[];
   var yearTxs=_txByYearStr[String(chartYear)]||[];
@@ -4085,6 +4104,7 @@ function renderAnnualTab(el){
       var sumIncPast=pastMonthsWithData.reduce(function(s,i){return s+incData[i];},0);
       var avgExpPast=sumExpPast/pastMonthsWithData.length;
       var savAmount=sumIncPast-sumExpPast;
+      var avgSavPast=pastMonthsWithData.length?(savAmount/pastMonthsWithData.length):0;
       var savRate=sumIncPast>0?savAmount/sumIncPast*100:null;
       var pastMonthsLabel='sobre '+pastMonthsWithData.length+' mes'+(pastMonthsWithData.length===1?'':'es')+' cerrado'+(pastMonthsWithData.length===1?'':'s');
       var daysInPastMonths=pastMonthsWithData.reduce(function(s,i){return s+new Date(chartYear,i+1,0).getDate();},0);
@@ -4093,7 +4113,7 @@ function renderAnnualTab(el){
       maxSavHtml='<div class="stat-card"><div class="stat-label">Mes con más ahorro</div><div class="stat-val" style="color:'+(savData[maxSavIdx]>=0?'var(--green)':'var(--red)')+'">'+(savData[maxSavIdx]>=0?'+':'−')+fmt(Math.abs(savData[maxSavIdx]))+'</div><div class="stat-sub">'+capitalize(MONTHS[maxSavIdx])+'</div></div>';
       avgExpHtml='<div class="stat-card"><div class="stat-label">Gasto medio mensual</div><div class="stat-val">'+fmt(avgExpPast)+'</div><div class="stat-sub">'+pastMonthsLabel+'</div></div>';
       avgDailyTotalHtml=(avgDailyTotal!=null?'<div class="stat-card"><div class="stat-label">Gasto diario medio</div><div class="stat-val">'+fmt(avgDailyTotal)+'</div><div class="stat-sub">'+pastMonthsLabel+'</div></div>':'');
-      savRateHtml=(savRate!=null?'<div class="stat-card wide"><div><div class="stat-label">Tasa de ahorro media</div><div class="stat-sub">(ingresos − gastos) / ingresos</div></div><div class="stat-val" style="color:'+(savRate>=0?'var(--green)':'var(--red)')+'">'+savRate.toFixed(1).replace('.',',')+'% ('+(savAmount>=0?'+':'−')+fmt(Math.abs(savAmount))+')</div></div>':'');
+      savRateHtml=(savRate!=null?'<div class="stat-card wide"><div><div class="stat-label">Tasa de ahorro media</div><div class="stat-sub">(ingresos − gastos) / ingresos</div></div><div class="stat-val" style="color:'+(savRate>=0?'var(--green)':'var(--red)')+'">'+savRate.toFixed(1).replace('.',',')+'% ('+(avgSavPast>=0?'+':'−')+fmt(Math.abs(avgSavPast))+')</div></div>':'');
     }
     var curMonthDailyHtml='';
     if(chartYear===realY){
@@ -4135,25 +4155,33 @@ function renderAnnualTab(el){
   var lineLabels=MONTHS_S.slice();
   ensureTxIndices();
   var series=visibleAccounts.map(function(a){
-    var hist=accountHistory(a.id);
-    var accTxs=_txByAccount[a.id]||[];
-    var invOps=(investmentOperations||[]).filter(function(o){return o.cash_account_id===a.id||o.investment_account_id===a.id;});
     var dates=[];
-    if(hist.length){
-      var d0=hist[0].reset_date||lastDayOfMonthStr(hist[0].year,hist[0].month);
-      if(d0)dates.push(d0);
-    }
-    if(accTxs.length){
-      var minTx=accTxs.reduce(function(min,t){return (!min||t.date<min)?t.date:min;},'');
-      if(minTx)dates.push(minTx);
-    }
-    if(invOps.length){
-      var minOp=invOps.reduce(function(min,o){return (!min||o.operation_date<min)?o.operation_date:min;},'');
-      if(minOp)dates.push(minOp);
+    if(a.is_investment){
+      var invOps=(investmentOperations||[]).filter(function(o){return a.id==='__investments__'||o.investment_account_id===a.id||o.cash_account_id===a.id||!o.investment_account_id;});
+      if(invOps.length){
+        var minOp=invOps.reduce(function(min,o){return (!min||o.operation_date<min)?o.operation_date:min;},'');
+        if(minOp)dates.push(minOp);
+      }
+    }else{
+      var hist=accountHistory(a.id);
+      var accTxs=_txByAccount[a.id]||[];
+      var invOps=(investmentOperations||[]).filter(function(o){return o.cash_account_id===a.id;});
+      if(hist.length){
+        var d0=hist[0].reset_date||lastDayOfMonthStr(hist[0].year,hist[0].month);
+        if(d0)dates.push(d0);
+      }
+      if(accTxs.length){
+        var minTx=accTxs.reduce(function(min,t){return (!min||t.date<min)?t.date:min;},'');
+        if(minTx)dates.push(minTx);
+      }
+      if(invOps.length){
+        var minOp=invOps.reduce(function(min,o){return (!min||o.operation_date<min)?o.operation_date:min;},'');
+        if(minOp)dates.push(minOp);
+      }
     }
     dates.sort();
     var firstDate=dates[0]||'';
-    var hasAnyActivity=dates.length>0||accounts.length===1;
+    var hasAnyActivity=dates.length>0;
     return {
       label:capitalize(a.name),
       color:a.color,
@@ -4161,6 +4189,10 @@ function renderAnnualTab(el){
         if(!hasAnyActivity)return null;
         var endOfMonth=lastDayOfMonthStr(chartYear,m+1);
         if(firstDate && endOfMonth<firstDate.slice(0,7)+'-01')return null;
+        if(a.is_investment){
+          var pVal=investmentPortfolioValueAsOf(a.id==='__investments__'?null:a.id,endOfMonth);
+          return pVal!=null?pVal:null;
+        }
         return accountCalcBalanceAsOf(a.id,endOfMonth);
       })
     };
