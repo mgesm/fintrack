@@ -1,6 +1,6 @@
-var CACHE_NAME='fintrack-cache-v155';
+var CACHE_NAME='fintrack-cache-v156';
 var CACHE_PREFIX='fintrack-cache-';
-var PRECACHE=['./','./index.html','./manifest.json','./supabase-js.min.js','./icon-192.png','./icon-512.png','./vendor/jspdf.umd.min.js','./vendor/exceljs.min.js'];
+var PRECACHE=['./','./index.html','./manifest.json','./supabase-js.min.js','./icon-192.png','./icon-512.png','./vendor/jspdf.umd.min.js','./vendor/exceljs.min.js','./fonts/inter-latin-wght-normal.woff2'];
 
 self.addEventListener('install',function(e){
   self.skipWaiting();
