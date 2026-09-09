@@ -1662,8 +1662,8 @@ button:not(:disabled):active{transform:scale(.975);}
 </div>
 
 <script>
-var APP_VERSION='2026.09.09.2';
-var APP_PUBLISHED_AT='09/09/2026 10:55 CEST';
+var APP_VERSION='2026.09.09.3';
+var APP_PUBLISHED_AT='09/09/2026 10:57 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
 var sb=window.supabase.createClient(SB_URL,SB_KEY);
@@ -3274,7 +3274,7 @@ function updateFilterCount(){
 }
 function onTxSearchInput(input){searchQuery=input.value;renderTxList();}
 function accNameById(id){var a=accounts.find(function(a){return a.id===id;});return a?capitalize(a.name):'?';}
-function isAccountInvestment(accId){var a=accounts.find(function(acc){return acc.id===accId;});return !!(a&&a.is_investment);}
+function isAccountInvestment(accId){var a=accounts.find(function(acc){return acc.id===accId;});return !!(a&&(a.is_investment||/inversi[oó]n/i.test(a.name)));}
 function buildTxItem(t){
   if(t.type==='transfer'){
     var rec='';
@@ -3732,8 +3732,7 @@ function investmentPortfolioValueAsOf(accountId,dateStr){
   },0);
 }
 function accountCalcBalance(accountId,yr,mo){
-  var acc=accounts.find(function(a){return a.id===accountId;});
-  if(acc&&acc.is_investment){
+  if(isAccountInvestment(accountId)){
     var targetDate=lastDayOfMonthStr(yr,mo);
     var pVal=investmentPortfolioValueAsOf(accountId,targetDate);
     if(pVal!==null)return pVal;
@@ -3749,8 +3748,7 @@ function accountCalcBalance(accountId,yr,mo){
   return base+live+voids;
 }
 function accountCalcBalanceAsOf(accountId,dateStr){
-  var acc=accounts.find(function(a){return a.id===accountId;});
-  if(acc&&acc.is_investment){
+  if(isAccountInvestment(accountId)){
     var pVal=investmentPortfolioValueAsOf(accountId,dateStr);
     if(pVal!==null)return pVal;
   }
@@ -4060,9 +4058,8 @@ function renderAnnualTab(el){
   var curInc=curTxs.filter(function(t){return !t.is_balance_adjustment&&t.type==='income'&&dayOf(t.date)<=expCutoff;}).reduce(function(s,t){return s+t.amount;},0);
   var prevInc=prevTxs.filter(function(t){return !t.is_balance_adjustment&&t.type==='income'&&dayOf(t.date)<=prevExpCutoff;}).reduce(function(s,t){return s+t.amount;},0);
   var expDiff=curExp-prevExp,incDiff=curInc-prevInc;
-  function legItem(c,l){return '<span class="chart-legend-item"><span class="chart-legend-dot" style="background:'+c+'"></span>'+l+'</span>';}
-  var hasInvAccount=accounts.some(function(a){return !!a.is_investment;});
-  var hasInvOps=(investmentOperations||[]).length>0;
+  var hasInvAccount=accounts.some(function(a){return isAccountInvestment(a.id);});
+  var hasInvOps=(investmentOperations||[]).length>0||investmentPositionList().length>0;
   var chartAccounts=accounts.slice();
   if(!hasInvAccount&&hasInvOps){
     var usedColors=accounts.map(function(a){return (a.color||'').toLowerCase();});
@@ -4074,7 +4071,7 @@ function renderAnnualTab(el){
       is_investment:true
     });
   }
-  var visibleAccounts=chartAccounts.filter(function(a){return !(portfolioValueHidden()&&a.is_investment);});
+  var visibleAccounts=chartAccounts;
   var lineLegend=visibleAccounts.length?visibleAccounts.map(function(a){return legItem(a.color,capEsc(a.name));}).join(''):legItem('#8E8E93','Sin datos');
   var incData=Array(12).fill(0),expData=Array(12).fill(0),savData=[];
   var yearTxs=_txByYearStr[String(chartYear)]||[];
@@ -4155,12 +4152,22 @@ function renderAnnualTab(el){
   var lineLabels=MONTHS_S.slice();
   ensureTxIndices();
   var series=visibleAccounts.map(function(a){
+    var isInv=isAccountInvestment(a.id)||a.id==='__investments__'||!!a.is_investment;
     var dates=[];
-    if(a.is_investment){
+    if(isInv){
       var invOps=(investmentOperations||[]).filter(function(o){return a.id==='__investments__'||o.investment_account_id===a.id||o.cash_account_id===a.id||!o.investment_account_id;});
       if(invOps.length){
         var minOp=invOps.reduce(function(min,o){return (!min||o.operation_date<min)?o.operation_date:min;},'');
         if(minOp)dates.push(minOp);
+      }
+      var accTxs=_txByAccount[a.id]||[];
+      if(accTxs.length){
+        var minTx=accTxs.reduce(function(min,t){return (!min||t.date<min)?t.date:min;},'');
+        if(minTx)dates.push(minTx);
+      }
+      if(!dates.length&&(investmentOperations||[]).length){
+        var anyOp=(investmentOperations||[]).reduce(function(min,o){return (!min||o.operation_date<min)?o.operation_date:min;},'');
+        if(anyOp)dates.push(anyOp);
       }
     }else{
       var hist=accountHistory(a.id);
@@ -4181,17 +4188,20 @@ function renderAnnualTab(el){
     }
     dates.sort();
     var firstDate=dates[0]||'';
-    var hasAnyActivity=dates.length>0;
     return {
       label:capitalize(a.name),
       color:a.color,
       data:Array.from({length:12},function(_,m){
-        if(!hasAnyActivity)return null;
         var endOfMonth=lastDayOfMonthStr(chartYear,m+1);
         if(firstDate && endOfMonth<firstDate.slice(0,7)+'-01')return null;
-        if(a.is_investment){
+        if(isInv){
           var pVal=investmentPortfolioValueAsOf(a.id==='__investments__'?null:a.id,endOfMonth);
-          return pVal!=null?pVal:null;
+          if(pVal!==null)return pVal;
+          if(chartYear===realY&&m>=(realNow.getMonth())){
+            var curVal=investmentPortfolioValueAsOf(null,todayStr());
+            if(curVal!==null)return curVal;
+          }
+          return firstDate?0:null;
         }
         return accountCalcBalanceAsOf(a.id,endOfMonth);
       })
