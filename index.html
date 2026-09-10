@@ -5265,7 +5265,7 @@ function exportKpiCardsDataURL(w, h, incData, expData, balData) {
   var gap = 12;
   var cw = (w - 2 * gap) / 3;
   var ch = h;
-  var r = 12;
+  var r = 20; // Radio exacto de 20px solicitado por el usuario
 
   var cards = [
     {
@@ -5279,7 +5279,7 @@ function exportKpiCardsDataURL(w, h, incData, expData, balData) {
       bg: '#FEF2F2', border: '#FECACA', textColor: '#DC2626', kickerColor: '#991B1B'
     },
     {
-      type: 'bal', kicker: balData.isPositive ? 'BALANCE NETO' : 'DÉFICIT NETO',
+      type: 'bal', kicker: 'BALANCE', // Renombrado a BALANCE
       amount: (balData.isPositive ? '+' : '') + balData.formatted,
       sub: balData.isPositive ? ('Tasa de ahorro: ' + balData.savRate + '%') : 'Gasto supera ingresos',
       bg: '#EFF6FF', border: '#BFDBFE',
@@ -5292,7 +5292,12 @@ function exportKpiCardsDataURL(w, h, incData, expData, balData) {
     var cx = i * (cw + gap);
     ctx.save();
     ctx.beginPath();
-    if (ctx.roundRect) ctx.roundRect(cx, 0, cw, ch, r); else ctx.rect(cx, 0, cw, ch);
+    // Inset de 0.5px para trazo de 1px exacto, nítido y sin recorte perimetral
+    var cardX = cx + 0.5;
+    var cardY = 0.5;
+    var cardW = cw - 1;
+    var cardH = ch - 1;
+    if (ctx.roundRect) ctx.roundRect(cardX, cardY, cardW, cardH, r); else ctx.rect(cardX, cardY, cardW, cardH);
     ctx.fillStyle = c.bg; ctx.fill();
 
     ctx.strokeStyle = c.border; ctx.lineWidth = 1; ctx.stroke();
@@ -5300,17 +5305,17 @@ function exportKpiCardsDataURL(w, h, incData, expData, balData) {
     ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
     ctx.fillStyle = c.kickerColor; ctx.font = '600 10px Inter, -apple-system, sans-serif';
     if ('letterSpacing' in ctx) ctx.letterSpacing = '0.5px';
-    ctx.fillText(c.kicker, cx + 16, 22);
+    ctx.fillText(c.kicker, cardX + 16, 22);
     if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
 
     ctx.fillStyle = c.textColor; ctx.font = '800 21px Inter, -apple-system, sans-serif';
     ctx.textBaseline = 'alphabetic';
     if ('letterSpacing' in ctx) ctx.letterSpacing = '-0.5px';
-    ctx.fillText(c.amount, cx + 16, 56);
+    ctx.fillText(c.amount, cardX + 16, 56);
     if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
 
     ctx.fillStyle = '#64748B'; ctx.font = '500 10px Inter, -apple-system, sans-serif';
-    ctx.fillText(c.sub, cx + 16, 78);
+    ctx.fillText(c.sub, cardX + 16, 78);
     ctx.restore();
   });
 
@@ -5358,28 +5363,29 @@ function exportDonutDataURL(entries, total, px) {
   return cv.toDataURL('image/png');
 }
 
-// ── GRÁFICOS ANUALES EN PDF (Ingresos vs Gastos/Ahorro y Evolución del Patrimonio) ──
+// ── GRÁFICOS ANUALES EN PDF (Ingresos vs Gastos/Ahorro y Evolución del Patrimonio con aire vertical) ──
 function exportAnnualBarsDataURL(w, h, year) {
   var cv = document.createElement('canvas'); var dpr = 3;
   cv.width = w * dpr; cv.height = h * dpr; var ctx = cv.getContext('2d'); ctx.scale(dpr, dpr);
   ctx.imageSmoothingEnabled = true;
 
   ctx.fillStyle = '#FFFFFF'; ctx.beginPath();
-  if (ctx.roundRect) ctx.roundRect(0, 0, w, h, 6); else ctx.rect(0, 0, w, h);
+  if (ctx.roundRect) ctx.roundRect(0.5, 0.5, w - 1, h - 1, 8); else ctx.rect(0.5, 0.5, w - 1, h - 1);
   ctx.fill();
   ctx.strokeStyle = '#E2E8F0'; ctx.lineWidth = 0.8; ctx.stroke();
 
-  ctx.fillStyle = '#0F172A'; ctx.font = '700 10.5px Inter, -apple-system, sans-serif';
+  var titleY = 20;
+  ctx.fillStyle = '#0F172A'; ctx.font = '700 11px Inter, -apple-system, sans-serif';
   ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-  ctx.fillText('Ingresos vs gastos mensuales · ' + year, 14, 15);
+  ctx.fillText('Ingresos vs gastos mensuales · ' + year, 16, titleY);
 
-  var legX = w - 210; ctx.font = '500 8.5px Inter, -apple-system, sans-serif';
-  ctx.fillStyle = '#16A34A'; ctx.beginPath(); ctx.arc(legX, 15, 3, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = '#64748B'; ctx.fillText('Ingresos', legX + 6, 15);
-  ctx.fillStyle = '#DC2626'; ctx.beginPath(); ctx.arc(legX + 68, 15, 3, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = '#64748B'; ctx.fillText('Gastos', legX + 74, 15);
-  ctx.fillStyle = '#D97706'; ctx.beginPath(); ctx.arc(legX + 134, 15, 3, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = '#64748B'; ctx.fillText('Ahorro', legX + 140, 15);
+  var legX = w - 216; ctx.font = '500 8.5px Inter, -apple-system, sans-serif';
+  ctx.fillStyle = '#16A34A'; ctx.beginPath(); ctx.arc(legX, titleY, 3, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#64748B'; ctx.fillText('Ingresos', legX + 7, titleY);
+  ctx.fillStyle = '#DC2626'; ctx.beginPath(); ctx.arc(legX + 70, titleY, 3, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#64748B'; ctx.fillText('Gastos', legX + 77, titleY);
+  ctx.fillStyle = '#D97706'; ctx.beginPath(); ctx.arc(legX + 138, titleY, 3, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#64748B'; ctx.fillText('Ahorro', legX + 145, titleY);
 
   var incData = Array(12).fill(0), expData = Array(12).fill(0), savData = [];
   ensureTxIndices();
@@ -5400,7 +5406,8 @@ function exportAnnualBarsDataURL(w, h, year) {
   var ax = axisTicks(dataMin, dataMax, 4), y0 = ax.min, y1 = ax.max;
   if (y1 === y0) { y1 = y0 + 100; }
 
-  var padL = 46, padR = 14, padT = 28, padB = 20;
+  // Espacio holgado: padT = 48 proporciona 28px de aire limpio entre el título (titleY=20) y los gráficos
+  var padL = 48, padR = 16, padT = 48, padB = 24;
   var plotW = w - padL - padR, plotH = h - padT - padB;
   function Y(v) { return padT + plotH - ((v - y0) / (y1 - y0)) * plotH; }
 
@@ -5441,7 +5448,7 @@ function exportAnnualBarsDataURL(w, h, year) {
     }
 
     ctx.fillStyle = '#64748B'; ctx.font = '500 8px Inter, -apple-system, sans-serif';
-    ctx.fillText(MONTHS_S[m], cxc, h - padB + 5);
+    ctx.fillText(MONTHS_S[m], cxc, h - padB + 6);
   }
 
   // Línea de Ahorro
@@ -5469,13 +5476,14 @@ function exportAnnualNetWorthDataURL(w, h, year) {
   ctx.imageSmoothingEnabled = true;
 
   ctx.fillStyle = '#FFFFFF'; ctx.beginPath();
-  if (ctx.roundRect) ctx.roundRect(0, 0, w, h, 6); else ctx.rect(0, 0, w, h);
+  if (ctx.roundRect) ctx.roundRect(0.5, 0.5, w - 1, h - 1, 8); else ctx.rect(0.5, 0.5, w - 1, h - 1);
   ctx.fill();
   ctx.strokeStyle = '#E2E8F0'; ctx.lineWidth = 0.8; ctx.stroke();
 
-  ctx.fillStyle = '#0F172A'; ctx.font = '700 10.5px Inter, -apple-system, sans-serif';
+  var titleY = 20;
+  ctx.fillStyle = '#0F172A'; ctx.font = '700 11px Inter, -apple-system, sans-serif';
   ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-  ctx.fillText('Evolución mensual del patrimonio · ' + year, 14, 15);
+  ctx.fillText('Evolución mensual del patrimonio · ' + year, 16, titleY);
 
   var regAccounts = accounts.filter(function(a) {
     return !isAccountInvestment(a.id) && !a.is_investment && a.type !== 'investment' && a.id !== '__investments__' && !/inversi[oó]n/i.test(a.name);
@@ -5508,13 +5516,13 @@ function exportAnnualNetWorthDataURL(w, h, year) {
     };
   });
 
-  var curX = w - 14; ctx.textAlign = 'right'; ctx.font = '500 8.5px Inter, -apple-system, sans-serif';
+  var curX = w - 16; ctx.textAlign = 'right'; ctx.font = '500 8.5px Inter, -apple-system, sans-serif';
   series.slice().reverse().forEach(function(se) {
     var lbl = se.label.slice(0, 14);
     var tw = ctx.measureText(lbl).width;
-    ctx.fillStyle = '#64748B'; ctx.fillText(lbl, curX, 15);
-    ctx.fillStyle = se.color; ctx.beginPath(); ctx.arc(curX - tw - 5, 15, 3, 0, Math.PI * 2); ctx.fill();
-    curX -= (tw + 16);
+    ctx.fillStyle = '#64748B'; ctx.fillText(lbl, curX, titleY);
+    ctx.fillStyle = se.color; ctx.beginPath(); ctx.arc(curX - tw - 6, titleY, 3, 0, Math.PI * 2); ctx.fill();
+    curX -= (tw + 18);
   });
 
   var all = [];
@@ -5526,7 +5534,8 @@ function exportAnnualNetWorthDataURL(w, h, year) {
   var ax = axisTicks(Math.min(0, minVal), maxVal, 4), y0 = ax.min, y1 = ax.max;
   if (y1 === y0) { y1 = y0 + 100; }
 
-  var padL = 46, padR = 14, padT = 28, padB = 20;
+  // Espacio holgado: padT = 48 proporciona 28px de aire limpio entre el título (titleY=20) y los gráficos
+  var padL = 48, padR = 16, padT = 48, padB = 24;
   var plotW = w - padL - padR, plotH = h - padT - padB;
   function X(m) { return padL + (plotW / 12) * m + (plotW / 12) / 2; }
   function Y(v) { return padT + plotH - ((v - y0) / (y1 - y0)) * plotH; }
@@ -5546,7 +5555,7 @@ function exportAnnualNetWorthDataURL(w, h, year) {
   ctx.textAlign = 'center'; ctx.textBaseline = 'top';
   for (var mm = 0; mm < 12; mm++) {
     ctx.fillStyle = '#64748B'; ctx.font = '500 8px Inter, -apple-system, sans-serif';
-    ctx.fillText(MONTHS_S[mm], X(mm), h - padB + 5);
+    ctx.fillText(MONTHS_S[mm], X(mm), h - padB + 6);
   }
 
   ctx.lineJoin = 'round'; ctx.lineCap = 'round';
@@ -5598,7 +5607,7 @@ function exportPDF(range) {
   }
   var y = 12 + headerH + 5;
 
-  // 2. FLAT SUBTLE KPI CARDS (Sin iconos, fondos planos verde/rojo/azul claro, balance en azul oscuro si >= 0 o rojo si < 0)
+  // 2. FLAT SUBTLE KPI CARDS (Radio 20px, Borde 1px uniforme, BALANCE, azul marino si >= 0)
   var kpiH = 24;
   try {
     var incData = { formatted: fmt(tInc), count: incs.length };
@@ -5658,34 +5667,19 @@ function exportPDF(range) {
 
   y += analyticsH + 5;
 
-  // 4. SECCIÓN ANUAL (Ingresos vs Gastos y Ahorro Mensual + Evolución Mensual del Patrimonio)
-  var annualChartH = 34;
-  try {
-    doc.addImage(exportAnnualBarsDataURL(728, 136, year), 'PNG', M, y, UW, annualChartH);
-  } catch (e) {}
-  y += annualChartH + 4;
-
-  try {
-    doc.addImage(exportAnnualNetWorthDataURL(728, 136, year), 'PNG', M, y, UW, annualChartH);
-  } catch (e) {}
-  y += annualChartH + 6;
-
-  // 5. PÁGINA 2: CUENTAS BANCARIAS (EXCLUIDAS LAS CUENTAS DE INVERSIÓN)
-  doc.addPage(); y = 14;
-
+  // 4. ESTADO DE CUENTAS BANCARIAS (Página 1: después del Donut y antes de los gráficos anuales)
   var regAccounts = accounts.filter(function(a) {
     return !isAccountInvestment(a.id) && !a.is_investment && a.type !== 'investment' && a.id !== '__investments__' && !/inversi[oó]n/i.test(a.name);
   });
 
   if (regAccounts.length) {
     doc.setTextColor(15, 23, 42); doc.setFontSize(8.8); doc.setFont('helvetica', 'bold');
-    doc.text('Estado de Cuentas Bancarias', M, y); y += 4.5;
+    doc.text('Estado de Cuentas Bancarias', M, y + 2.5); y += 6.0;
     var accCardW = (UW - 4) / 2, accCardH = 13;
     regAccounts.forEach(function(a, i) {
       var row = Math.floor(i / 2), col = i % 2;
       var ax = M + col * (accCardW + 4);
       var ay = y + row * (accCardH + 3);
-      if (ay + accCardH > 280) { doc.addPage(); y = 14; ay = y; }
       var rgb = hexToRgb(a.color);
       doc.setFillColor(248, 250, 252); doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.2);
       doc.roundedRect(ax, ay, accCardW, accCardH, 2.5, 2.5, 'FD');
@@ -5701,15 +5695,28 @@ function exportPDF(range) {
       doc.text('Último saldo real: ' + lastAudit, ax + 5, ay + 9.8);
     });
     var totalAccRows = Math.ceil(regAccounts.length / 2);
-    y += totalAccRows * (accCardH + 3) + 4;
+    y += totalAccRows * (accCardH + 3) + 3;
   }
 
-  // 6. GASTOS POR CATEGORÍA Y CONTROL PRESUPUESTARIO (Puntos tipo viñeta, textos uniformes y Gasto / Límite)
+  // 5. SECCIÓN ANUAL (Ingresos vs Gastos y Ahorro Mensual + Evolución Mensual del Patrimonio)
+  var annualChartH = 35;
+  try {
+    doc.addImage(exportAnnualBarsDataURL(728, 146, year), 'PNG', M, y, UW, annualChartH);
+  } catch (e) {}
+  y += annualChartH + 4;
+
+  try {
+    doc.addImage(exportAnnualNetWorthDataURL(728, 146, year), 'PNG', M, y, UW, annualChartH);
+  } catch (e) {}
+  y += annualChartH + 5;
+
+  // 6. PÁGINA 2: GASTOS POR CATEGORÍA Y CONTROL PRESUPUESTARIO
+  doc.addPage(); y = 14;
+
   var bycat = {};
   exps.forEach(function(t) { bycat[t.category] = (bycat[t.category] || 0) + t.amount; });
   var sorted = Object.entries(bycat).sort(function(a, b) { return b[1] - a[1]; });
   if (sorted.length) {
-    if (y > 225) { doc.addPage(); y = 14; }
     doc.setTextColor(100, 116, 139); doc.setFontSize(6.8); doc.setFont('helvetica', 'bold');
     doc.text('CONTROL PRESUPUESTARIO', M, y); y += 4;
     doc.setTextColor(15, 23, 42); doc.setFontSize(9.2); doc.setFont('helvetica', 'bold');
@@ -5790,7 +5797,7 @@ function exportPDF(range) {
       doc.line(M, y + 2.8, PW - M, y + 2.8);
       y += 6.0;
     });
-    y += 3;
+    y += 4;
   }
 
   // 7. DETAILED TRANSACTIONS LEDGER (Espaciado amplio sin solapes, chips uniformes centrados, fecha con día)
