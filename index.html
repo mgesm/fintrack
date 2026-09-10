@@ -830,6 +830,17 @@ select.field-input option{background:var(--bg2);}
 .tags-text-input{background:none;border:none;outline:none;color:var(--text);font-size:15px;font-family:var(--font);min-width:80px;flex:1;}
 .tags-text-input::placeholder{color:var(--text4);}
 .recurring-toggle{display:flex;align-items:center;gap:12px;background:var(--bg3);border-radius:var(--radius-md);padding:13px 14px;cursor:pointer;}
+.tx-amount-row{display:flex;gap:12px;align-items:flex-start;width:100%;}
+.tx-amount-col{flex:1.2;min-width:0;}
+.tx-calc-col{flex:1;min-width:0;}
+.exclude-calc-toggle{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--card-border);border-radius:var(--radius-md);padding:0 12px;height:52px;box-sizing:border-box;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;transition:all 0.2s ease;}
+.exclude-calc-toggle:hover{background:var(--bg4);}
+.exclude-calc-toggle:active{opacity:0.8;}
+.exclude-calc-toggle.active{border-color:rgba(255,159,10,0.45);background:rgba(255,159,10,0.06);}
+.exclude-calc-text{font-size:13px;font-weight:500;color:var(--text2);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.exclude-calc-toggle.active .exclude-calc-text{color:var(--text);font-weight:600;}
+#excludeCalcSwitch.on{background:var(--amber);}
+.tx-no-calc-badge{font-size:10px;font-weight:600;color:var(--text3);background:var(--bg4);padding:1px 6px;border-radius:var(--radius-pill);margin-top:2px;display:inline-block;letter-spacing:0.02em;}
 .toggle-switch{width:38px;height:22px;background:var(--bg4);border-radius:var(--radius-pill);position:relative;transition:background 0.25s;flex-shrink:0;}
 .toggle-switch.on{background:var(--amber);}
 .toggle-knob{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:white;transition:left 0.25s;box-shadow:0 1px 4px rgba(0,0,0,0.2);}
@@ -1583,7 +1594,19 @@ button:not(:disabled):active{transform:scale(.975);}
     <div class="modal-handle"></div>
     <div class="modal-title" id="modalTitle">Nueva transacción</div>
     <div class="type-toggle"><div class="type-btn active-exp" id="typeExp" onclick="setType('expense')">Gasto</div><div class="type-btn" id="typeInc" onclick="setType('income')">Ingreso</div><div class="type-btn" id="typeTra" onclick="setType('transfer')">Transferencia</div></div>
-    <div class="field-label">Importe</div><input aria-label="Importe" type="number" inputmode="decimal" enterkeyhint="done" class="field-input" id="txAmount" placeholder="0,00" min="0" step="0.01" style="font-family:var(--mono);font-size:22px;font-weight:700;letter-spacing:-0.5px;">
+    <div class="tx-amount-row">
+      <div class="tx-amount-col">
+        <div class="field-label">Importe</div>
+        <input aria-label="Importe" type="number" inputmode="decimal" enterkeyhint="done" class="field-input" id="txAmount" placeholder="0,00" min="0" step="0.01" style="font-family:var(--mono);font-size:22px;font-weight:700;letter-spacing:-0.5px;">
+      </div>
+      <div class="tx-calc-col" id="txExcludeCalcWrap">
+        <div class="field-label">Cálculo</div>
+        <div class="exclude-calc-toggle" id="txExcludeCalcBtn" onclick="toggleExcludeFromCalc()" role="button" tabindex="0" title="Excluir del cálculo de ingresos/gastos">
+          <div class="toggle-switch" id="excludeCalcSwitch"><div class="toggle-knob"></div></div>
+          <span class="exclude-calc-text">No computar</span>
+        </div>
+      </div>
+    </div>
     <div id="txCatWrap"><div class="field-label">Categoría</div><select aria-label="Categoría" class="field-input" id="txCat" onchange="populateSubcats()"></select>
     <div class="field-label">Subcategoría <span style="color:var(--text4);font-size:12px;font-weight:400">(opcional)</span></div><select aria-label="Subcategoría" class="field-input" id="txSubcat"></select></div>
     <div id="txAccWrap" style="display:none"><div class="field-label">Cuenta <span style="color:var(--text4);font-size:12px;font-weight:400">(opcional)</span></div><select aria-label="Cuenta" class="field-input" id="txAccount"></select></div>
@@ -1867,14 +1890,24 @@ function txDisplayCategory(t){
   if(t&&t.is_balance_adjustment)return {name:'Actualización de saldo',color:t.type==='expense'?'#FF3B30':'#34C759',icon:'↕',subcats:[]};
   return catById(t&&t.category);
 }
+function isTxExcludedFromCalc(t){
+  if(!t)return false;
+  if(t.exclude_from_calc!==undefined)return !!t.exclude_from_calc;
+  return Array.isArray(t.tags)&&t.tags.includes('_no_calc');
+}
 function txExpenseImpact(t){
   if(!t)return 0;
   if(t.is_balance_adjustment)return t.type==='expense'?Number(t.amount):-Number(t.amount);
   if(t.type!=='expense')return 0;
+  if(isTxExcludedFromCalc(t))return 0;
   if(t.category&&isCategoryExcludedFromExpense(t.category,t.date))return 0;
   return Number(t.amount);
 }
-function txIncomeImpact(t){return t&&!t.is_balance_adjustment&&t.type==='income'?Number(t.amount):0;}
+function txIncomeImpact(t){
+  if(!t||t.is_balance_adjustment||t.type!=='income')return 0;
+  if(isTxExcludedFromCalc(t))return 0;
+  return Number(t.amount);
+}
 var CAT_ICON_PATHS={
   'compras':'<path d="M6 8H18L19 20C19 20.55 18.55 21 18 21H6C5.45 21 5 20.55 5 20L6 8Z"/><path d="M9 8V6C9 4.34 10.34 3 12 3C13.66 3 15 4.34 15 6V8"/>',
   'deporte':'<rect x="2" y="9" width="3" height="6" rx="1"/><rect x="19" y="9" width="3" height="6" rx="1"/><rect x="5.5" y="10.3" width="2" height="3.4" rx="0.6"/><rect x="16.5" y="10.3" width="2" height="3.4" rx="0.6"/><line x1="7.5" y1="12" x2="16.5" y2="12"/>',
@@ -2071,9 +2104,9 @@ function processOfflineQueue(){
             var conflictTarget='id';
             if(op.table==='transaction_voids')conflictTarget='user_id,transaction_id';
             else if(op.table==='recurrence_exclusions')conflictTarget='user_id,recur_series_id,skipped_date';
-            res=await sb.from(op.table).upsert(op.data,{onConflict:conflictTarget});
+            res=await sb.from(op.table).upsert(op.table==='transactions'?sanitizeRemoteTxPayload(op.data):op.data,{onConflict:conflictTarget});
           }
-          else if(op.type==='update')res=await sb.from(op.table).update(op.data).eq('id',op.id);
+          else if(op.type==='update')res=await sb.from(op.table).update(op.table==='transactions'?sanitizeRemoteTxPayload(op.data):op.data).eq('id',op.id);
           else if(op.type==='delete')res=await sb.from(op.table).delete().eq('id',op.id);
         }catch(e){
           res=null;
@@ -2500,6 +2533,7 @@ async function loadData(force){
     var cd=await readSecureLocalCache(currentUser.id);
     if(cd){
       transactions=cd.transactions||[];
+      transactions.forEach(function(t){if(t.exclude_from_calc===undefined)t.exclude_from_calc=!!(Array.isArray(t.tags)&&t.tags.includes('_no_calc'));});
       categories=cd.categories||[];
       accounts=cd.accounts||[];
       patrimony=cd.patrimony||[];
@@ -2531,10 +2565,11 @@ async function loadData(force){
     var failedRead=res.find(function(x){return x&&x.error;});
     if(failedRead)throw failedRead.error;
     categories=res[0].data||[];transactions=res[1].data||[];accounts=res[2].data||[];
+    transactions.forEach(function(t){if(t.exclude_from_calc===undefined)t.exclude_from_calc=!!(Array.isArray(t.tags)&&t.tags.includes('_no_calc'));});
     patrimony=res[3].data||[];budgets=res[4].data||[];recurrenceExclusions=res[5].data||[];transactionVoids=res[6].data||[];investmentOperations=res[7].data||[];
     // Repara movimientos de actualización que falten en ajustes antiguos o
     // que quedaron a medias por una caída de red.
-    try{var repaired=await withLoadTimeout(sb.rpc('repair_fintrack_balance_adjustments'),5000,'reparación de ajustes');if(!repaired.error&&repaired.data&&repaired.data.length)transactions=transactions.concat(repaired.data);}catch(repairError){}
+    try{var repaired=await withLoadTimeout(sb.rpc('repair_fintrack_balance_adjustments'),5000,'reparación de ajustes');if(!repaired.error&&repaired.data&&repaired.data.length){transactions=transactions.concat(repaired.data);transactions.forEach(function(t){if(t.exclude_from_calc===undefined)t.exclude_from_calc=!!(Array.isArray(t.tags)&&t.tags.includes('_no_calc'));});}}catch(repairError){}
     
     if(categories.length===0){var cd2=DEFAULT_CATS.map(function(c){return Object.assign({},c,{user_id:uid});});var ins=await withLoadTimeout(sb.from('categories').insert(cd2).select(),LOAD_REMOTE_TIMEOUT_MS,'La creación de categorías iniciales ha tardado demasiado');if(ins.error)throw ins.error;categories=ins.data||cd2;}
     if(!isActiveLoad(uid,generation))return false;
@@ -2957,8 +2992,8 @@ function renderHeatmap(exps,cfg){
     var b2=document.getElementById(cfg.detail);
     if(b2){
       var yTxs=getYearTx().filter(function(t){return !t.is_balance_adjustment;});
-      var yExp=yTxs.filter(function(t){return t.type==='expense';}).reduce(function(s,t){return s+t.amount;},0);
-      var yInc=yTxs.filter(function(t){return t.type==='income';}).reduce(function(s,t){return s+t.amount;},0);
+      var yExp=yTxs.filter(function(t){return t.type==='expense';}).reduce(function(s,t){return s+txExpenseImpact(t);},0);
+      var yInc=yTxs.filter(function(t){return t.type==='income';}).reduce(function(s,t){return s+txIncomeImpact(t);},0);
       var ySav=yInc-yExp,savRate=yInc>0?Math.round((ySav/yInc)*100):0;
       b2.innerHTML='<div class="annual-flip-kpi" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:6px 0;">'
         +'<div class="annual-kpi-card"><small>Gastos</small><strong style="color:var(--red);">−'+fmt(yExp)+'</strong></div>'
@@ -2974,11 +3009,11 @@ function renderHeatmap(exps,cfg){
   // group expenses of the viewed month by day-of-month (cached by array reference)
   var byDay;
   if(exps===_lastHmExps){byDay=_lastHmByDay;}
-  else{byDay={};exps.forEach(function(t){var dt=new Date(t.date+'T12:00:00');if(dt.getFullYear()===viewYear&&dt.getMonth()===viewMonth){var d=dt.getDate();byDay[d]=(byDay[d]||0)+t.amount;}});_lastHmExps=exps;_lastHmByDay=byDay;}
+  else{byDay={};exps.forEach(function(t){var dt=new Date(t.date+'T12:00:00');if(dt.getFullYear()===viewYear&&dt.getMonth()===viewMonth){var d=dt.getDate();byDay[d]=(byDay[d]||0)+txExpenseImpact(t);}});_lastHmExps=exps;_lastHmByDay=byDay;}
   var daysInMonth=new Date(viewYear,viewMonth+1,0).getDate();
   var firstDow=(new Date(viewYear,viewMonth,1).getDay()+6)%7; // Mon=0
   var max=0;for(var k in byDay)if(byDay[k]>max)max=byDay[k];
-  var tot=exps.reduce(function(s,t){return s+t.amount;},0);
+  var tot=exps.reduce(function(s,t){return s+txExpenseImpact(t);},0);
   var tEl=document.getElementById(cfg.title);if(tEl)tEl.textContent='Gasto diario';
   var toEl=document.getElementById(cfg.tot);if(toEl)toEl.textContent=tot?'total '+fmtShort(tot):'';
   var html='';
@@ -3001,7 +3036,7 @@ function renderHeatmapDetail(exps,cfg){
   var box=document.getElementById(cfg.detail);if(!box)return;
   if(!hmSelDay){box.innerHTML='<div class="hm-det-empty">Toca un día para ver sus gastos</div>';setFlipHeight(cfg.inner);return;}
   var items=exps.filter(function(t){var d=new Date(t.date+'T12:00:00');return d.getFullYear()===viewYear&&d.getMonth()===viewMonth&&d.getDate()===hmSelDay;}).sort(function(a,b){return b.amount-a.amount;});
-  var tot=items.reduce(function(s,t){return s+t.amount;},0);
+  var tot=items.reduce(function(s,t){return s+txExpenseImpact(t);},0);
   var dayName=new Date(viewYear,viewMonth,hmSelDay).toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'short'});
   var h='<div class="hm-det-top"><span class="hm-det-day">'+dayName+'</span><span class="hm-det-tot">−'+fmt(tot)+'</span></div>';
   if(!items.length)h+='<div class="hm-det-empty">Sin gastos este día</div>';
@@ -3294,7 +3329,8 @@ function renderTxList(){
       if(normStr(c.name).includes(q))return true;
       if(t.note&&normStr(t.note).includes(q))return true;
       if(t.subcategory&&normStr(t.subcategory).includes(q))return true;
-      if((t.tags||[]).some(function(g){return normStr(g).includes(q);}))return true;
+      if((t.tags||[]).some(function(g){return g!=='_no_calc'&&normStr(g).includes(q);}))return true;
+      if(isTxExcludedFromCalc(t)&&'no computa'.includes(q))return true;
       if(t.type==='transfer'){
         if(normStr('transferencia').includes(q)||normStr('traspaso').includes(q))return true;
         var fromAcc=accounts.find(function(a){return a.id===t.account_id;});
@@ -3470,8 +3506,8 @@ function renderCatTab(el,prefix){
   var incs=dashTxs.filter(function(t){return t.type==='income';});
   // Cache bycat totals — compute once, not per-category in forEach
   var bycat={},bysubcat={},bycatInc={},bysubcatInc={};
-  exps.forEach(function(t){var a=Number(t.amount)||0;bycat[t.category]=(bycat[t.category]||0)+a;if(t.subcategory){var k=t.category+'||'+t.subcategory;bysubcat[k]=(bysubcat[k]||0)+a;}});
-  incs.forEach(function(t){var a=Number(t.amount)||0;bycatInc[t.category]=(bycatInc[t.category]||0)+a;if(t.subcategory){var k=t.category+'||'+t.subcategory;bysubcatInc[k]=(bysubcatInc[k]||0)+a;}});
+  exps.forEach(function(t){var a=txExpenseImpact(t);if(a>0){bycat[t.category]=(bycat[t.category]||0)+a;if(t.subcategory){var k=t.category+'||'+t.subcategory;bysubcat[k]=(bysubcat[k]||0)+a;}}});
+  incs.forEach(function(t){var a=txIncomeImpact(t);if(a>0){bycatInc[t.category]=(bycatInc[t.category]||0)+a;if(t.subcategory){var k=t.category+'||'+t.subcategory;bysubcatInc[k]=(bysubcatInc[k]||0)+a;}}});
   var totalExp=Object.keys(bycat).reduce(function(sum,cid){return sum+(isCategoryExcludedFromExpense(cid,curYm)?0:bycat[cid]);},0)||1;
   var totalInc=Object.values(bycatInc).reduce(function(a,b){return a+b;},0)||1;
   var activeCats=categories.filter(function(c){return !c.archived;});
@@ -4137,10 +4173,10 @@ function renderAnnualTab(el){
   var expCutoff=Math.min(todayDay,curDaysInMonth);
   var prevExpCutoff=Math.min(todayDay,prevDaysInMonth);
   function dayOf(dateStr){return parseInt(String(dateStr).slice(8,10),10)||0;}
-  var curExp=curTxs.filter(function(t){return !t.is_balance_adjustment&&t.type==='expense'&&dayOf(t.date)<=expCutoff;}).reduce(function(s,t){return s+t.amount;},0);
-  var prevExp=prevTxs.filter(function(t){return !t.is_balance_adjustment&&t.type==='expense'&&dayOf(t.date)<=prevExpCutoff;}).reduce(function(s,t){return s+t.amount;},0);
-  var curInc=curTxs.filter(function(t){return !t.is_balance_adjustment&&t.type==='income'&&dayOf(t.date)<=expCutoff;}).reduce(function(s,t){return s+t.amount;},0);
-  var prevInc=prevTxs.filter(function(t){return !t.is_balance_adjustment&&t.type==='income'&&dayOf(t.date)<=prevExpCutoff;}).reduce(function(s,t){return s+t.amount;},0);
+  var curExp=curTxs.filter(function(t){return dayOf(t.date)<=expCutoff;}).reduce(function(s,t){return s+txExpenseImpact(t);},0);
+  var prevExp=prevTxs.filter(function(t){return dayOf(t.date)<=prevExpCutoff;}).reduce(function(s,t){return s+txExpenseImpact(t);},0);
+  var curInc=curTxs.filter(function(t){return dayOf(t.date)<=expCutoff;}).reduce(function(s,t){return s+txIncomeImpact(t);},0);
+  var prevInc=prevTxs.filter(function(t){return dayOf(t.date)<=prevExpCutoff;}).reduce(function(s,t){return s+txIncomeImpact(t);},0);
   var expDiff=curExp-prevExp,incDiff=curInc-prevInc;
   function legItem(c,l){return '<span class="chart-legend-item"><span class="chart-legend-dot" style="background:'+c+'"></span>'+l+'</span>';}
   var hasInvAccount=accounts.some(function(a){return isAccountInvestment(a.id);});
@@ -4160,7 +4196,7 @@ function renderAnnualTab(el){
   var lineLegend=visibleAccounts.length?visibleAccounts.map(function(a){return legItem(a.color,capEsc(a.name));}).join(''):legItem('#8E8E93','Sin datos');
   var incData=Array(12).fill(0),expData=Array(12).fill(0),savData=[];
   var yearTxs=_txByYearStr[String(chartYear)]||[];
-  yearTxs.forEach(function(t){if(t.is_balance_adjustment)return;var m=parseInt(String(t.date).slice(5,7),10)-1;if(m>=0&&m<12){if(t.type==='income')incData[m]+=Number(t.amount)||0;else if(t.type==='expense'&&!isCategoryExcludedFromExpense(t.category,t.date))expData[m]+=Number(t.amount)||0;}});
+  yearTxs.forEach(function(t){if(t.is_balance_adjustment)return;var m=parseInt(String(t.date).slice(5,7),10)-1;if(m>=0&&m<12){if(t.type==='income')incData[m]+=txIncomeImpact(t);else if(t.type==='expense')expData[m]+=txExpenseImpact(t);}});
   for(var m=0;m<12;m++)savData.push(incData[m]-expData[m]);
   var statsHtml='';
   var realNow=new Date(),realY=realNow.getFullYear(),realM=realNow.getMonth();
@@ -4202,7 +4238,7 @@ function renderAnnualTab(el){
       var curDay=realNow.getDate();
       var curPrefix=realY+'-'+pad(realM+1);
       var curMonthPool=_txByMonthStr[curPrefix]||[];
-      var curMonthExpToDate=curMonthPool.filter(function(t){if(t.type!=='expense'||t.is_balance_adjustment||isCategoryExcludedFromExpense(t.category,t.date))return false;return dayOf(t.date)<=curDay;}).reduce(function(s,t){return s+t.amount;},0);
+      var curMonthExpToDate=curMonthPool.filter(function(t){return dayOf(t.date)<=curDay;}).reduce(function(s,t){return s+txExpenseImpact(t);},0);
       var avgDailyCur=curMonthExpToDate/curDay;
       curMonthDailyHtml='<div class="stat-card"><div class="stat-label">Gasto diario medio (mes en curso)</div><div class="stat-val">'+fmt(avgDailyCur)+'</div><div class="stat-sub">sobre '+curDay+' día'+(curDay===1?'':'s')+'</div></div>';
     }
@@ -4726,10 +4762,27 @@ async function clearTxs(){
 }
 
 // TX MODAL
+var isExcludeFromCalc=false;
+function setExcludeFromCalc(val){
+  isExcludeFromCalc=!!val;
+  var sw=document.getElementById('excludeCalcSwitch');
+  var btn=document.getElementById('txExcludeCalcBtn');
+  if(sw)sw.classList.toggle('on',isExcludeFromCalc);
+  if(btn)btn.classList.toggle('active',isExcludeFromCalc);
+}
+function toggleExcludeFromCalc(){
+  setExcludeFromCalc(!isExcludeFromCalc);
+}
+function sanitizeRemoteTxPayload(p){
+  if(!p||typeof p!=='object')return p;
+  var clone=Object.assign({},p);
+  delete clone.exclude_from_calc;
+  return clone;
+}
 var lastModalTrigger=null;
 function openModal(){
   lastModalTrigger=document.activeElement;
-  editingTxId=null;txTags=[];isRecurring=false;
+  editingTxId=null;txTags=[];isRecurring=false;setExcludeFromCalc(false);
   document.getElementById('modalTitle').textContent='Nueva transacción';
   var _dn=new Date();document.getElementById('txDate').value=_dn.getFullYear()+'-'+pad(_dn.getMonth()+1)+'-'+pad(_dn.getDate());
   document.getElementById('txAmount').value='';document.getElementById('txNote').value='';
@@ -4751,7 +4804,7 @@ function editTx(id){
     showUndoToast('Desactiva el modo privado para ver o editar movimientos de inversión');
     return;
   }
-  editingTxId=id;txTags=Array.isArray(tx.tags)?tx.tags.slice():[];isRecurring=!!tx.recurring;
+  editingTxId=id;txTags=Array.isArray(tx.tags)?tx.tags.slice():[];isRecurring=!!tx.recurring;setExcludeFromCalc(isTxExcludedFromCalc(tx));
   document.getElementById('modalTitle').textContent='Editar transacción';
   setType(tx.type);populateCats();
   if(tx.type==='transfer'){
@@ -4790,6 +4843,7 @@ function setType(t){
   document.getElementById('txCatWrap').style.display=isTra?'none':'block';
   document.getElementById('txRecurWrap').style.display=isTra?'none':'block';
   document.getElementById('txTransferWrap').style.display=isTra?'block':'none';
+  var excWrap=document.getElementById('txExcludeCalcWrap');if(excWrap)excWrap.style.display=isTra?'none':'block';
   if(isTra){document.getElementById('txAccWrap').style.display='none';populateTransferAccounts();}
   else {populateAccounts();populateCats();populateSubcats();}
 }
@@ -4866,7 +4920,7 @@ async function saveTx(){
     var fromAcc=document.getElementById('txFromAccount').value,toAcc=document.getElementById('txToAccount').value;
     if(!fromAcc||!toAcc||fromAcc===toAcc){status.textContent='elige dos cuentas distintas';status.className='modal-status status-err';isSaving=false;return;}
     if(!accounts.some(function(a){return a.id===fromAcc;})||!accounts.some(function(a){return a.id===toAcc;})){status.textContent='una de las cuentas ya no existe, vuelve a abrir el formulario';status.className='modal-status status-err';isSaving=false;return;}
-    payload={type:'transfer',amount:amount,category:'transfer',subcategory:null,note:note,date:date,recurring:false,recur_interval:null,recur_end_date:null,tags:[],account_id:fromAcc,to_account_id:toAcc};
+    payload={type:'transfer',amount:amount,category:'transfer',subcategory:null,note:note,date:date,recurring:false,recur_interval:null,recur_end_date:null,tags:[],account_id:fromAcc,to_account_id:toAcc,exclude_from_calc:false};
   } else {
     var category=document.getElementById('txCat').value;
     if(!category){status.textContent='selecciona una categoría';status.className='modal-status status-err';isSaving=false;return;}
@@ -4884,7 +4938,8 @@ async function saveTx(){
     if(accounts.length===1&&!accountId){
       accountId=accounts[0].id;
     }
-    payload={type:txType,amount:amount,category:category,subcategory:subcategory,note:note,date:date,recurring:isRecurring,recur_interval:recurInterval,recur_end_date:recurEndDate,tags:txTags,account_id:accountId,to_account_id:null};
+    if(isExcludeFromCalc){if(!txTags.includes('_no_calc'))txTags.push('_no_calc');}else{txTags=txTags.filter(function(g){return g!=='_no_calc';});}
+    payload={type:txType,amount:amount,category:category,subcategory:subcategory,note:note,date:date,recurring:isRecurring,recur_interval:recurInterval,recur_end_date:recurEndDate,tags:txTags,account_id:accountId,to_account_id:null,exclude_from_calc:isExcludeFromCalc};
   }
   status.textContent='guardando...';status.className='modal-status';setSync('syncing');
   var queuedFallback=false;
@@ -4895,7 +4950,7 @@ async function saveTx(){
     if(isOffline){var idx2=transactions.findIndex(function(t){return t.id===editingTxId;});if(idx2>=0)transactions[idx2]=Object.assign(transactions[idx2],payload);queueOp({type:'update',table:'transactions',id:editingTxId,data:payload});saveLocalCache();}
     else{
       try{
-        var r=await sb.from('transactions').update(payload).eq('id',editingTxId).select();
+        var r=await sb.from('transactions').update(sanitizeRemoteTxPayload(payload)).eq('id',editingTxId).select();
         if(r.error){setSync('err');status.textContent='error: '+r.error.message;status.className='modal-status status-err';isSaving=false;return;}
         var idx=transactions.findIndex(function(t){return t.id===editingTxId;});if(idx>=0)transactions[idx]=(r.data&&r.data[0])?r.data[0]:Object.assign({},transactions[idx],payload);
       }catch(ex){
@@ -4918,7 +4973,7 @@ async function saveTx(){
     if(isOffline){transactions.unshift(tx);queueOp({type:'insert',table:'transactions',data:tx});saveLocalCache();}
     else{
       try{
-        var r=await sb.from('transactions').insert(tx).select();
+        var r=await sb.from('transactions').insert(sanitizeRemoteTxPayload(tx)).select();
         if(r.error){setSync('err');status.textContent='error: '+r.error.message;status.className='modal-status status-err';isSaving=false;return;}
         transactions.unshift(r.data[0]||tx);
       }catch(ex){
@@ -5431,8 +5486,8 @@ function exportAnnualBarsDataURL(w, h, year) {
     if (t.is_balance_adjustment) return;
     var m = parseInt(String(t.date).slice(5, 7), 10) - 1;
     if (m >= 0 && m < 12) {
-      if (t.type === 'income') incData[m] += Number(t.amount) || 0;
-      else if (t.type === 'expense' && !isCategoryExcludedFromExpense(t.category, t.date)) expData[m] += Number(t.amount) || 0;
+      if (t.type === 'income') incData[m] += txIncomeImpact(t);
+      else if (t.type === 'expense') expData[m] += txExpenseImpact(t);
     }
   });
   for (var m = 0; m < 12; m++) savData.push(incData[m] - expData[m]);
@@ -5625,10 +5680,10 @@ function exportPDF(range) {
   var doc = new window.jspdf.jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   var PW = 210, PH = 297, M = 14, UW = PW - 2 * M; // 182mm usable width
   var txs = getExportTx(range).sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
-  var exps = txs.filter(function(t) { return t.type === 'expense' && !t.is_balance_adjustment; });
-  var incs = txs.filter(function(t) { return t.type === 'income' && !t.is_balance_adjustment; });
-  var tExp = exps.reduce(function(s, t) { return s + t.amount; }, 0);
-  var tInc = incs.reduce(function(s, t) { return s + t.amount; }, 0);
+  var exps = txs.filter(function(t) { return !t.is_balance_adjustment && txExpenseImpact(t) > 0; });
+  var incs = txs.filter(function(t) { return !t.is_balance_adjustment && txIncomeImpact(t) > 0; });
+  var tExp = txs.reduce(function(s, t) { return s + txExpenseImpact(t); }, 0);
+  var tInc = txs.reduce(function(s, t) { return s + txIncomeImpact(t); }, 0);
   var bal = tInc - tExp;
   var savRate = tInc > 0 ? ((bal / tInc) * 100) : 0;
   var email = currentUser ? (currentUser.email || '') : '';
@@ -5932,10 +5987,19 @@ function exportPDF(range) {
 
     // Importe tabular
     var isExp = t.type === 'expense', isInc = t.type === 'income';
+    var isNoCalc = isTxExcludedFromCalc(t);
     var sign = isExp ? '-' : (isInc ? '+' : '');
-    if (isExp) doc.setTextColor(220, 38, 38); else if (isInc) doc.setTextColor(21, 128, 61); else doc.setTextColor(37, 99, 235);
+    if (isNoCalc) {
+      doc.setTextColor(148, 163, 184);
+    } else if (isExp) {
+      doc.setTextColor(220, 38, 38);
+    } else if (isInc) {
+      doc.setTextColor(21, 128, 61);
+    } else {
+      doc.setTextColor(37, 99, 235);
+    }
     doc.setFont('helvetica', 'bold'); doc.setFontSize(8.0);
-    doc.text(sign + fmt(t.amount), PW - M - 2, y, { align: 'right' });
+    doc.text((isNoCalc ? '⊘ ' : sign) + fmt(t.amount), PW - M - 2, y, { align: 'right' });
 
     // Borde inferior de la última fila
     if (i === txs.length - 1) {
@@ -6294,10 +6358,10 @@ function exportXLSX(range){
     var isInc=t.type==='income';
     var bg=i%2===0?C.white:C.light;
     var amount=isExp?-t.amount:t.amount;
-    if(isInc)totalInc+=t.amount;else if(isExp)totalExp+=t.amount;
+    if(isInc)totalInc+=txIncomeImpact(t);else if(isExp)totalExp+=txExpenseImpact(t);
     var typeLabel=isExp?'Gasto':isInc?'Ingreso':'Transferencia';
     var catLabel=t.type==='transfer'?(accNameById(t.account_id)+' → '+accNameById(t.to_account_id)):catById(t.category).name;
-    var row=ws1.addRow([t.date,typeLabel,catLabel,t.subcategory||'',t.note||'',(t.tags||[]).join(', '),t.recurring?'Sí':'No',amount]);
+    var row=ws1.addRow([t.date,typeLabel,catLabel,t.subcategory||'',t.note||'',(t.tags||[]).filter(function(g){return g!=='_no_calc';}).concat(isTxExcludedFromCalc(t)?['no computa']:[]).join(', '),t.recurring?'Sí':'No',amount]);
     row.height=18;
     var typeColor=isExp?C.red:isInc?C.green:C.text2;
     row.getCell(1).style=dataStyle(bg,C.text,'center');
@@ -6664,6 +6728,11 @@ async function dtQuickAdd(){
 
 document.getElementById('fabBtn').onclick=openModal;
 function enableKeyboardControls(){
+  var excBtn=document.getElementById('txExcludeCalcBtn');
+  if(excBtn&&!excBtn._kbBound){
+    excBtn._kbBound=true;
+    excBtn.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleExcludeFromCalc();}});
+  }
   document.querySelectorAll('.type-btn,.recurring-toggle,.cat-color-swatch,.dt-nav-item').forEach(function(el){
     if(el.tabIndex<0)el.tabIndex=0;
     if(!el.getAttribute('role'))el.setAttribute('role','button');
