@@ -5826,28 +5826,43 @@ function exportPDF(range) {
 
   drawTxHeader(y); y += 6.8;
   var rowH = 7.2;
+  var dayGap = 2.2;
+  var dayTxIdx = 0;
   var daysOfWeek = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
   txs.forEach(function(t, i) {
+    var isDayChange = (i > 0 && txs[i - 1].date !== t.date);
+    var nextRowSpace = rowH + (isDayChange ? dayGap : 0);
     var isNewPage = false;
-    if (y > 274) {
+
+    if (y + nextRowSpace > 274) {
       doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.15);
       doc.line(M, y - 4.2, PW - M, y - 4.2);
       doc.addPage(); y = 14; drawTxHeader(y); y += 6.8;
       isNewPage = true;
+      isDayChange = false;
     }
-    if (i % 2 === 1) { doc.setFillColor(251, 252, 253); doc.rect(M, y - 4.2, UW, rowH, 'F'); }
 
-    // Separación exacta en el límite entre entradas (y - 4.2)
-    if (i > 0 && !isNewPage) {
-      var isDayChange = txs[i - 1].date !== t.date;
-      if (isDayChange) {
-        doc.setDrawColor(180, 195, 210); doc.setLineWidth(0.26); // Grosor reducido de 0.45 a 0.26mm
-        doc.line(M, y - 4.2, PW - M, y - 4.2);
-      } else {
-        doc.setDrawColor(241, 245, 249); doc.setLineWidth(0.12);
+    // Separador simétrico entre jornadas o micro-guía intra-día
+    if (isDayChange) {
+      // Línea divisoria en el centro exacto del gap (1.1mm a cada celda, 2.6mm a cada chip)
+      var sepLineY = (y - 4.2) + (dayGap / 2);
+      doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.18);
+      doc.line(M, sepLineY, PW - M, sepLineY);
+      y += dayGap;
+      dayTxIdx = 0;
+    } else {
+      if (i > 0 && !isNewPage) {
+        doc.setDrawColor(241, 245, 249); doc.setLineWidth(0.10);
         doc.line(M, y - 4.2, PW - M, y - 4.2);
       }
+      dayTxIdx++;
+    }
+
+    // Fondo alterno por jornada: la 1ª fila de cada día es siempre limpia
+    if (dayTxIdx % 2 === 1) {
+      doc.setFillColor(251, 252, 253);
+      doc.rect(M, y - 4.2, UW, rowH, 'F');
     }
 
     // Fecha con día de la semana
@@ -5862,16 +5877,16 @@ function exportPDF(range) {
     doc.setTextColor(15, 23, 42); doc.setFontSize(7.5); doc.setFont('helvetica', 'bold');
     doc.text(desc.slice(0, 36), M + 26, y);
 
-    // Categoría: chip con TAMAÑO UNIFORME y TEXTO CENTRADO
+    // Categoría: chip centrado milimétricamente en la fila (margen 1.5mm superior e inferior)
     var c = catById(t.category);
     var catLabel = t.type === 'transfer' ? 'Transferencia' : (t.is_balance_adjustment ? 'Ajuste' : capitalize(c.name));
     var rgb = hexToRgb(t.type === 'transfer' ? '#2563EB' : (t.is_balance_adjustment ? '#64748B' : c.color));
 
-    var pillW = 28, pillH = 4.2, pillX = M + 88, pillY = y - 3.1;
+    var pillW = 28, pillH = 4.2, pillX = M + 88, pillY = y - 2.7;
     doc.setFillColor(Math.round(rgb[0] * 0.12 + 255 * 0.88), Math.round(rgb[1] * 0.12 + 255 * 0.88), Math.round(rgb[2] * 0.12 + 255 * 0.88));
     doc.roundedRect(pillX, pillY, pillW, pillH, 1, 1, 'F');
     doc.setTextColor(rgb[0], rgb[1], rgb[2]); doc.setFontSize(6.4); doc.setFont('helvetica', 'bold');
-    doc.text(catLabel.slice(0, 16), pillX + pillW / 2, y - 0.1, { align: 'center' });
+    doc.text(catLabel.slice(0, 16), pillX + pillW / 2, y - 0.05, { align: 'center' });
 
     // Cuenta
     var accName = accNameById(t.account_id) || '—';
