@@ -5223,85 +5223,40 @@ async function runExport(fmt){
 function hexToRgb(h){h=(h||'#888').replace('#','');if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];return [parseInt(h.substr(0,2),16)||0,parseInt(h.substr(2,2),16)||0,parseInt(h.substr(4,2),16)||0];}
 
 // ── MEMBRETE EDITORIAL PREMIUM "WHITE EDITION" (Outfit 800 + Inter) ────────
-function exportBrandHeaderDataURL(w,h,rangeLabel,userEmail,dateStr){
-  var cv=document.createElement('canvas');var dpr=3;
-  cv.width=w*dpr;cv.height=h*dpr;var ctx=cv.getContext('2d');ctx.scale(dpr,dpr);
+function exportBrandHeaderDataURL(w, h, rangeLabel, userEmail, dateStr) {
+  var cv = document.createElement('canvas'); var dpr = 3;
+  cv.width = w * dpr; cv.height = h * dpr; var ctx = cv.getContext('2d'); ctx.scale(dpr, dpr);
 
-  // 1. Fondo blanco editorial inmaculado (cero cajas negras)
-  ctx.fillStyle='#FFFFFF';ctx.fillRect(0,0,w,h);
+  // 1. Fondo blanco editorial inmaculado (sin línea verde superior)
+  ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, w, h);
 
-  // 2. Línea decorativa hairline superior (Verde Esmeralda de marca ultra-fino)
-  var topGrad=ctx.createLinearGradient(0,0,w,0);
-  topGrad.addColorStop(0,'#16A34A');topGrad.addColorStop(0.35,'#248A3D');topGrad.addColorStop(1,'#CBD5E1');
-  ctx.fillStyle=topGrad;ctx.fillRect(0,0,w,2);
+  // 2. WORDMARK OFICIAL "fintrack." alineado a la izquierda (Outfit 800)
+  var logoX = 0, logoY = h / 2;
+  ctx.font = '800 24px Outfit, -apple-system, sans-serif';
+  ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+  var finW = ctx.measureText('fin').width;
+  var trackW = ctx.measureText('track').width;
+  ctx.fillStyle = '#0F172A'; ctx.fillText('fin', logoX, logoY);
+  ctx.fillStyle = '#16A34A'; ctx.fillText('track', logoX + finW, logoY);
+  ctx.fillText('.', logoX + finW + trackW, logoY);
 
-  // 3. IMAGOTIPO OFICIAL 'ft.' (Flotante sobre blanco, Outfit 800)
-  var logoX=6,logoY=34;
-  ctx.font='800 32px Outfit, -apple-system, sans-serif';
-  ctx.textBaseline='alphabetic';ctx.textAlign='left';
+  // 3. METADATOS EDITORIALES A LA DERECHA (Mes y fecha de emisión)
+  ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#0F172A'; ctx.font = '700 13px Inter, -apple-system, sans-serif';
+  ctx.fillText(rangeLabel, w, logoY - 8);
 
-  var fWidth=ctx.measureText('f').width;
-  var tWidth=ctx.measureText('t.').width;
+  ctx.fillStyle = '#64748B'; ctx.font = '400 8.5px Inter, -apple-system, sans-serif';
+  var metaSub = 'Emitido el ' + dateStr + (userEmail ? ' · ' + userEmail : '');
+  ctx.fillText(metaSub, w, logoY + 9);
 
-  ctx.fillStyle='#0F172A';ctx.fillText('f',logoX,logoY);
-  ctx.fillStyle='#16A34A';ctx.fillText('t.',logoX+fWidth-1,logoY);
-
-  // Divisor vertical sutil
-  var divX=logoX+fWidth+tWidth+14;
-  ctx.strokeStyle='#E2E8F0';ctx.lineWidth=1;
-  ctx.beginPath();ctx.moveTo(divX,12);ctx.lineTo(divX,42);ctx.stroke();
-
-  // 4. WORDMARK OFICIAL "fintrack." (Outfit 800 idéntico a pantalla de carga)
-  var nameX=divX+14;
-  ctx.font='800 20px Outfit, -apple-system, sans-serif';
-  var finW=ctx.measureText('fin').width;
-  var trackW=ctx.measureText('track').width;
-
-  ctx.fillStyle='#0F172A';ctx.fillText('fin',nameX,26);
-  ctx.fillStyle='#16A34A';ctx.fillText('track',nameX+finW,26);
-  ctx.fillText('.',nameX+finW+trackW,26);
-
-  // Subtítulo editorial en Inter SemiBold con tracking expandido
-  ctx.font='600 7.5px Inter, -apple-system, sans-serif';
-  ctx.fillStyle='#64748B';
-  if('letterSpacing' in ctx)ctx.letterSpacing='0.9px';
-  ctx.fillText('LIBRO DE MOVIMIENTOS & RESUMEN FINANCIERO',nameX,40);
-  if('letterSpacing' in ctx)ctx.letterSpacing='0px';
-
-  // 5. METADATOS EDITORIALES A LA DERECHA (Inter + Badge de Auditoría)
-  var rX=w-6;ctx.textAlign='right';
-  ctx.fillStyle='#0F172A';ctx.font='700 13px Inter, -apple-system, sans-serif';
-  ctx.fillText(rangeLabel,rX,22);
-
-  ctx.fillStyle='#64748B';ctx.font='400 8.5px Inter, -apple-system, sans-serif';
-  var metaSub='Emitido el '+dateStr+(userEmail?' · '+userEmail:'');
-  ctx.fillText(metaSub,rX,35);
-
-  // Micro-badge editorial "ESTADO CONSOLIDADO"
-  var badgeText='ESTADO CONSOLIDADO';
-  ctx.font='600 7px Inter, -apple-system, sans-serif';
-  var badgeW=ctx.measureText(badgeText).width+16,badgeH=14;
-  var badgeX=rX-badgeW,badgeY=40;
-
-  ctx.fillStyle='#F0FDF4';ctx.beginPath();
-  if(ctx.roundRect)ctx.roundRect(badgeX,badgeY,badgeW,badgeH,3);else ctx.rect(badgeX,badgeY,badgeW,badgeH);
-  ctx.fill();
-  ctx.strokeStyle='#BBF7D0';ctx.lineWidth=0.75;ctx.stroke();
-
-  ctx.fillStyle='#16A34A';ctx.beginPath();
-  ctx.arc(badgeX+6,badgeY+badgeH/2,2,0,Math.PI*2);ctx.fill();
-
-  ctx.fillStyle='#15803D';ctx.textAlign='left';
-  ctx.fillText(badgeText,badgeX+11,badgeY+10);
-
-  // 6. Hairline inferior de cierre editorial (0.25mm)
-  ctx.strokeStyle='#E2E8F0';ctx.lineWidth=1;
-  ctx.beginPath();ctx.moveTo(0,h-0.5);ctx.lineTo(w,h-0.5);ctx.stroke();
+  // 4. Hairline inferior de cierre editorial
+  ctx.strokeStyle = '#E2E8F0'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, h - 0.5); ctx.lineTo(w, h - 0.5); ctx.stroke();
 
   return cv.toDataURL('image/png');
 }
 
-// ── KPI CARDS EDITORIALES FINTRACK (Inter 800 + Gradientes 160° + Micro-badges) ──
+// ── KPI CARDS PLANAS Y SUTILES FINTRACK (Fondo plano verde/rojo/azul claro, sin iconos) ──
 function exportKpiCardsDataURL(w, h, incData, expData, balData) {
   var cv = document.createElement('canvas'); var dpr = 3;
   cv.width = w * dpr; cv.height = h * dpr; var ctx = cv.getContext('2d'); ctx.scale(dpr, dpr);
@@ -5310,36 +5265,26 @@ function exportKpiCardsDataURL(w, h, incData, expData, balData) {
   var gap = 12;
   var cw = (w - 2 * gap) / 3;
   var ch = h;
-  var r = 16;
+  var r = 12;
 
   var cards = [
     {
       type: 'inc', kicker: 'TOTAL INGRESOS', amount: '+' + incData.formatted,
       sub: incData.count + ' movimientos',
-      gradStart: 'rgba(52, 199, 89, 0.16)', gradMid: 'rgba(52, 199, 89, 0.035)', gradEnd: '#FFFFFF',
-      border: 'rgba(52, 199, 89, 0.28)', textColor: '#15803D', kickerColor: '#166534',
-      badgeBg: 'rgba(52, 199, 89, 0.12)', badgeBorder: 'rgba(52, 199, 89, 0.35)', badgeSymbol: '↑'
+      bg: '#F0FDF4', border: '#BBF7D0', textColor: '#15803D', kickerColor: '#166534'
     },
     {
       type: 'exp', kicker: 'TOTAL GASTOS', amount: '-' + expData.formatted,
       sub: expData.count + ' movimientos',
-      gradStart: 'rgba(255, 59, 48, 0.14)', gradMid: 'rgba(255, 59, 48, 0.03)', gradEnd: '#FFFFFF',
-      border: 'rgba(255, 59, 48, 0.25)', textColor: '#B91C1C', kickerColor: '#991B1B',
-      badgeBg: 'rgba(255, 59, 48, 0.10)', badgeBorder: 'rgba(255, 59, 48, 0.30)', badgeSymbol: '↓'
+      bg: '#FEF2F2', border: '#FECACA', textColor: '#DC2626', kickerColor: '#991B1B'
     },
     {
       type: 'bal', kicker: balData.isPositive ? 'BALANCE NETO' : 'DÉFICIT NETO',
       amount: (balData.isPositive ? '+' : '') + balData.formatted,
       sub: balData.isPositive ? ('Tasa de ahorro: ' + balData.savRate + '%') : 'Gasto supera ingresos',
-      gradStart: balData.isPositive ? 'rgba(0, 122, 255, 0.14)' : 'rgba(239, 68, 68, 0.14)',
-      gradMid: balData.isPositive ? 'rgba(52, 199, 89, 0.04)' : 'rgba(245, 158, 11, 0.03)',
-      gradEnd: '#FFFFFF',
-      border: balData.isPositive ? 'rgba(0, 122, 255, 0.25)' : 'rgba(239, 68, 68, 0.25)',
-      textColor: balData.isPositive ? (balData.amountNum === 0 ? '#0F172A' : '#15803D') : '#B91C1C',
-      kickerColor: balData.isPositive ? '#1E40AF' : '#991B1B',
-      badgeBg: balData.isPositive ? 'rgba(0, 122, 255, 0.10)' : 'rgba(239, 68, 68, 0.10)',
-      badgeBorder: balData.isPositive ? 'rgba(0, 122, 255, 0.30)' : 'rgba(239, 68, 68, 0.30)',
-      badgeSymbol: balData.isPositive ? '◈' : '!'
+      bg: '#EFF6FF', border: '#BFDBFE',
+      textColor: balData.isPositive ? '#1E3A8A' : '#DC2626',
+      kickerColor: balData.isPositive ? '#1E40AF' : '#991B1B'
     }
   ];
 
@@ -5348,39 +5293,24 @@ function exportKpiCardsDataURL(w, h, incData, expData, balData) {
     ctx.save();
     ctx.beginPath();
     if (ctx.roundRect) ctx.roundRect(cx, 0, cw, ch, r); else ctx.rect(cx, 0, cw, ch);
-    ctx.fillStyle = '#FFFFFF'; ctx.fill();
-
-    var rad = 160 * Math.PI / 180;
-    var grad = ctx.createLinearGradient(cx + cw * 0.1, 0, cx + cw * 0.1 + cw * Math.cos(rad) * -1, ch * Math.sin(rad));
-    grad.addColorStop(0, c.gradStart); grad.addColorStop(0.55, c.gradMid); grad.addColorStop(0.85, c.gradEnd); grad.addColorStop(1, '#FFFFFF');
-    ctx.fillStyle = grad; ctx.fill();
+    ctx.fillStyle = c.bg; ctx.fill();
 
     ctx.strokeStyle = c.border; ctx.lineWidth = 1; ctx.stroke();
 
-    var badgeX = cx + 16, badgeY = 16, badgeSize = 20;
-    ctx.beginPath();
-    if (ctx.roundRect) ctx.roundRect(badgeX, badgeY, badgeSize, badgeSize, 5); else ctx.rect(badgeX, badgeY, badgeSize, badgeSize);
-    ctx.fillStyle = c.badgeBg; ctx.fill();
-    ctx.strokeStyle = c.badgeBorder; ctx.lineWidth = 0.8; ctx.stroke();
-
-    ctx.fillStyle = c.textColor; ctx.font = '700 12px Inter, -apple-system, sans-serif';
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(c.badgeSymbol, badgeX + badgeSize / 2, badgeY + badgeSize / 2);
-
     ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-    ctx.fillStyle = c.kickerColor; ctx.font = '600 10.5px Inter, -apple-system, sans-serif';
-    if ('letterSpacing' in ctx) ctx.letterSpacing = '0.6px';
-    ctx.fillText(c.kicker, badgeX + badgeSize + 10, badgeY + badgeSize / 2);
+    ctx.fillStyle = c.kickerColor; ctx.font = '600 10px Inter, -apple-system, sans-serif';
+    if ('letterSpacing' in ctx) ctx.letterSpacing = '0.5px';
+    ctx.fillText(c.kicker, cx + 16, 22);
     if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
 
-    ctx.fillStyle = c.textColor; ctx.font = '800 22px Inter, -apple-system, sans-serif';
+    ctx.fillStyle = c.textColor; ctx.font = '800 21px Inter, -apple-system, sans-serif';
     ctx.textBaseline = 'alphabetic';
     if ('letterSpacing' in ctx) ctx.letterSpacing = '-0.5px';
-    ctx.fillText(c.amount, cx + 16, 68);
+    ctx.fillText(c.amount, cx + 16, 56);
     if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
 
-    ctx.fillStyle = '#64748B'; ctx.font = '500 10.5px Inter, -apple-system, sans-serif';
-    ctx.fillText(c.sub, cx + 16, 94);
+    ctx.fillStyle = '#64748B'; ctx.font = '500 10px Inter, -apple-system, sans-serif';
+    ctx.fillText(c.sub, cx + 16, 78);
     ctx.restore();
   });
 
@@ -5428,120 +5358,213 @@ function exportDonutDataURL(entries, total, px) {
   return cv.toDataURL('image/png');
 }
 
-function exportMonthDailyBalance() {
-  var days = new Date(viewYear, viewMonth + 1, 0).getDate(), arr = [], last = null;
-  for (var d = 1; d <= days; d++) {
-    var ds = viewYear + '-' + pad(viewMonth + 1) + '-' + pad(d), tot = 0, any = false;
-    accounts.forEach(function(a) { var v = accountRealBalanceAtDate(a.id, ds); if (v !== null) { tot += v; any = true; } });
-    if (any) { last = tot; arr.push(tot); } else arr.push(last);
-  }
-  return arr;
-}
+// ── GRÁFICOS ANUALES EN PDF (Ingresos vs Gastos/Ahorro y Evolución del Patrimonio) ──
+function exportAnnualBarsDataURL(w, h, year) {
+  var cv = document.createElement('canvas'); var dpr = 3;
+  cv.width = w * dpr; cv.height = h * dpr; var ctx = cv.getContext('2d'); ctx.scale(dpr, dpr);
+  ctx.imageSmoothingEnabled = true;
 
-function exportLineDataURL(vals, w, h) {
-  var cv = document.createElement('canvas'); var dpr = 3; cv.width = w * dpr; cv.height = h * dpr; var x = cv.getContext('2d'); x.scale(dpr, dpr);
-  x.imageSmoothingEnabled = true;
+  ctx.fillStyle = '#FFFFFF'; ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(0, 0, w, h, 6); else ctx.rect(0, 0, w, h);
+  ctx.fill();
+  ctx.strokeStyle = '#E2E8F0'; ctx.lineWidth = 0.8; ctx.stroke();
 
-  var pts = (vals || []).map(function(v) { return v; });
-  var valid = pts.filter(function(v) { return v !== null && !isNaN(v); });
-  if (!valid.length) {
-    x.fillStyle = '#94A3B8'; x.font = '500 11px Inter, -apple-system, sans-serif';
-    x.textAlign = 'center'; x.textBaseline = 'middle';
-    x.fillText('Sin datos de evolución disponibles para este periodo', w / 2, h / 2);
-    return cv.toDataURL('image/png');
-  }
+  ctx.fillStyle = '#0F172A'; ctx.font = '700 10.5px Inter, -apple-system, sans-serif';
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  ctx.fillText('Ingresos vs gastos mensuales · ' + year, 14, 15);
 
-  var min = Math.min.apply(null, valid), max = Math.max.apply(null, valid);
-  if (min === max) { max = min + 100; min = Math.max(0, min - 100); }
-  var rng = max - min; min = min - rng * 0.06; max = max + rng * 0.08;
+  var legX = w - 210; ctx.font = '500 8.5px Inter, -apple-system, sans-serif';
+  ctx.fillStyle = '#16A34A'; ctx.beginPath(); ctx.arc(legX, 15, 3, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#64748B'; ctx.fillText('Ingresos', legX + 6, 15);
+  ctx.fillStyle = '#DC2626'; ctx.beginPath(); ctx.arc(legX + 68, 15, 3, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#64748B'; ctx.fillText('Gastos', legX + 74, 15);
+  ctx.fillStyle = '#D97706'; ctx.beginPath(); ctx.arc(legX + 134, 15, 3, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#64748B'; ctx.fillText('Ahorro', legX + 140, 15);
 
-  var padL = 52, padR = 18, padT = 16, padB = 22;
+  var incData = Array(12).fill(0), expData = Array(12).fill(0), savData = [];
+  ensureTxIndices();
+  var yearTxs = _txByYearStr[String(year)] || [];
+  yearTxs.forEach(function(t) {
+    if (t.is_balance_adjustment) return;
+    var m = parseInt(String(t.date).slice(5, 7), 10) - 1;
+    if (m >= 0 && m < 12) {
+      if (t.type === 'income') incData[m] += Number(t.amount) || 0;
+      else if (t.type === 'expense' && !isCategoryExcludedFromExpense(t.category, t.date)) expData[m] += Number(t.amount) || 0;
+    }
+  });
+  for (var m = 0; m < 12; m++) savData.push(incData[m] - expData[m]);
+
+  var maxBar = Math.max(1, Math.max.apply(null, incData.concat(expData)));
+  var dataMax = Math.max(maxBar, Math.max.apply(null, savData), 0);
+  var dataMin = Math.min(0, Math.min.apply(null, savData));
+  var ax = axisTicks(dataMin, dataMax, 4), y0 = ax.min, y1 = ax.max;
+  if (y1 === y0) { y1 = y0 + 100; }
+
+  var padL = 46, padR = 14, padT = 28, padB = 20;
   var plotW = w - padL - padR, plotH = h - padT - padB;
-  var n = pts.length;
-  function X(i) { return padL + (n > 1 ? (i / (n - 1)) * plotW : plotW / 2); }
-  function Y(v) { return padT + plotH * (1 - (v - min) / (max - min)); }
+  function Y(v) { return padT + plotH - ((v - y0) / (y1 - y0)) * plotH; }
 
-  // Superficie inmaculada con reborde hairline ultra-suave
-  x.fillStyle = '#FFFFFF'; x.beginPath();
-  if (x.roundRect) x.roundRect(0, 0, w, h, 8); else x.rect(0, 0, w, h);
-  x.fill();
-  x.strokeStyle = 'rgba(0, 0, 0, 0.06)'; x.lineWidth = 0.6; x.stroke();
+  ctx.lineWidth = 0.5; ctx.setLineDash([2, 4]);
+  ax.ticks.forEach(function(t) {
+    var yy = Y(t);
+    ctx.strokeStyle = t === 0 ? 'rgba(100, 116, 139, 0.35)' : 'rgba(100, 116, 139, 0.12)';
+    ctx.beginPath(); ctx.moveTo(padL, yy); ctx.lineTo(w - padR, yy); ctx.stroke();
+    ctx.fillStyle = '#94A3B8'; ctx.font = '500 8px Inter, -apple-system, sans-serif';
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.setLineDash([]);
+    ctx.fillText(fmtAxis(t), padL - 6, yy);
+    ctx.setLineDash([2, 4]);
+  });
+  ctx.setLineDash([]);
 
-  // Cuadrícula hairline horizontal tenue con tipografía Inter
-  x.strokeStyle = 'rgba(100, 116, 139, 0.10)'; x.lineWidth = 0.5; x.setLineDash([2, 4]);
-  for (var g = 0; g <= 3; g++) {
-    var yy = padT + (plotH * g) / 3; var valAtY = max - ((max - min) * g) / 3;
-    x.beginPath(); x.moveTo(padL, yy); x.lineTo(w - padR, yy); x.stroke();
+  var slot = plotW / 12, barW = Math.min(slot * 0.30, 14), gap = 3, yz = Y(0);
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  for (var m = 0; m < 12; m++) {
+    var cxc = padL + slot * m + slot / 2;
+    var yi = Y(incData[m]), ye = Y(expData[m]);
 
-    x.fillStyle = '#94A3B8'; x.font = '500 8.5px Inter, -apple-system, sans-serif';
-    x.textAlign = 'right'; x.textBaseline = 'middle'; x.setLineDash([]);
-    x.fillText(Math.round(valAtY).toLocaleString('es-ES') + ' €', padL - 8, yy);
-    x.setLineDash([2, 4]);
-  }
-  x.setLineDash([]);
-
-  // Gradiente niebla esmeralda líquida (Emerald Mist)
-  var grad = x.createLinearGradient(0, padT, 0, h - padB);
-  grad.addColorStop(0, 'rgba(22, 163, 74, 0.12)');
-  grad.addColorStop(0.35, 'rgba(22, 163, 74, 0.05)');
-  grad.addColorStop(0.75, 'rgba(22, 163, 74, 0.012)');
-  grad.addColorStop(1, 'rgba(22, 163, 74, 0.0)');
-
-  var validIndices = []; pts.forEach(function(v, i) { if (v !== null && !isNaN(v)) validIndices.push(i); });
-
-  if (validIndices.length > 1) {
-    function traceSpline(ctx) {
+    var iH = Math.abs(yz - yi), iY = Math.min(yi, yz);
+    if (iH > 0) {
+      ctx.fillStyle = 'rgba(22, 163, 74, 0.85)';
       ctx.beginPath();
-      var firstX = X(validIndices[0]), firstY = Y(pts[validIndices[0]]);
-      ctx.moveTo(firstX, firstY);
-      var tension = 0.20;
-      for (var k = 0; k < validIndices.length - 1; k++) {
-        var p0 = validIndices[Math.max(0, k - 1)];
-        var p1 = validIndices[k];
-        var p2 = validIndices[k + 1];
-        var p3 = validIndices[Math.min(validIndices.length - 1, k + 2)];
-        var x1 = X(p1), y1 = Y(pts[p1]);
-        var x2 = X(p2), y2 = Y(pts[p2]);
-        var cp1x = x1 + (X(p2) - X(p0)) * tension;
-        var cp1y = y1 + (Y(pts[p2]) - Y(pts[p0])) * tension;
-        var cp2x = x2 - (X(p3) - X(p1)) * tension;
-        var cp2y = y2 - (Y(pts[p3]) - Y(pts[p1])) * tension;
-        ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x2, y2);
-      }
+      if (ctx.roundRect) ctx.roundRect(cxc - barW - gap / 2, iY, barW, iH, [2, 2, 0, 0]);
+      else ctx.rect(cxc - barW - gap / 2, iY, barW, iH);
+      ctx.fill();
     }
 
-    // 1. Relleno niebla bajo la curva
-    traceSpline(x);
-    x.lineTo(X(validIndices[validIndices.length - 1]), h - padB);
-    x.lineTo(X(validIndices[0]), h - padB);
-    x.closePath(); x.fillStyle = grad; x.fill();
+    var eH = Math.abs(yz - ye), eY = Math.min(ye, yz);
+    if (eH > 0) {
+      ctx.fillStyle = 'rgba(220, 38, 38, 0.85)';
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(cxc + gap / 2, eY, barW, eH, [2, 2, 0, 0]);
+      else ctx.rect(cxc + gap / 2, eY, barW, eH);
+      ctx.fill();
+    }
 
-    // 2. Trazo hairline ultra-fino en verde FinTrack (#16A34A)
-    traceSpline(x);
-    x.strokeStyle = '#16A34A'; x.lineWidth = 1.15; x.lineCap = 'round'; x.lineJoin = 'round'; x.stroke();
-
-    // 3. Puntero cronómetro de precisión
-    var lastIdx = validIndices[validIndices.length - 1];
-    var lx = X(lastIdx), ly = Y(pts[lastIdx]);
-
-    x.beginPath(); x.arc(lx, ly, 4.2, 0, Math.PI * 2);
-    x.fillStyle = 'rgba(22, 163, 74, 0.18)'; x.fill();
-
-    x.beginPath(); x.arc(lx, ly, 2.2, 0, Math.PI * 2);
-    x.fillStyle = '#16A34A'; x.fill();
-    x.strokeStyle = '#FFFFFF'; x.lineWidth = 0.8; x.stroke();
+    ctx.fillStyle = '#64748B'; ctx.font = '500 8px Inter, -apple-system, sans-serif';
+    ctx.fillText(MONTHS_S[m], cxc, h - padB + 5);
   }
 
-  // Eje X: marcas limpias en Inter 500
-  x.fillStyle = '#94A3B8'; x.font = '500 7.5px Inter, -apple-system, sans-serif';
-  x.textAlign = 'center'; x.textBaseline = 'top';
+  // Línea de Ahorro
+  ctx.strokeStyle = '#D97706'; ctx.lineWidth = 1.6; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  ctx.beginPath();
+  for (var m2 = 0; m2 < 12; m2++) {
+    var sx = padL + slot * m2 + slot / 2, sy = Y(savData[m2]);
+    if (m2 === 0) ctx.moveTo(sx, sy); else ctx.lineTo(sx, sy);
+  }
+  ctx.stroke();
 
-  var daySteps = [1, Math.round(n * 0.25), Math.round(n * 0.5), Math.round(n * 0.75), n];
-  var uniqueSteps = Array.from(new Set(daySteps)).sort(function(a, b) { return a - b; });
-  uniqueSteps.forEach(function(d) {
-    if (d >= 1 && d <= n) {
-      var label = (d === 1) ? '1' : (d === n ? 'Fin' : String(d));
-      x.fillText(label, X(d - 1), h - padB + 5);
+  for (var m3 = 0; m3 < 12; m3++) {
+    var sx3 = padL + slot * m3 + slot / 2, sy3 = Y(savData[m3]);
+    ctx.beginPath(); ctx.arc(sx3, sy3, 2.5, 0, Math.PI * 2);
+    ctx.fillStyle = '#D97706'; ctx.fill();
+    ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 1; ctx.stroke();
+  }
+
+  return cv.toDataURL('image/png');
+}
+
+function exportAnnualNetWorthDataURL(w, h, year) {
+  var cv = document.createElement('canvas'); var dpr = 3;
+  cv.width = w * dpr; cv.height = h * dpr; var ctx = cv.getContext('2d'); ctx.scale(dpr, dpr);
+  ctx.imageSmoothingEnabled = true;
+
+  ctx.fillStyle = '#FFFFFF'; ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(0, 0, w, h, 6); else ctx.rect(0, 0, w, h);
+  ctx.fill();
+  ctx.strokeStyle = '#E2E8F0'; ctx.lineWidth = 0.8; ctx.stroke();
+
+  ctx.fillStyle = '#0F172A'; ctx.font = '700 10.5px Inter, -apple-system, sans-serif';
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  ctx.fillText('Evolución mensual del patrimonio · ' + year, 14, 15);
+
+  var regAccounts = accounts.filter(function(a) {
+    return !isAccountInvestment(a.id) && !a.is_investment && a.type !== 'investment' && a.id !== '__investments__' && !/inversi[oó]n/i.test(a.name);
+  });
+
+  ensureTxIndices();
+  var series = regAccounts.map(function(a) {
+    var hist = accountHistory(a.id);
+    var accTxs = _txByAccount[a.id] || [];
+    var dates = [];
+    if (hist.length) {
+      var d0 = hist[0].reset_date || lastDayOfMonthStr(hist[0].year, hist[0].month);
+      if (d0) dates.push(d0);
+    }
+    if (accTxs.length) {
+      var minTx = accTxs.reduce(function(min, t) { return (!min || t.date < min) ? t.date : min; }, '');
+      if (minTx) dates.push(minTx);
+    }
+    dates.sort();
+    var firstDate = dates[0] || '';
+
+    return {
+      label: capitalize(a.name),
+      color: a.color || '#2563EB',
+      data: Array.from({ length: 12 }, function(_, m) {
+        var endOfMonth = lastDayOfMonthStr(year, m + 1);
+        if (firstDate && endOfMonth < firstDate.slice(0, 7) + '-01') return null;
+        return accountCalcBalanceAsOf(a.id, endOfMonth);
+      })
+    };
+  });
+
+  var curX = w - 14; ctx.textAlign = 'right'; ctx.font = '500 8.5px Inter, -apple-system, sans-serif';
+  series.slice().reverse().forEach(function(se) {
+    var lbl = se.label.slice(0, 14);
+    var tw = ctx.measureText(lbl).width;
+    ctx.fillStyle = '#64748B'; ctx.fillText(lbl, curX, 15);
+    ctx.fillStyle = se.color; ctx.beginPath(); ctx.arc(curX - tw - 5, 15, 3, 0, Math.PI * 2); ctx.fill();
+    curX -= (tw + 16);
+  });
+
+  var all = [];
+  series.forEach(function(se) {
+    se.data.forEach(function(v) { if (v !== null && !isNaN(v)) all.push(v); });
+  });
+  if (!all.length) all = [0, 100];
+  var minVal = Math.min.apply(null, all), maxVal = Math.max.apply(null, all);
+  var ax = axisTicks(Math.min(0, minVal), maxVal, 4), y0 = ax.min, y1 = ax.max;
+  if (y1 === y0) { y1 = y0 + 100; }
+
+  var padL = 46, padR = 14, padT = 28, padB = 20;
+  var plotW = w - padL - padR, plotH = h - padT - padB;
+  function X(m) { return padL + (plotW / 12) * m + (plotW / 12) / 2; }
+  function Y(v) { return padT + plotH - ((v - y0) / (y1 - y0)) * plotH; }
+
+  ctx.lineWidth = 0.5; ctx.setLineDash([2, 4]);
+  ax.ticks.forEach(function(t) {
+    var yy = Y(t);
+    ctx.strokeStyle = t === 0 ? 'rgba(100, 116, 139, 0.35)' : 'rgba(100, 116, 139, 0.12)';
+    ctx.beginPath(); ctx.moveTo(padL, yy); ctx.lineTo(w - padR, yy); ctx.stroke();
+    ctx.fillStyle = '#94A3B8'; ctx.font = '500 8px Inter, -apple-system, sans-serif';
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.setLineDash([]);
+    ctx.fillText(fmtAxis(t), padL - 6, yy);
+    ctx.setLineDash([2, 4]);
+  });
+  ctx.setLineDash([]);
+
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  for (var mm = 0; mm < 12; mm++) {
+    ctx.fillStyle = '#64748B'; ctx.font = '500 8px Inter, -apple-system, sans-serif';
+    ctx.fillText(MONTHS_S[mm], X(mm), h - padB + 5);
+  }
+
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  series.forEach(function(se) {
+    ctx.strokeStyle = se.color; ctx.lineWidth = 1.6; ctx.beginPath();
+    var started = false;
+    for (var m = 0; m < 12; m++) {
+      var v = se.data[m]; if (v === null || isNaN(v)) continue;
+      var x = X(m), y = Y(v);
+      if (!started) { ctx.moveTo(x, y); started = true; } else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    for (var m2 = 0; m2 < 12; m2++) {
+      var v2 = se.data[m2]; if (v2 === null || isNaN(v2)) continue;
+      ctx.beginPath(); ctx.arc(X(m2), Y(v2), 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = se.color; ctx.fill();
+      ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 1; ctx.stroke();
     }
   });
 
@@ -5552,6 +5575,7 @@ function exportPDF(range) {
   if (typeof window.jspdf === 'undefined') { alert('Librería PDF no cargada, inténtalo en unos segundos.'); return; }
   range = range || currentMonthRange();
   var rb = rangeBounds(range);
+  var year = parseInt(rb.from.slice(0, 4), 10) || 2026;
   var doc = new window.jspdf.jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   var PW = 210, PH = 297, M = 14, UW = PW - 2 * M; // 182mm usable width
   var txs = getExportTx(range).sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
@@ -5564,96 +5588,100 @@ function exportPDF(range) {
   var email = currentUser ? (currentUser.email || '') : '';
   var dateStr = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
-  // 1. BRAND HERO HEADER (White Edition Editorial en Outfit 800 + Inter)
-  var headerH = 26;
+  // 1. BRAND HERO HEADER (fintrack. alineado a la izquierda, sin ft., sin línea verde, sin subtítulo, sin chip)
+  var headerH = 16;
   try {
-    doc.addImage(exportBrandHeaderDataURL(728, 104, range.label, email, dateStr), 'PNG', M, 12, UW, headerH);
+    doc.addImage(exportBrandHeaderDataURL(728, 64, range.label, email, dateStr), 'PNG', M, 12, UW, headerH);
   } catch (e) {
-    doc.setDrawColor(226, 232, 240); doc.setFillColor(255, 255, 255); doc.roundedRect(M, 12, UW, headerH, 2, 2, 'FD');
-    doc.setTextColor(15, 23, 42); doc.setFontSize(16); doc.setFont('helvetica', 'bold'); doc.text('fintrack', M + 6, 24);
-    doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 116, 139); doc.text('Informe · ' + range.label, M + 6, 32);
+    doc.setTextColor(15, 23, 42); doc.setFontSize(16); doc.setFont('helvetica', 'bold'); doc.text('fintrack.', M, 24);
+    doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 116, 139); doc.text(range.label, PW - M, 24, { align: 'right' });
   }
-  var y = 12 + headerH + 6;
+  var y = 12 + headerH + 5;
 
-  // 2. EXECUTIVE KPI CARDS FINTRACK (28mm de altura con respiración amplia, gradientes a 160° e Inter 800 tabular)
-  var kpiH = 28;
+  // 2. FLAT SUBTLE KPI CARDS (Sin iconos, fondos planos verde/rojo/azul claro, balance en azul oscuro si >= 0 o rojo si < 0)
+  var kpiH = 24;
   try {
     var incData = { formatted: fmt(tInc), count: incs.length };
     var expData = { formatted: fmt(tExp), count: exps.length };
     var balData = { formatted: fmt(bal), isPositive: bal >= 0, amountNum: bal, savRate: savRate.toFixed(1) };
-    doc.addImage(exportKpiCardsDataURL(728, 112, incData, expData, balData), 'PNG', M, y, UW, kpiH);
+    doc.addImage(exportKpiCardsDataURL(728, 96, incData, expData, balData), 'PNG', M, y, UW, kpiH);
   } catch (e) {
     var cwFallback = (UW - 2 * 4) / 3;
     doc.setFillColor(248, 250, 252); doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.22);
     doc.roundedRect(M, y, cwFallback, kpiH, 3.8, 3.8, 'FD');
   }
-  y += kpiH + 6;
+  y += kpiH + 5;
 
-  // 3. ANALYTICS (DONUT & TOP CATEGORIES RANKING CON SQUIRCLES Y MICRO-GAUGES DE 0.8mm)
+  // 3. ANALYTICS (DONUT & TOP CATEGORIES RANKING CON PUNTOS TIPO VIÑETA)
   var entries = donutEntries(exps);
   doc.setFillColor(255, 255, 255); doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.22);
-  var analyticsH = 56;
-  doc.roundedRect(M, y, UW, analyticsH, 3.8, 3.8, 'FD');
+  var analyticsH = 50;
+  doc.roundedRect(M, y, UW, analyticsH, 3.5, 3.5, 'FD');
   doc.setTextColor(15, 23, 42); doc.setFontSize(8.8); doc.setFont('helvetica', 'bold');
-  doc.text('Distribución y Categorías de Gasto', M + 6, y + 6.5);
+  doc.text('Distribución y Categorías de Gasto', M + 6, y + 6.0);
 
-  var donutSize = 43;
+  var donutSize = 38;
   try {
-    doc.addImage(exportDonutDataURL(entries, tExp, 260), 'PNG', M + 5, y + 9.0, donutSize, donutSize);
+    doc.addImage(exportDonutDataURL(entries, tExp, 240), 'PNG', M + 5, y + 8.5, donutSize, donutSize);
   } catch (e) {}
 
-  var lx = M + donutSize + 10, ly = y + 12.5;
+  var lx = M + donutSize + 10, ly = y + 11.5;
   var topEntries = entries.slice(0, 6);
   if (topEntries.length) {
     topEntries.forEach(function(e) {
       var c = catById(e.id), rgb = hexToRgb(c.color);
       var pct = tExp > 0 ? e.value / tExp : 0;
 
-      // Squircle Oficial FinTrack (2.4 x 2.4 mm, radio 0.7 mm)
+      // Cuadrado pequeño estilo punto de numeración (1.3 x 1.3 mm)
       doc.setFillColor(rgb[0], rgb[1], rgb[2]);
-      doc.roundedRect(lx, ly - 2.4, 2.4, 2.4, 0.7, 0.7, 'F');
+      doc.roundedRect(lx, ly - 1.5, 1.3, 1.3, 0.35, 0.35, 'F');
 
-      doc.setTextColor(31, 41, 55); doc.setFontSize(7.6); doc.setFont('helvetica', 'normal');
-      doc.text(capitalize(c.name).slice(0, 18), lx + 4.2, ly);
+      doc.setTextColor(31, 41, 55); doc.setFontSize(7.5); doc.setFont('helvetica', 'normal');
+      doc.text(capitalize(c.name).slice(0, 18), lx + 3.4, ly);
 
-      // Micro-gauge ultra-esbelto de 0.8 mm (en vez de 1.5 mm), radio 0.4 mm sobre pista seda
       var barW = 46, bx = lx + 39;
       doc.setFillColor(238, 242, 246);
       doc.roundedRect(bx, ly - 1.0, barW, 0.8, 0.4, 0.4, 'F');
       doc.setFillColor(rgb[0], rgb[1], rgb[2]);
       doc.roundedRect(bx, ly - 1.0, Math.max(0.8, barW * pct), 0.8, 0.4, 0.4, 'F');
 
-      doc.setTextColor(17, 24, 39); doc.setFont('helvetica', 'bold'); doc.setFontSize(7.6);
+      doc.setTextColor(17, 24, 39); doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5);
       doc.text(fmt(e.value), PW - M - 14, ly, { align: 'right' });
       doc.setTextColor(100, 116, 139); doc.setFont('helvetica', 'normal'); doc.setFontSize(7.2);
       doc.text(Math.round(pct * 100) + '%', PW - M - 4, ly, { align: 'right' });
-      ly += 6.5;
+      ly += 6.0;
     });
   } else {
     doc.setTextColor(148, 163, 184); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
     doc.text('No hay gastos registrados en este periodo.', lx, ly + 12);
   }
 
-  y += analyticsH + 6;
+  y += analyticsH + 5;
 
-  // 4. DAILY BALANCE EVOLUTION (Spline suavizado con niebla esmeralda)
-  if (accounts.length && daysBetween(rb.from, rb.to) <= 120) {
-    doc.setTextColor(15, 23, 42); doc.setFontSize(8.8); doc.setFont('helvetica', 'bold');
-    doc.text('Evolución Diaria del Saldo Consolidado', M, y); y += 4;
-    var chartH = 30;
-    try {
-      doc.addImage(exportLineDataURL(exportDailyBalanceRange(rb.from, rb.to), 728, 120), 'PNG', M, y, UW, chartH);
-    } catch (e) {}
-    y += chartH + 6;
-  }
+  // 4. SECCIÓN ANUAL (Ingresos vs Gastos y Ahorro Mensual + Evolución Mensual del Patrimonio)
+  var annualChartH = 34;
+  try {
+    doc.addImage(exportAnnualBarsDataURL(728, 136, year), 'PNG', M, y, UW, annualChartH);
+  } catch (e) {}
+  y += annualChartH + 4;
 
-  // 5. CUENTAS BANCARIAS (Página 2 con ritmo editorial)
+  try {
+    doc.addImage(exportAnnualNetWorthDataURL(728, 136, year), 'PNG', M, y, UW, annualChartH);
+  } catch (e) {}
+  y += annualChartH + 6;
+
+  // 5. PÁGINA 2: CUENTAS BANCARIAS (EXCLUIDAS LAS CUENTAS DE INVERSIÓN)
   doc.addPage(); y = 14;
-  if (accounts.length) {
+
+  var regAccounts = accounts.filter(function(a) {
+    return !isAccountInvestment(a.id) && !a.is_investment && a.type !== 'investment' && a.id !== '__investments__' && !/inversi[oó]n/i.test(a.name);
+  });
+
+  if (regAccounts.length) {
     doc.setTextColor(15, 23, 42); doc.setFontSize(8.8); doc.setFont('helvetica', 'bold');
     doc.text('Estado de Cuentas Bancarias', M, y); y += 4.5;
     var accCardW = (UW - 4) / 2, accCardH = 13;
-    accounts.forEach(function(a, i) {
+    regAccounts.forEach(function(a, i) {
       var row = Math.floor(i / 2), col = i % 2;
       var ax = M + col * (accCardW + 4);
       var ay = y + row * (accCardH + 3);
@@ -5672,11 +5700,11 @@ function exportPDF(range) {
       var lastAudit = hist.length ? (hist[hist.length - 1].reset_date || lastDayOfMonthStr(hist[hist.length - 1].year, hist[hist.length - 1].month)) : 'Sin ajustes en periodo';
       doc.text('Último saldo real: ' + lastAudit, ax + 5, ay + 9.8);
     });
-    var totalAccRows = Math.ceil(accounts.length / 2);
+    var totalAccRows = Math.ceil(regAccounts.length / 2);
     y += totalAccRows * (accCardH + 3) + 4;
   }
 
-  // 6. GASTOS POR CATEGORÍA Y CONTROL PRESUPUESTARIO (Micro-Guías de 0.8mm & Aguja Relojera Micro-Pin)
+  // 6. GASTOS POR CATEGORÍA Y CONTROL PRESUPUESTARIO (Puntos tipo viñeta, textos uniformes y Gasto / Límite)
   var bycat = {};
   exps.forEach(function(t) { bycat[t.category] = (bycat[t.category] || 0) + t.amount; });
   var sorted = Object.entries(bycat).sort(function(a, b) { return b[1] - a[1]; });
@@ -5687,11 +5715,11 @@ function exportPDF(range) {
     doc.setTextColor(15, 23, 42); doc.setFontSize(9.2); doc.setFont('helvetica', 'bold');
     doc.text('Cumplimiento y Presupuesto por Categoría', M, y); y += 5.5;
 
-    var barW = 72, bx = M + 42;
+    var barW = 60, bx = M + 42;
     doc.setTextColor(100, 116, 139); doc.setFontSize(6.5); doc.setFont('helvetica', 'bold');
     doc.text('CATEGORÍA', M, y);
     doc.text('EJECUCIÓN / LÍMITE', bx, y);
-    doc.text('GASTO / LÍMITE', PW - M - 24, y, { align: 'right' });
+    doc.text('GASTO / LÍMITE', PW - M - 22, y, { align: 'right' });
     doc.text('ESTADO', PW - M - 1, y, { align: 'right' });
     y += 2.5;
 
@@ -5705,14 +5733,13 @@ function exportPDF(range) {
       var bud = budgetForCatRange(e[0], rb.from, rb.to);
       var pctBud = bud > 0 ? e[1] / bud : 0;
 
-      // Squircle Oficial FinTrack (2.5 x 2.5 mm, radio 0.75 mm)
+      // Puntos viñeta pequeños (1.3 x 1.3 mm)
       doc.setFillColor(rgb[0], rgb[1], rgb[2]);
-      doc.roundedRect(M, y - 2.5, 2.5, 2.5, 0.75, 0.75, 'F');
+      doc.roundedRect(M, y - 1.5, 1.3, 1.3, 0.35, 0.35, 'F');
 
-      doc.setTextColor(31, 41, 55); doc.setFontSize(7.6); doc.setFont('helvetica', 'normal');
-      doc.text(capitalize(c.name).slice(0, 19), M + 4.2, y);
+      doc.setTextColor(31, 41, 55); doc.setFontSize(7.5); doc.setFont('helvetica', 'normal');
+      doc.text(capitalize(c.name).slice(0, 18), M + 3.2, y);
 
-      // Micro-gauge ultra-esbelto de 0.8 mm (en vez de 1.6 mm tosco)
       doc.setFillColor(238, 242, 246);
       doc.roundedRect(bx, y - 1.0, barW, 0.8, 0.4, 0.4, 'F');
 
@@ -5720,7 +5747,6 @@ function exportPDF(range) {
       if (bud > 0 && pctBud >= 1) doc.setFillColor(239, 68, 68); else doc.setFillColor(rgb[0], rgb[1], rgb[2]);
       doc.roundedRect(bx, y - 1.0, Math.max(0.8, fillW), 0.8, 0.4, 0.4, 'F');
 
-      // Aguja de Relojero de Ultra-Precisión (Watchmaker Micro-Pin)
       if (bud > 0 && maxCatAmt > 0) {
         var mkX = bx + barW * Math.min(bud / maxCatAmt, 1);
         doc.setFillColor(51, 65, 85);
@@ -5729,10 +5755,12 @@ function exportPDF(range) {
         doc.line(mkX, y - 2.0, mkX, y + 0.4);
       }
 
-      doc.setFont('helvetica', 'bold'); doc.setTextColor(15, 23, 42); doc.setFontSize(7.6);
-      doc.text(fmt(e[1]), PW - M - 24, y, { align: 'right' });
+      // Gasto / Límite
+      var amtText = fmt(e[1]) + (bud > 0 ? ' / ' + fmt(bud) : ' / —');
+      doc.setFont('helvetica', 'bold'); doc.setTextColor(15, 23, 42); doc.setFontSize(7.2);
+      doc.text(amtText, PW - M - 22, y, { align: 'right' });
 
-      var pillW = 19, pillH = 4.0, pillX = PW - M - pillW, pillY = y - 2.9;
+      var pillW = 18, pillH = 4.0, pillX = PW - M - pillW, pillY = y - 2.9;
       if (bud > 0) {
         if (pctBud >= 1) {
           doc.setFillColor(254, 242, 242); doc.setDrawColor(254, 202, 202); doc.setLineWidth(0.15);
@@ -5765,14 +5793,14 @@ function exportPDF(range) {
     y += 3;
   }
 
-  // 7. DETAILED TRANSACTIONS LEDGER ("OPEN LEDGER" ARCHITECTURE)
-  if (y > 200) { doc.addPage(); y = 14; }
+  // 7. DETAILED TRANSACTIONS LEDGER (Espaciado amplio sin solapes, chips uniformes centrados, fecha con día)
+  if (y > 190) { doc.addPage(); y = 14; }
   doc.setTextColor(15, 23, 42); doc.setFontSize(10.5); doc.setFont('helvetica', 'bold');
   doc.text('Libro Detallado de Movimientos', M, y);
   doc.setFontSize(7.8); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 116, 139);
   var netSign = bal >= 0 ? '+' : '';
-  doc.text(range.label + ' · ' + txs.length + ' movimientos registrados · Balance del periodo: ' + netSign + fmt(bal), M, y + 4.8);
-  y += 9.5;
+  doc.text(range.label + ' · ' + txs.length + ' movimientos registrados · Balance del periodo: ' + netSign + fmt(bal), M, y + 5.0);
+  y += 13;
 
   function drawTxHeader(topY) {
     var headerH = 7;
@@ -5783,14 +5811,15 @@ function exportPDF(range) {
 
     doc.setTextColor(71, 85, 105); doc.setFontSize(6.8); doc.setFont('helvetica', 'bold');
     doc.text('FECHA', M + 2, topY);
-    doc.text('CONCEPTO / DESCRIPCIÓN', M + 24, topY);
-    doc.text('CATEGORÍA', M + 90, topY);
-    doc.text('CUENTA', M + 126, topY);
+    doc.text('CONCEPTO / DESCRIPCIÓN', M + 26, topY);
+    doc.text('CATEGORÍA', M + 88 + 14, topY, { align: 'center' });
+    doc.text('CUENTA', M + 120, topY);
     doc.text('IMPORTE', PW - M - 2, topY, { align: 'right' });
   }
 
   drawTxHeader(y); y += 6.8;
   var rowH = 7.2;
+  var daysOfWeek = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
   txs.forEach(function(t, i) {
     if (y > 274) { doc.addPage(); y = 14; drawTxHeader(y); y += 6.8; }
@@ -5798,30 +5827,33 @@ function exportPDF(range) {
     doc.setDrawColor(241, 245, 249); doc.setLineWidth(0.15);
     doc.line(M, y + 3.0, PW - M, y + 3.0);
 
-    // Fecha
-    doc.setTextColor(100, 116, 139); doc.setFontSize(7.2); doc.setFont('helvetica', 'normal');
-    doc.text(t.date.slice(8, 10) + '/' + t.date.slice(5, 7) + '/' + t.date.slice(0, 4), M + 2, y);
+    // Fecha con día de la semana
+    var dObj = new Date(t.date + 'T12:00:00');
+    var dayName = !isNaN(dObj.getDay()) ? daysOfWeek[dObj.getDay()] : '';
+    var dateFormatted = (dayName ? dayName + ' ' : '') + t.date.slice(8, 10) + '/' + t.date.slice(5, 7) + '/' + t.date.slice(0, 4);
+    doc.setTextColor(100, 116, 139); doc.setFontSize(7.0); doc.setFont('helvetica', 'normal');
+    doc.text(dateFormatted, M + 2, y);
 
     // Concepto
     var desc = t.type === 'transfer' ? (accNameById(t.account_id) + ' → ' + accNameById(t.to_account_id)) : (t.is_balance_adjustment ? ('Ajuste de saldo' + (t.note ? ' · ' + t.note : '')) : (t.note || t.subcategory || 'Movimiento ordinario'));
-    doc.setTextColor(15, 23, 42); doc.setFontSize(7.6); doc.setFont('helvetica', 'bold');
-    doc.text(desc.slice(0, 36), M + 24, y);
+    doc.setTextColor(15, 23, 42); doc.setFontSize(7.5); doc.setFont('helvetica', 'bold');
+    doc.text(desc.slice(0, 36), M + 26, y);
 
-    // Categoría (Micro-pastilla con tinte suave y esquinas redondeadas)
+    // Categoría: chip con TAMAÑO UNIFORME y TEXTO CENTRADO
     var c = catById(t.category);
     var catLabel = t.type === 'transfer' ? 'Transferencia' : (t.is_balance_adjustment ? 'Ajuste' : capitalize(c.name));
     var rgb = hexToRgb(t.type === 'transfer' ? '#2563EB' : (t.is_balance_adjustment ? '#64748B' : c.color));
 
-    var pillW = Math.min(30, doc.getTextWidth(catLabel.slice(0, 16)) + 5);
+    var pillW = 28, pillH = 4.2, pillX = M + 88, pillY = y - 3.1;
     doc.setFillColor(Math.round(rgb[0] * 0.12 + 255 * 0.88), Math.round(rgb[1] * 0.12 + 255 * 0.88), Math.round(rgb[2] * 0.12 + 255 * 0.88));
-    doc.roundedRect(M + 90, y - 3.2, pillW, 4.2, 1, 1, 'F');
-    doc.setTextColor(rgb[0], rgb[1], rgb[2]); doc.setFontSize(6.2); doc.setFont('helvetica', 'bold');
-    doc.text(catLabel.slice(0, 16), M + 92.5, y - 0.2);
+    doc.roundedRect(pillX, pillY, pillW, pillH, 1, 1, 'F');
+    doc.setTextColor(rgb[0], rgb[1], rgb[2]); doc.setFontSize(6.4); doc.setFont('helvetica', 'bold');
+    doc.text(catLabel.slice(0, 16), pillX + pillW / 2, y - 0.1, { align: 'center' });
 
     // Cuenta
     var accName = accNameById(t.account_id) || '—';
     doc.setTextColor(100, 116, 139); doc.setFontSize(7.0); doc.setFont('helvetica', 'normal');
-    doc.text(accName.slice(0, 15), M + 126, y);
+    doc.text(accName.slice(0, 15), M + 120, y);
 
     // Importe tabular
     var isExp = t.type === 'expense', isInc = t.type === 'income';
@@ -5842,10 +5874,10 @@ function exportPDF(range) {
   doc.text('TOTAL MOVIMIENTOS: ' + txs.length, M + 2, y);
   doc.text('GASTOS: -' + fmt(tExp), M + 65, y);
   doc.text('INGRESOS: +' + fmt(tInc), M + 115, y);
-  doc.setTextColor(bal >= 0 ? 21 : 220, bal >= 0 ? 128 : 38, bal >= 0 ? 61 : 38);
+  doc.setTextColor(bal >= 0 ? 30 : 220, bal >= 0 ? 58 : 38, bal >= 0 ? 138 : 38); // Dark blue if positive!
   doc.text('NETO: ' + (bal >= 0 ? '+' : '') + fmt(bal), PW - M - 2, y, { align: 'right' });
 
-  // 8. RUNNING FOOTER INSTITUCIONAL EN TODAS LAS PÁGINAS (Outfit 800 + Inter)
+  // 8. RUNNING FOOTER INSTITUCIONAL EN TODAS LAS PÁGINAS (fintrack. y paginación)
   var totalPages = doc.internal.getNumberOfPages();
   for (var pi = 1; pi <= totalPages; pi++) {
     doc.setPage(pi);
@@ -5854,10 +5886,10 @@ function exportPDF(range) {
     doc.line(M, footerY - 2.5, PW - M, footerY - 2.5);
 
     doc.setFontSize(6.8); doc.setFont('helvetica', 'bold');
-    doc.setTextColor(15, 23, 42); doc.text('f', M, footerY + 1);
-    var fW_pdf = doc.getTextWidth('f');
-    doc.setTextColor(22, 163, 74); doc.text('t.', M + fW_pdf, footerY + 1);
-    var ftW_pdf = doc.getTextWidth('ft. ');
+    doc.setTextColor(15, 23, 42); doc.text('fin', M, footerY + 1);
+    var finW_pdf = doc.getTextWidth('fin');
+    doc.setTextColor(22, 163, 74); doc.text('track.', M + finW_pdf, footerY + 1);
+    var ftW_pdf = doc.getTextWidth('fintrack. ');
     doc.setFont('helvetica', 'normal'); doc.setTextColor(148, 163, 184);
     doc.text(' · Documento financiero confidencial generado automáticamente por fintrack', M + ftW_pdf + 1, footerY + 1);
 
