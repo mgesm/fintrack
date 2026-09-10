@@ -5831,8 +5831,16 @@ function exportPDF(range) {
   txs.forEach(function(t, i) {
     if (y > 274) { doc.addPage(); y = 14; drawTxHeader(y); y += 6.8; }
     if (i % 2 === 1) { doc.setFillColor(251, 252, 253); doc.rect(M, y - 4.2, UW, rowH, 'F'); }
-    doc.setDrawColor(241, 245, 249); doc.setLineWidth(0.15);
-    doc.line(M, y + 3.0, PW - M, y + 3.0);
+
+    // Separación clara entre días: mayor grosor de línea al cambiar de jornada
+    var isDayEnd = (i === txs.length - 1) || (txs[i + 1] && txs[i + 1].date !== t.date);
+    if (isDayEnd && i < txs.length - 1) {
+      doc.setDrawColor(180, 195, 210); doc.setLineWidth(0.45);
+      doc.line(M, y + 3.0, PW - M, y + 3.0);
+    } else {
+      doc.setDrawColor(241, 245, 249); doc.setLineWidth(0.12);
+      doc.line(M, y + 3.0, PW - M, y + 3.0);
+    }
 
     // Fecha con día de la semana
     var dObj = new Date(t.date + 'T12:00:00');
@@ -5870,6 +5878,9 @@ function exportPDF(range) {
     doc.text(sign + fmt(t.amount), PW - M - 2, y, { align: 'right' });
 
     y += rowH;
+    if (isDayEnd && i < txs.length - 1) {
+      y += 1.4;
+    }
   });
 
   // Totales de cierre
@@ -5877,12 +5888,38 @@ function exportPDF(range) {
   y += 2;
   doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.25);
   doc.line(M, y, PW - M, y); y += 4.5;
-  doc.setFontSize(7.2); doc.setFont('helvetica', 'bold'); doc.setTextColor(71, 85, 105);
-  doc.text('TOTAL MOVIMIENTOS: ' + txs.length, M + 2, y);
-  doc.text('GASTOS: -' + fmt(tExp), M + 65, y);
-  doc.text('INGRESOS: +' + fmt(tInc), M + 115, y);
-  doc.setTextColor(bal >= 0 ? 30 : 220, bal >= 0 ? 58 : 38, bal >= 0 ? 138 : 38); // Dark blue if positive!
-  doc.text('NETO: ' + (bal >= 0 ? '+' : '') + fmt(bal), PW - M - 2, y, { align: 'right' });
+  doc.setFontSize(7.2); doc.setFont('helvetica', 'bold');
+
+  // Total Movimientos
+  doc.setTextColor(100, 116, 139);
+  doc.text('TOTAL MOVIMIENTOS: ', M + 2, y);
+  var tmW = doc.getTextWidth('TOTAL MOVIMIENTOS: ');
+  doc.setTextColor(15, 23, 42);
+  doc.text(String(txs.length), M + 2 + tmW, y);
+
+  // Gastos (en rojo)
+  var gx = M + 56;
+  doc.setTextColor(100, 116, 139);
+  doc.text('GASTOS: ', gx, y);
+  var gw = doc.getTextWidth('GASTOS: ');
+  doc.setTextColor(220, 38, 38);
+  doc.text('-' + fmt(tExp), gx + gw, y);
+
+  // Ingresos (en verde)
+  var ix = M + 104;
+  doc.setTextColor(100, 116, 139);
+  doc.text('INGRESOS: ', ix, y);
+  var iw = doc.getTextWidth('INGRESOS: ');
+  doc.setTextColor(22, 163, 74);
+  doc.text('+' + fmt(tInc), ix + iw, y);
+
+  // Balance Neto (azul oscuro si >= 0, rojo si < 0)
+  var netValStr = (bal >= 0 ? '+' : '') + fmt(bal);
+  var netValW = doc.getTextWidth(netValStr);
+  doc.setTextColor(bal >= 0 ? 30 : 220, bal >= 0 ? 58 : 38, bal >= 0 ? 138 : 38);
+  doc.text(netValStr, PW - M - 2, y, { align: 'right' });
+  doc.setTextColor(100, 116, 139);
+  doc.text('NETO: ', PW - M - 2 - netValW, y, { align: 'right' });
 
   // 8. RUNNING FOOTER INSTITUCIONAL EN TODAS LAS PÁGINAS (fintrack. y paginación)
   var totalPages = doc.internal.getNumberOfPages();
