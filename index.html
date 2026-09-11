@@ -1476,12 +1476,12 @@ button:not(:disabled):active{transform:scale(.975);}
       <div id="forgotPassWrap" style="text-align:center;margin-top:10px"><button class="auth-link-btn" onclick="sendPasswordReset()">¿Olvidaste tu contraseña?</button></div>
       <div class="auth-divider"><span>o continúa sin contraseña</span></div>
       <button class="auth-magic-btn" onclick="sendMagicLink()">
-        <span class="auth-magic-icon">✉</span> Enviar magic link
+        <span class="auth-magic-icon" style="display:inline-flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span> Enviar magic link
       </button>
       <div class="auth-msg" id="authMsg"></div>
     </div>
     <div id="magicSent" style="display:none" class="magic-sent">
-      <div class="magic-icon">📬</div>
+      <div class="magic-icon" style="display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="var(--brand-green)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
       <p>Enlace enviado a<br><strong id="magicEmail"></strong></p>
       <small>Revisa tu email y pulsa el enlace para entrar.</small>
       <button class="auth-magic-btn" style="margin-top:18px" onclick="showAuthForm()">← Volver</button>
@@ -1664,6 +1664,7 @@ button:not(:disabled):active{transform:scale(.975);}
       <option value="all">Todo el histórico</option>
     </select>
     <div id="exportMonthWrap"><div class="field-label">Mes</div><input type="month" class="field-input" id="exportMonth"></div>
+    <div id="exportYearWrap" style="display:none"><div class="field-label">Año</div><select class="field-input" id="exportYear"></select></div>
     <div id="exportRangeWrap" style="display:none">
       <div class="field-label">Desde</div><input type="date" class="field-input" id="exportFrom2">
       <div class="field-label">Hasta</div><input type="date" class="field-input" id="exportTo2">
@@ -1780,14 +1781,14 @@ function getCachedQuote(symbol,maxAgeMs){
   });
 }
 var DEFAULT_CATS=[
-  {id:'c1',name:'alimentación',color:'#34C759',icon:'🛒',subcats:['supermercado','mercado','alimentación online'],position:0},
-  {id:'c2',name:'transporte',color:'#007AFF',icon:'🚗',subcats:['gasolina','taxi/uber','transporte público','parking'],position:1},
-  {id:'c3',name:'hogar',color:'#FF9500',icon:'🏠',subcats:['alquiler/hipoteca','suministros','mantenimiento','muebles'],position:2},
-  {id:'c4',name:'ocio',color:'#AF52DE',icon:'🎮',subcats:['cine/teatro','viajes','deporte','suscripciones'],position:3},
-  {id:'c5',name:'salud',color:'#FF3B30',icon:'💊',subcats:['farmacia','médico','gym','seguros'],position:4},
-  {id:'c6',name:'ropa',color:'#FF2D55',icon:'👕',subcats:['ropa','zapatos','accesorios'],position:5},
-  {id:'c7',name:'restaurantes',color:'#FF9F0A',icon:'🍽',subcats:['comida rápida','restaurante','bar/cafetería','delivery'],position:6},
-  {id:'c8',name:'otros',color:'#8E8E93',icon:'📦',subcats:[],position:7}
+  {id:'c1',name:'alimentación',color:'#34C759',icon:'alimentación',subcats:['supermercado','mercado','alimentación online'],position:0},
+  {id:'c2',name:'transporte',color:'#007AFF',icon:'transporte',subcats:['gasolina','taxi/uber','transporte público','parking'],position:1},
+  {id:'c3',name:'hogar',color:'#FF9500',icon:'hogar',subcats:['alquiler/hipoteca','suministros','mantenimiento','muebles'],position:2},
+  {id:'c4',name:'ocio',color:'#AF52DE',icon:'ocio',subcats:['cine/teatro','viajes','deporte','suscripciones'],position:3},
+  {id:'c5',name:'salud',color:'#FF3B30',icon:'salud',subcats:['farmacia','médico','gym','seguros'],position:4},
+  {id:'c6',name:'ropa',color:'#FF2D55',icon:'ropa',subcats:['ropa','zapatos','accesorios'],position:5},
+  {id:'c7',name:'restaurantes',color:'#FF9F0A',icon:'restaurantes',subcats:['comida rápida','restaurante','bar/cafetería','delivery'],position:6},
+  {id:'c8',name:'otros',color:'#8E8E93',icon:'otros',subcats:[],position:7}
 ];
 function pad(n){return String(n).padStart(2,'0');}
 function localIsoDate(isoOrDate){if(!isoOrDate)return '';var d=new Date(isoOrDate);if(isNaN(d.getTime()))return '';return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
@@ -1886,9 +1887,9 @@ function toggleCategoryExpenseExclusion(catId,ym){
   showSuccessToast(willExclude?'Categoría excluida de gastos en este mes':'Categoría incluida en gastos de este mes');
   refreshTab();
 }
-function catById(id){if(!id)return {name:'',color:'#8E8E93',icon:'📦',subcats:[]};return categories.find(function(c){return c.id===id;})||{name:'(cat. eliminada)',color:'#8E8E93',icon:'📦',subcats:[],ghost:true};}
+function catById(id){if(!id)return {name:'',color:'#8E8E93',icon:'otros',subcats:[]};return categories.find(function(c){return c.id===id;})||{name:'(cat. eliminada)',color:'#8E8E93',icon:'otros',subcats:[],ghost:true};}
 function txDisplayCategory(t){
-  if(t&&t.is_balance_adjustment)return {name:'Actualización de saldo',color:t.type==='expense'?'#FF3B30':'#34C759',icon:'↕',subcats:[]};
+  if(t&&t.is_balance_adjustment)return {name:'Actualización de saldo',color:t.type==='expense'?'#FF3B30':'#34C759',icon:'balance',subcats:[]};
   return catById(t&&t.category);
 }
 function isTxExcludedFromCalc(t){
@@ -1936,6 +1937,7 @@ var CAT_ICON_PATHS={
   'tecnología':'<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
   'suministros':'<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>',
   'inversión':'<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',
+  'balance':'<line x1="12" y1="3" x2="12" y2="21"/><polyline points="17 8 12 3 7 8"/><polyline points="7 16 12 21 17 16"/>',
   'otros':'<circle cx="6" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="18" cy="12" r="1.5" fill="currentColor" stroke="none"/>'
 };
 var AVAILABLE_CAT_ICONS=['alimentación','restaurantes','delivery','café','compras','ropa','hogar','transporte','coche','viajes','ocio','entretenimiento','deporte','salud','cuidado personal','suscripciones','regalos','tecnología','suministros','educación','mascotas','inversión','sueldo','ingresos','otros'];
@@ -2192,8 +2194,8 @@ function openSyncTray(){
     +'<h3 style="font-size:20px;letter-spacing:-.4px;margin:5px 0;">Bandeja de operaciones ('+total+')</h3>'
     +itemsHtml
     +'<div style="display:flex;flex-direction:column;gap:8px;margin-top:14px;">'
-    +(total>0?'<button type="button" id="btnRetrySyncTray" style="background:var(--accent-grad);border:none;color:#fff;border-radius:20px;padding:12px;font:700 14px var(--font);cursor:pointer;">↺ Reintentar sincronización ahora</button>':'')
-    +(total>0?'<button type="button" id="btnExportSyncRescue" style="background:var(--bg3);border:1px solid var(--card-border);color:var(--text);border-radius:20px;padding:12px;font:700 13px var(--font);cursor:pointer;">⬇ Descargar JSON de rescate</button>':'')
+    +(total>0?'<button type="button" id="btnRetrySyncTray" style="background:var(--accent-grad);border:none;color:#fff;border-radius:20px;padding:12px;font:700 14px var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Reintentar sincronización ahora</button>':'')
+    +(total>0?'<button type="button" id="btnExportSyncRescue" style="background:var(--bg3);border:1px solid var(--card-border);color:var(--text);border-radius:20px;padding:12px;font:700 13px var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar JSON de rescate</button>':'')
     +(issues.length>0?'<button type="button" id="btnClearSyncIssues" style="background:rgba(255,59,48,0.12);border:none;color:var(--red);border-radius:20px;padding:11px;font:700 13px var(--font);cursor:pointer;">Limpiar incidencias resueltas</button>':'')
     +'<button type="button" id="btnCloseSyncTray" style="background:none;border:none;color:var(--text3);padding:10px;font:600 13px var(--font);cursor:pointer;">Cerrar</button>'
     +'</div></div>';
@@ -3371,10 +3373,10 @@ function renderTxTab(el){
     +'<button class="filter-chip'+(filterType==='income'?' active':'')+'" onclick="setTxType(\'income\')">Ingresos</button>'
     +'<button class="filter-chip'+(filterType==='transfer'?' active':'')+'" onclick="setTxType(\'transfer\')">Transferencias</button>'
     +'<select class="sort-select" onchange="sortOrder=this.value;updateFilterCount();renderTxList()">'
-    +'<option value="date-desc"'+(sortOrder==='date-desc'?' selected':'')+'>Fecha ↓</option>'
-    +'<option value="date-asc"'+(sortOrder==='date-asc'?' selected':'')+'>Fecha ↑</option>'
-    +'<option value="amount-desc"'+(sortOrder==='amount-desc'?' selected':'')+'>Importe ↓</option>'
-    +'<option value="amount-asc"'+(sortOrder==='amount-asc'?' selected':'')+'>Importe ↑</option>'
+    +'<option value="date-desc"'+(sortOrder==='date-desc'?' selected':'')+'>Fecha (reciente)</option>'
+    +'<option value="date-asc"'+(sortOrder==='date-asc'?' selected':'')+'>Fecha (antigua)</option>'
+    +'<option value="amount-desc"'+(sortOrder==='amount-desc'?' selected':'')+'>Importe (mayor)</option>'
+    +'<option value="amount-asc"'+(sortOrder==='amount-asc'?' selected':'')+'>Importe (menor)</option>'
     +'<option value="cat"'+(sortOrder==='cat'?' selected':'')+'>Categoría</option>'
     +'</select>'
     +'<select class="sort-select" id="filterCatSelect"'+(filterType==='transfer'?' disabled style="opacity:0.4;cursor:not-allowed;"':'')+' onchange="filterCat=this.value;updateFilterCount();renderTxList()">'+catOptions+'</select>'
@@ -3494,7 +3496,7 @@ function buildTxItem(t){
     var traAmtStr=hideTra?'••••••':fmt(t.amount);
     return '<div class="tx-swipe-wrap"'+(IS_DESKTOP?'':' data-swipe-id="'+t.id+'"')+'><div class="tx-delete-bg"><span class="tx-delete-x">×</span></div>'
       +'<div class="tx-item" onclick="if(!event.target.closest(\'.tx-btn\'))editTx(\''+t.id+'\')">'
-      +'<div style="width:34px;height:34px;border-radius:12px;background:rgba(0,122,255,0.16);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--blue);font-size:15px;">⇄</div>'
+      +'<div style="width:34px;height:34px;border-radius:12px;background:rgba(0,122,255,0.16);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--blue);"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div>'
       +'<div class="tx-info"><div class="tx-top"><span class="tx-cat">'+htmlEscape(accNameById(t.account_id))+' → '+htmlEscape(accNameById(t.to_account_id))+'</span></div>'
       +(t.note?'<div class="tx-note">'+hlText(t.note,searchQuery)+'</div>':'')+'</div>'
       +'<div class="tx-right"><span class="tx-amount" style="color:var(--blue)">'+traAmtStr+'</span>'+rec
@@ -3502,8 +3504,8 @@ function buildTxItem(t){
   }
   var c=txDisplayCategory(t);var sign=t.is_balance_adjustment?(t.type==='expense'?'−':'+'):(t.type==='expense'?'−':'+');var col=t.type==='expense'?'var(--red)':'var(--green)';
   var sub=t.subcategory?'<span class="tx-subcat">'+capitalize(htmlEscape(t.subcategory))+'</span>':'';
-  var noCalcBadge=t.exclude_from_calc?'<span class="tx-no-calc-badge" style="display:inline-flex;align-items:center;font-size:10px;font-weight:700;color:var(--text3);background:var(--bg3);border:1px solid var(--separator2);border-radius:20px;padding:1px 6px;margin-left:4px;vertical-align:middle;">⊘ No computa</span>':'';
-  var rec=t.recurring?'<div class="tx-recurring-badge">↺ Recurrente</div>':'';
+  var noCalcBadge=t.exclude_from_calc?'<span class="tx-no-calc-badge" style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:var(--text3);background:var(--bg3);border:1px solid var(--separator2);border-radius:20px;padding:1px 6px;margin-left:4px;vertical-align:middle;"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>No computa</span>':'';
+  var rec=t.recurring?'<div class="tx-recurring-badge" style="display:inline-flex;align-items:center;gap:3px;"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Recurrente</div>':'';
   var delBtn=IS_DESKTOP?'<div class="tx-actions"><button class="tx-btn del" data-action="del-tx" data-id="'+t.id+'" title="eliminar">×</button></div>':'';
   var hideTx=portfolioValueHidden()&&isAccountInvestment(t.account_id);
   var txAmtStr=hideTx?'••••••':(sign+fmt(t.amount));
@@ -3624,7 +3626,7 @@ function renderCatTab(el,prefix){
     } else if(budget>0){
       var used=Math.round(amt/budget*100);
       var alertCol=used>=100?'var(--red)':budgetGradientColor(used);
-      if(amt>budget)budgetAlert='<div class="budget-alert" style="color:'+alertCol+'">⚠ Excedido en '+fmt(amt-budget)+' ('+used+'% usado)</div>';
+      if(amt>budget)budgetAlert='<div class="budget-alert" style="color:'+alertCol+';display:flex;align-items:center;gap:4px;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Excedido en '+fmt(amt-budget)+' ('+used+'% usado)</div>';
       else budgetAlert='<div class="budget-alert" style="color:'+alertCol+'">quedan '+fmt(budget-amt)+' ('+used+'% usado)</div>';
       if(!isInc&&amt>0){
         var usedCol=used>=100?'var(--red)':(used>=80?'var(--amber)':'var(--text3)');
@@ -3649,17 +3651,17 @@ function renderCatTab(el,prefix){
       return '<button type="button" class="cat-icon-swatch'+(act?' active':'')+'" data-action="set-cat-icon" data-id="'+c.id+'" data-sub="'+ic+'" title="'+ic+'">'+catIconSvg({name:ic,icon:ic,color:c.color},18)+'</button>';
     }).join('');
     var catColorSwatches=PALETTE.map(function(pc){return '<div class="cat-color-swatch'+(pc.toLowerCase()===String(c.color).toLowerCase()?' active':'')+'" style="background:'+pc+';color:'+pc+'" data-action="set-cat-color" data-id="'+c.id+'" data-sub="'+pc+'"></div>';}).join('');
-    var excludeBtn=isInc?'':'<button type="button" class="cat-exclude-btn'+(isExcluded?' is-excluded':'')+'" data-action="toggle-cat-exclude" data-id="'+c.id+'" title="'+(isExcluded?'Excluida de gastos este mes (pulsa para incluir)':'Cuenta en gastos este mes (pulsa para excluir)')+'">'+(isExcluded?'🚫 Excluida de gastos':'✓ Cuenta en gastos')+'</button>';
+    var excludeBtn=isInc?'':'<button type="button" class="cat-exclude-btn'+(isExcluded?' is-excluded':'')+'" data-action="toggle-cat-exclude" data-id="'+c.id+'" title="'+(isExcluded?'Excluida de gastos este mes (pulsa para incluir)':'Cuenta en gastos este mes (pulsa para excluir)')+'">'+(isExcluded?'<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:4px;"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>Excluida de gastos':'<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>Cuenta en gastos')+'</button>';
     html+='<div class="flip-card cat-flip-card" data-cat-id="'+c.id+'"><div class="flip-inner" id="catFlipInner_'+prefix+c.id+'">'
       +'<div class="cat-row flip-face flip-front" onclick="if(!event.target.closest(\'[data-action],.cat-drag-handle,input,textarea,select,button,label\'))toggleFlip(\'catFlipInner_'+prefix+c.id+'\')">'
       +'<div class="cat-row-top">'
       +'<span class="cat-drag-handle" onpointerdown="catDragStart(event,\''+c.id+'\')">⠿</span>'
       +'<div class="cat-color" style="background:'+c.color+'22;cursor:pointer;width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0" data-action="show-colorform" data-id="'+c.id+'" title="Cambiar icono o color">'+catIconSvg(c,18)+'</div>'
-      +'<span style="flex:1;display:flex;align-items:center;gap:6px;min-width:0"><strong style="font-size:15px;font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+capEsc(c.name)+'</strong><button type="button" class="cat-rename-btn" data-action="rename-cat" data-id="'+c.id+'" title="Renombrar categoría" aria-label="Renombrar categoría" style="background:none;border:none;color:var(--text3);cursor:pointer;padding:2px 4px;font-size:12px">✎</button></span>'
+      +'<span style="flex:1;display:flex;align-items:center;gap:6px;min-width:0"><strong style="font-size:15px;font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+capEsc(c.name)+'</strong><button type="button" class="cat-rename-btn" data-action="rename-cat" data-id="'+c.id+'" title="Renombrar categoría" aria-label="Renombrar categoría" style="background:none;border:none;color:var(--text3);cursor:pointer;padding:2px 4px;display:inline-flex;align-items:center;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button></span>'
       +catPctDisplay
       +'<span style="font-family:var(--mono);font-size:13px;color:'+(isExcluded?'var(--text3)':'var(--text2)')+';margin-left:6px">'+(amt>0?fmt(amt):'—')+'</span>'
-      +'<button class="arch-btn-sm" data-action="archive-cat" data-id="'+c.id+'" title="'+(c.archived?'Restaurar':'Archivar')+'">'
-      +(c.archived?'↺':'⊙')+'</button>'
+      +'<button class="arch-btn-sm" data-action="archive-cat" data-id="'+c.id+'" title="'+(c.archived?'Restaurar':'Archivar')+'" style="display:inline-flex;align-items:center;justify-content:center;">'
+      +(c.archived?'<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>':'<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>')+'</button>'
       +'<button class="del-btn-sm" data-action="del-cat" data-id="'+c.id+'">×</button>'
       +'</div>'
       +'<div class="cat-bar-bg" style="margin-top:7px">'
@@ -3683,7 +3685,7 @@ function renderCatTab(el,prefix){
       +'<div class="form-row"><input type="text" class="add-input" id="subinput_'+prefix+c.id+'" placeholder="Nombre...">'
       +'<button class="add-btn" data-action="add-subcat" data-id="'+c.id+'">Añadir</button></div></div>'
       +'<div id="budgetform_'+prefix+c.id+'" style="display:none;margin-top:6px">'
-      +(isAutoSubBudgetCat(c.id)?'<div style="font-size:11px;color:var(--text3);margin-bottom:6px">'+(hasManualBudget(c.id)?'Fijado manualmente. ':'🔄 Calculado automáticamente según tus gastos recurrentes de este mes. ')+(hasManualBudget(c.id)?'<span style="color:var(--amber);cursor:pointer;text-decoration:underline" data-action="reset-budget-auto" data-id="'+c.id+'">Volver a automático</span>':'Puedes fijarlo a mano y así dejará de recalcularse.')+'</div>':'')
+      +(isAutoSubBudgetCat(c.id)?'<div style="font-size:11px;color:var(--text3);margin-bottom:6px">'+(hasManualBudget(c.id)?'Fijado manualmente. ':'<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:4px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Calculado automáticamente según tus gastos recurrentes de este mes. ')+(hasManualBudget(c.id)?'<span style="color:var(--amber);cursor:pointer;text-decoration:underline" data-action="reset-budget-auto" data-id="'+c.id+'">Volver a automático</span>':'Puedes fijarlo a mano y así dejará de recalcularse.')+'</div>':'')
       +(autoBreakdown&&autoBreakdown.items.length?'<div style="font-size:11px;color:var(--text3);margin-bottom:8px;display:flex;flex-direction:column;gap:2px">'+autoBreakdown.items.map(function(it){return '<div style="display:flex;justify-content:space-between;gap:8px"><span>'+capEsc(it.label)+(it.count>1?' ×'+it.count:'')+'</span><span style="font-family:var(--mono)">'+fmt(it.amount)+'</span></div>';}).join('')+'</div>':'')
       +'<div class="budget-input-row">'
       +'<span style="font-size:12px;color:var(--text2);flex:1">Presupuesto de '+capitalize(MONTHS[viewMonth])+'</span>'
@@ -3708,7 +3710,7 @@ function renderCatTab(el,prefix){
         +'<div class="cat-row flip-face flip-front"><div class="cat-row-top">'
         +'<div class="cat-color" style="background:'+ac.color+'22;width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center">'+catIconSvg(ac,16)+'</div>'
         +'<span style="flex:1;font-size:14px;color:var(--text2)">'+capEsc(ac.name)+'</span>'
-        +'<button class="arch-btn-sm" data-action="archive-cat" data-id="'+ac.id+'" title="Restaurar" style="color:var(--accent)">↺</button>'
+        +'<button class="arch-btn-sm" data-action="archive-cat" data-id="'+ac.id+'" title="Restaurar" style="color:var(--accent);display:inline-flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>'
         +'<button class="del-btn-sm" data-action="del-cat" data-id="'+ac.id+'">×</button>'
         +'</div></div></div></div>';
     });
@@ -3805,7 +3807,7 @@ function renderPatTab(el){
       +'<div class="pat-account-row">'
       +'<div class="pat-acc-color" style="background:'+a.color+';cursor:pointer" data-action="show-acc-colorform" data-id="'+a.id+'" title="Cambiar color de cuenta"></div>'
       +'<span class="pat-acc-name">'+capEsc(a.name)+'</span>'
-      +'<button class="pat-acc-star'+(defAccId===a.id?' on':'')+'" data-action="set-default-acc" data-id="'+a.id+'" title="'+(defAccId===a.id?'Cuenta de gastos por defecto':'Usar como cuenta de gastos por defecto')+'">'+(defAccId===a.id?'★':'☆')+'</button>'
+      +'<button class="pat-acc-star'+(defAccId===a.id?' on':'')+'" data-action="set-default-acc" data-id="'+a.id+'" title="'+(defAccId===a.id?'Cuenta de gastos por defecto':'Usar como cuenta de gastos por defecto')+'" style="display:inline-flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" width="13" height="13" fill="'+(defAccId===a.id?'currentColor':'none')+'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>'
       +'<span class="pat-acc-theoretical">'+calcText+'</span>'
       +'<button class="del-btn-sm" data-action="del-acc" data-id="'+a.id+'" title="Eliminar cuenta">×</button>'
       +'</div>'
@@ -3818,7 +3820,7 @@ function renderPatTab(el){
       +'</div></div>'
       +'<div class="pat-acc-calc">'+resetHtml+'</div>'
       +'<div class="pat-acc-actions">'
-      +'<button class="pat-acc-btn pat-acc-btn-primary" onclick="event.stopPropagation();openTransferFrom(\''+a.id+'\')">⇄ Transferir</button>'
+      +'<button class="pat-acc-btn pat-acc-btn-primary" onclick="event.stopPropagation();openTransferFrom(\''+a.id+'\')" style="display:inline-flex;align-items:center;justify-content:center;gap:5px;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>Transferir</button>'
       +'<button class="pat-acc-btn" data-action="show-adjustform" data-id="'+a.id+'">Ajustar saldo</button>'
       +'</div>'
       +'<div id="adjustform_'+a.id+'" class="pat-adjust-form" style="display:none">'
@@ -4359,7 +4361,7 @@ function renderAnnualTab(el){
   var prevIcon='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>';
   var nextIcon='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
   el.innerHTML='<div class="annual-wrap">'
-    +'<div class="chart-year-nav" style="display:flex;align-items:center;justify-content:space-between;"><div style="display:flex;align-items:center;gap:6px;"><button class="nav-btn" onclick="chartYear--;switchTab(3)" aria-label="Año anterior">'+prevIcon+'</button><div class="chart-year-label">'+chartYear+'</div><button class="nav-btn" onclick="chartYear++;switchTab(3)" aria-label="Año siguiente">'+nextIcon+'</button></div><button class="dt-sc-btn" style="border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--card-border);color:var(--text);cursor:pointer;" onclick="exportAnnualPDF(chartYear)" title="Exportar informe anual en PDF"><span>📄</span> Exportar PDF Anual</button></div>'
+    +'<div class="chart-year-nav"><button class="nav-btn" onclick="chartYear--;switchTab(3)" aria-label="Año anterior">'+prevIcon+'</button><div class="chart-year-label">'+chartYear+'</div><button class="nav-btn" onclick="chartYear++;switchTab(3)" aria-label="Año siguiente">'+nextIcon+'</button></div>'
     +'<div style="padding:0 0 4px"><div style="font-size:11px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Comparativa con el mes anterior</div>'
     +'<div class="compare-grid">'
     +'<div class="compare-card"><div class="compare-label">Gastos</div><div class="compare-val" style="color:var(--red)">'+fmt(curExp)+'</div><div class="compare-diff" style="color:'+(expDiff>0?'var(--red)':'var(--green)')+'">'+( expDiff>0?'▲':'▼')+' '+fmt(Math.abs(expDiff))+' vs día '+prevExpCutoff+' de '+MONTHS_S[prevM]+'</div></div>'
@@ -4721,7 +4723,7 @@ function refreshInvestmentMarketValue(){
 function renderInvestmentOperations(wrap){
   if(!wrap)return;var rows=investmentOperations.slice().sort(function(a,b){return String(b.operation_date).localeCompare(String(a.operation_date));}),html='<section class="invest-operations"><div class="invest-operations-head"><h3>Operaciones</h3><small>'+rows.length+' '+(rows.length===1?'movimiento':'movimientos')+'</small></div>';
   if(!rows.length)html+='<div class="invest-empty" style="padding:18px"><small>Tus compras y ventas aparecerán aquí.</small></div>';
-  else html+=rows.map(function(o){var buy=o.side==='buy',date=new Date(o.operation_date+'T12:00:00').toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'}),units=Number(o.units).toLocaleString('es-ES',{maximumFractionDigits:6}),account=accNameById(o.cash_account_id);var valStr=portfolioValueHidden()?'••••••':fmt(o.amount);var unitsStr=portfolioValueHidden()?'••••••':(units+' part.');return '<div class="invest-operation-row" data-operation-id="'+htmlEscape(o.id)+'"><div class="invest-operation-side '+(buy?'':'sell')+'">'+(buy?'↓':'↑')+'</div><div class="invest-operation-main"><strong>'+htmlEscape(o.product_name||o.symbol)+'</strong><small>'+htmlEscape(o.symbol)+' · '+date+' · '+htmlEscape(account)+'</small></div><div class="invest-operation-value">'+valStr+'<small>'+unitsStr+'</small></div><button class="invest-operation-delete" title="Eliminar operación" data-operation-id="'+htmlEscape(o.id)+'">×</button></div>';}).join('');
+  else html+=rows.map(function(o){var buy=o.side==='buy',date=new Date(o.operation_date+'T12:00:00').toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'}),units=Number(o.units).toLocaleString('es-ES',{maximumFractionDigits:6}),account=accNameById(o.cash_account_id);var valStr=portfolioValueHidden()?'••••••':fmt(o.amount);var unitsStr=portfolioValueHidden()?'••••••':(units+' part.');return '<div class="invest-operation-row" data-operation-id="'+htmlEscape(o.id)+'"><div class="invest-operation-side '+(buy?'':'sell')+'" style="display:flex;align-items:center;justify-content:center;">'+(buy?'<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>':'<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>')+'</div><div class="invest-operation-main"><strong>'+htmlEscape(o.product_name||o.symbol)+'</strong><small>'+htmlEscape(o.symbol)+' · '+date+' · '+htmlEscape(account)+'</small></div><div class="invest-operation-value">'+valStr+'<small>'+unitsStr+'</small></div><button class="invest-operation-delete" title="Eliminar operación" data-operation-id="'+htmlEscape(o.id)+'">×</button></div>';}).join('');
   html+='</section>';var portfolio=wrap.querySelector('.portfolio-card');if(portfolio)portfolio.insertAdjacentHTML('afterend',html);wrap.querySelectorAll('.invest-operation-delete').forEach(function(button){button.onclick=function(){deleteInvestmentOperation(this.dataset.operationId);};});wrap.querySelectorAll('.invest-operation-row').forEach(function(row){row.onclick=function(e){if(!e.target.closest('.invest-operation-delete'))openInvestmentOperationEdit(this.dataset.operationId);};});
 }
 function openInvestmentOperationEdit(id){if(portfolioValueHidden()){showUndoToast('Desactiva el modo privado para ver o editar operaciones de inversión');return;}var o=investmentOperations.find(function(x){return x.id===id;});if(!o)return;assetDetailState={name:o.product_name,type:o.product_type||'Producto',symbol:o.symbol};openInvestmentTradeModal(o.side);var m=document.querySelector('.investment-trade-modal');if(!m)return;var amount=m.querySelector('#tradeAmount'),price=m.querySelector('#tradePrice'),account=m.querySelector('#tradeAccount'),date=m.querySelector('#tradeDate'),submit=m.querySelector('.investment-trade-submit');amount.value=o.amount;price.value=o.unit_price;account.value=o.cash_account_id;date.value=o.operation_date;amount.dispatchEvent(new Event('input'));submit.textContent='Guardar cambios';submit.onclick=async function(){var isUnitsMode=m.querySelector('[data-mode="units"]')&&m.querySelector('[data-mode="units"]').classList.contains('active');var v=Number(amount.value),p=Number(price.value),units=isUnitsMode?v:v/p,total=isUnitsMode?v*p:v,d=date.value,acc=account.value;if(!d||!total||!p||!units){alert('Revisa los datos');return;}submit.disabled=true;var del=await sb.rpc('delete_investment_operation',{p_operation_id:o.id});if(del.error){alert(del.error.message);submit.disabled=false;return;}var r=await sb.rpc('record_investment_operation',{p_side:o.side,p_symbol:o.symbol,p_product_name:o.product_name,p_product_type:o.product_type||null,p_units:units,p_unit_price:p,p_amount:total,p_operation_date:d,p_cash_account_id:acc});if(r.error){alert('No se pudo guardar: '+r.error.message);submit.disabled=false;return;}m.remove();await loadData();showSuccessToast('Operación actualizada');};}
@@ -4734,7 +4736,7 @@ function renderInvestmentsTab(el){
   var allocHtml=rawPositions.length?renderAssetAllocationHtml(rawPositions,null):'';
   setTimeout(refreshInvestmentMarketValue,0);
   el.innerHTML='<div class="invest-wrap"><section class="portfolio-card"><span>Valor de cartera <button type="button" onclick="togglePortfolioValue()" aria-label="Ocultar o mostrar valor de cartera" style="border:0;background:transparent;color:inherit;font-size:15px;cursor:pointer;padding:0 0 0 7px">'+(portfolioValueHidden()?'◉':'◌')+'</button></span><strong>'+portfolioValueText('—')+'</strong></section><div class="invest-stats"><div><small>Invertido</small><strong>—</strong></div><div><small>Rentabilidad</small><strong>—</strong></div><div><small>Posiciones</small><strong>0</strong></div></div>'+allocHtml+'<div class="invest-explore"><div class="invest-explore-label">Explorar mercados</div><input class="invest-search" placeholder="Buscar acción, ETF o fondo" autocomplete="off"><div class="search-results" hidden></div><div class="invest-explore-label" style="margin-top:14px">Últimos visitados</div><div class="invest-chips">'+recentChips+'</div></div><div class="invest-section-head"><h3>Tu cartera</h3><small>'+portfolioValueText(String(rawPositions.length))+' posiciones</small></div><section class="positions">'+positions.map(function(p){return '<div class="position"><i>'+p[4]+'</i><div><strong>'+p[0]+'</strong><small>'+p[1]+'</small></div><div class="position-spark">⌁</div><div class="position-value"><strong>'+p[2]+'</strong><b>'+p[3]+'</b></div></div>';}).join('')+'</section></div>';
-  var wrap=el.querySelector('.invest-wrap'),positionsEl=el.querySelector('.positions');renderInvestmentOperations(wrap);var operationsEl=wrap&&wrap.querySelector('.invest-operations'),portfolioHead=wrap&&wrap.querySelector('.invest-section-head'),statsEl=wrap&&wrap.querySelector('.invest-stats'),explore=wrap&&wrap.querySelector('.invest-explore'),allocEl=wrap&&wrap.querySelector('.invest-allocation');if(operationsEl&&portfolioHead&&statsEl&&positionsEl&&explore){if(allocEl){statsEl.insertAdjacentElement('afterend',allocEl);allocEl.insertAdjacentElement('afterend',portfolioHead);}else{statsEl.insertAdjacentElement('afterend',portfolioHead);}portfolioHead.insertAdjacentElement('afterend',positionsEl);explore.insertAdjacentElement('afterend',operationsEl);}if(!positions.length&&positionsEl)positionsEl.innerHTML='<div class="invest-empty"><i>↗</i><strong>Aún no tienes inversiones</strong><small>Busca un producto para consultar sus datos y realizar tu primera compra.</small></div>';else if(positionsEl)positionsEl.querySelectorAll('.position').forEach(function(row,i){row.onclick=function(){var p=rawPositions[i];if(p)openAssetSheet(p.name,p.type,p.symbol);};});
+  var wrap=el.querySelector('.invest-wrap'),positionsEl=el.querySelector('.positions');renderInvestmentOperations(wrap);var operationsEl=wrap&&wrap.querySelector('.invest-operations'),portfolioHead=wrap&&wrap.querySelector('.invest-section-head'),statsEl=wrap&&wrap.querySelector('.invest-stats'),explore=wrap&&wrap.querySelector('.invest-explore'),allocEl=wrap&&wrap.querySelector('.invest-allocation');if(operationsEl&&portfolioHead&&statsEl&&positionsEl&&explore){if(allocEl){statsEl.insertAdjacentElement('afterend',allocEl);allocEl.insertAdjacentElement('afterend',portfolioHead);}else{statsEl.insertAdjacentElement('afterend',portfolioHead);}portfolioHead.insertAdjacentElement('afterend',positionsEl);explore.insertAdjacentElement('afterend',operationsEl);}if(!positions.length&&positionsEl)positionsEl.innerHTML='<div class="invest-empty"><i style="display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></i><strong>Aún no tienes inversiones</strong><small>Busca un producto para consultar sus datos y realizar tu primera compra.</small></div>';else if(positionsEl)positionsEl.querySelectorAll('.position').forEach(function(row,i){row.onclick=function(){var p=rawPositions[i];if(p)openAssetSheet(p.name,p.type,p.symbol);};});
   if(wrap){var search=wrap.querySelector('.invest-search'),results=wrap.querySelector('.search-results'),timer,requestId=0;search.oninput=function(){clearTimeout(timer);var q=this.value.trim(),id=++requestId;if(q.length<2){results.hidden=true;results.innerHTML='';return;}results.hidden=false;results.innerHTML='<div class="search-status">Buscando productos…</div>';timer=setTimeout(async function(){var r=await sb.functions.invoke('market-data',{body:{action:'search',query:q}});if(id!==requestId)return;var items=r.data&&r.data.data&&r.data.data.data||[];if(r.error){results.innerHTML='<div class="search-status">No se pudo realizar la búsqueda.</div>';return;}renderSearchResults(results,items);},280);};wrap.querySelectorAll('.invest-chip').forEach(function(chip){chip.onclick=function(){openAssetSheet(this.dataset.name,this.dataset.type,this.dataset.symbol);};});}
   if(assetDetailState)openAssetSheet(assetDetailState.name,assetDetailState.type,assetDetailState.symbol);
 }
@@ -4746,14 +4748,14 @@ function renderSettingsTab(el){
   var themeOpts=[{v:'system',label:'Sistema'},{v:'light',label:'Claro'},{v:'dark',label:'Oscuro'}];
 
   el.innerHTML='<div class="settings-wrap" style="display:flex;flex-direction:column;gap:20px">'
-    +'<div class="settings-section"><div class="settings-title">Versión y sincronización</div><div class="settings-info">FinTrack <strong>'+APP_VERSION+'</strong><br><span style="font-size:12px;color:var(--text3)">Último commit: <span id="appPublishedAt">consultando…</span></span></div><div style="display:flex;flex-direction:column;gap:8px"><button class="settings-btn" onclick="openSyncTray()" style="border-radius:20px;display:flex;align-items:center;justify-content:space-between;"><span>📴 Bandeja de sincronización offline</span><span class="sync-tray-count-badge" style="display:none;background:var(--amber);color:#000;border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;"></span><span class="btn-arrow">›</span></button><button class="settings-btn" onclick="forceSync()">↺ Sincronizar ahora</button><button class="settings-btn" onclick="clearLocalCacheAndResync()">🗑 Limpiar caché local y resincronizar</button></div><div class="status-msg" id="syncStatusMsg"></div></div>'
+    +'<div class="settings-section"><div class="settings-title">Versión y sincronización</div><div class="settings-info">FinTrack <strong>'+APP_VERSION+'</strong><br><span style="font-size:12px;color:var(--text3)">Último commit: <span id="appPublishedAt">consultando…</span></span></div><div style="display:flex;flex-direction:column;gap:8px"><button class="settings-btn" onclick="openSyncTray()" style="border-radius:20px;display:flex;align-items:center;justify-content:space-between;"><span style="display:inline-flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>Bandeja de sincronización offline</span><span class="sync-tray-count-badge" style="display:none;background:var(--amber);color:#000;border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;"></span><span class="btn-arrow">›</span></button><button class="settings-btn" onclick="forceSync()" style="display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Sincronizar ahora</button><button class="settings-btn" onclick="clearLocalCacheAndResync()" style="display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Limpiar caché local y resincronizar</button></div><div class="status-msg" id="syncStatusMsg"></div></div>'
     +'<div class="settings-section"><div class="settings-title">Apariencia</div><div class="theme-switch-row">'
     +themeOpts.map(function(o){return '<button class="theme-switch-btn'+(curTheme===o.v?' active':'')+'" onclick="setTheme(\''+o.v+'\')">'+o.label+'</button>';}).join('')
     +'</div></div>'
-    +'<div class="settings-section"><div class="settings-title">Exportar datos</div><button class="settings-btn" onclick="openExportModal()">↓ Exportar (PDF · Excel · CSV)<span class="btn-arrow">›</span></button><button class="settings-btn" onclick="exportJSON()">↓ Exportar JSON (copia)</button></div>'
-    +'<div class="settings-section"><div class="settings-title">Copia de Seguridad</div><div class="settings-info">Las copias se crean automáticamente cada cinco días y se conservan las tres últimas.'+(lastBackup?'<br>Última copia local: '+new Date(lastBackup).toLocaleDateString('es-ES'):'')+'<div id="cloudBackupStatus" style="margin-top:6px;font-size:12px;color:var(--text3)">Copia en la nube: consultando…</div></div><button class="settings-btn" onclick="downloadBackupNow()">↓ Descargar copia ahora</button><input id="importJSONFile" type="file" accept=".json,.json.gz,application/json,application/gzip" style="display:none" onchange="importJSONFile(this)"><button class="settings-btn" onclick="document.getElementById(&quot;importJSONFile&quot;).click()">↑ Importar JSON</button><div class="status-msg" id="importStatus"></div><button class="settings-btn" onclick="restoreLatestBackup()">↺ Restaurar última copia</button></div>'
+    +'<div class="settings-section"><div class="settings-title">Exportar datos</div><button class="settings-btn" onclick="openExportModal()" style="display:flex;align-items:center;justify-content:space-between;"><span style="display:inline-flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Exportar movimientos (PDF · Excel · CSV)</span><span class="btn-arrow">›</span></button><button class="settings-btn" onclick="openExportModal(\''+'year'+'\')" style="display:flex;align-items:center;justify-content:space-between;"><span style="display:inline-flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Exportar informe anual (PDF)</span><span class="btn-arrow">›</span></button><button class="settings-btn" onclick="exportJSON()" style="display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Exportar copia completa JSON</button></div>'
+    +'<div class="settings-section"><div class="settings-title">Copia de Seguridad</div><div class="settings-info">Las copias se crean automáticamente cada cinco días y se conservan las tres últimas.'+(lastBackup?'<br>Última copia local: '+new Date(lastBackup).toLocaleDateString('es-ES'):'')+'<div id="cloudBackupStatus" style="margin-top:6px;font-size:12px;color:var(--text3)">Copia en la nube: consultando…</div></div><button class="settings-btn" onclick="downloadBackupNow()" style="display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar copia ahora</button><input id="importJSONFile" type="file" accept=".json,.json.gz,application/json,application/gzip" style="display:none" onchange="importJSONFile(this)"><button class="settings-btn" onclick="document.getElementById(&quot;importJSONFile&quot;).click()" style="display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Importar JSON</button><div class="status-msg" id="importStatus"></div><button class="settings-btn" onclick="restoreLatestBackup()" style="display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>Restaurar última copia</button></div>'
     +'<div class="settings-section"><div class="settings-title">Cuenta</div><div class="settings-info">'+email+'</div><button class="settings-btn danger" onclick="signOut()">Cerrar sesión<span class="btn-arrow">›</span></button></div>'
-    +'<div class="settings-section"><div class="settings-title">Zona de peligro</div><button class="settings-btn danger" onclick="clearTxs()">⚠ Borrar todas las transacciones</button></div>'
+    +'<div class="settings-section"><div class="settings-title">Zona de peligro</div><button class="settings-btn danger" onclick="clearTxs()" style="display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Borrar todas las transacciones</button></div>'
     +'<div style="text-align:center;padding:16px 0;font-size:11px;font-family:var(--mono);color:var(--text3)">fintrack · '+email+'</div>'
     +'</div>';
   setTimeout(function(){loadLatestCommitTime();loadCloudBackupStatus();},0);
@@ -4765,9 +4767,9 @@ async function loadCloudBackupStatus(){
     var latest=r.data&&r.data.latest;
     if(latest&&latest.status==='completed'&&latest.created_at){
       var days=Math.floor((Date.now()-new Date(latest.created_at).getTime())/(1000*60*60*24));
-      el.innerHTML='<span style="color:var(--green)">✓ Copia en la nube:</span> '+new Date(latest.created_at).toLocaleDateString('es-ES')+' '+(days===0?'(hoy)':days===1?'(ayer)':'(hace '+days+' días)');
+      el.innerHTML='<span style="color:var(--green);display:inline-flex;align-items:center;gap:4px;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Copia en la nube:</span> '+new Date(latest.created_at).toLocaleDateString('es-ES')+' '+(days===0?'(hoy)':days===1?'(ayer)':'(hace '+days+' días)');
     } else if(latest&&latest.status==='failed'){
-      el.innerHTML='<span style="color:var(--red)">⚠ Último intento en la nube falló</span> ('+new Date(latest.created_at).toLocaleDateString('es-ES')+')';
+      el.innerHTML='<span style="color:var(--red);display:inline-flex;align-items:center;gap:4px;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Último intento en la nube falló</span> ('+new Date(latest.created_at).toLocaleDateString('es-ES')+')';
     } else {
       el.textContent='Copia en la nube: programada periódicamente';
     }
@@ -5393,9 +5395,21 @@ function exportDailyBalanceRange(from,to){
     if(any){last=tot;arr.push(tot);}else arr.push(last);d.setDate(d.getDate()+1);}
   return arr;
 }
-function openExportModal(){
+function openExportModal(scope){
   lastModalTrigger=document.activeElement;
   var mEl=document.getElementById('exportMonth');if(mEl&&!mEl.value)mEl.value=viewYear+'-'+pad(viewMonth+1);
+  var yrSel=document.getElementById('exportYear');
+  if(yrSel){
+    var yrs={};
+    transactions.forEach(function(t){if(t.date)yrs[t.date.slice(0,4)]=true;});
+    yrs[viewYear||new Date().getFullYear()]=true;
+    var yrArr=Object.keys(yrs).sort().reverse();
+    yrSel.innerHTML=yrArr.map(function(y){return '<option value="'+y+'"'+(y===String(chartYear||viewYear)?' selected':'')+'>'+y+'</option>';}).join('');
+  }
+  if(scope){
+    var sEl=document.getElementById('exportScope');
+    if(sEl)sEl.value=scope;
+  }
   onExportScopeChange();
   document.getElementById('exportModalBg').classList.add('visible');document.getElementById('exportModalBg').setAttribute('aria-hidden','false');
 }
@@ -5403,6 +5417,7 @@ function closeExportModal(){document.getElementById('exportModalBg').classList.r
 function onExportScopeChange(){
   var s=document.getElementById('exportScope').value;
   document.getElementById('exportMonthWrap').style.display=s==='month'?'block':'none';
+  var yrWrap=document.getElementById('exportYearWrap');if(yrWrap)yrWrap.style.display=s==='year'?'block':'none';
   document.getElementById('exportRangeWrap').style.display=s==='range'?'block':'none';
 }
 function exportRangeFromUI(){
@@ -5429,7 +5444,8 @@ function loadScript(src,ms){
 async function runExport(fmt){
   var scope=document.getElementById('exportScope').value;
   if(scope==='year'&&fmt==='pdf'){
-    var yr=viewYear||new Date().getFullYear();
+    var yrSel=document.getElementById('exportYear');
+    var yr=yrSel?parseInt(yrSel.value,10):(viewYear||new Date().getFullYear());
     closeExportModal();
     await exportAnnualPDF(yr);
     return;
@@ -6295,7 +6311,7 @@ function exportPDF(range) {
       doc.setTextColor(37, 99, 235);
     }
     doc.setFont('helvetica', 'bold'); doc.setFontSize(8.0);
-    doc.text((isNoCalc ? '⊘ ' : sign) + fmt(t.amount), PW - M - 2, y, { align: 'right' });
+    doc.text(sign + fmt(t.amount), PW - M - 2, y, { align: 'right' });
 
     // Borde inferior de la última fila
     if (i === txs.length - 1) {
