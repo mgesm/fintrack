@@ -2695,14 +2695,6 @@ async function processRecurring(){
   if(isOffline)return;
   var uid=currentUser.id;
   var recurring=transactions.filter(function(t){return t.recurring&&typeof t.date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(t.date);});
-  (transactionVoids||[]).forEach(function(v){
-    var vt=v&&v.transaction_data;
-    if(vt&&vt.recurring&&vt.recur_series_id&&(!vt.recur_end_date||vt.recur_end_date>=todayStr().slice(0,7))){
-      if(!recurring.some(function(rt){return rt.recur_series_id===vt.recur_series_id;})){
-        recurring.push(vt);
-      }
-    }
-  });
   var created=0,failures=[];
   var today=new Date();today.setHours(23,59,59,999);
   var processed={};
@@ -5155,13 +5147,27 @@ async function deleteOnlyRecurringOccurrence(tx){
     return;
   }
   try{
-    var r=await sb.rpc('skip_fintrack_recurring_occurrence',{target_id:tx.id,series_id:seriesKey});
-    if(r.error){setSync('err');return;}
+    if(tx.recur_series_id){
+      var r=await sb.rpc('skip_fintrack_recurring_occurrence',{target_id:tx.id,series_id:seriesKey});
+      if(r.error){
+        await sb.from('recurrence_exclusions').insert(exclusion);
+        await sb.from('transactions').delete().eq('id',tx.id);
+      }
+    } else {
+      await sb.from('recurrence_exclusions').insert(exclusion);
+      await sb.from('transactions').delete().eq('id',tx.id);
+    }
     if(!isRecurrenceExcluded(seriesKey,tx.date))recurrenceExclusions.push(exclusion);
     transactionVoids.push({id:'tv'+Date.now(),user_id:currentUser.id,transaction_id:tx.id,transaction_data:Object.assign({},tx),voided_at:new Date().toISOString()});
     transactions=transactions.filter(function(item){return item.id!==tx.id;});
     saveLocalCache();setSync('ok');refreshTab();showUndoToast('Transacción eliminada',function(){undoRecurringOccurrenceDelete(tx,exclusion);});
-  }catch(ex){setSync('err');}
+  }catch(ex){
+    recurrenceExclusions.push(exclusion);
+    queueOp({type:'insert',table:'recurrence_exclusions',data:exclusion});
+    queueOp({type:'delete',table:'transactions',id:tx.id});
+    transactions=transactions.filter(function(item){return item.id!==tx.id;});
+    saveLocalCache();setSync('err');refreshTab();showUndoToast('Transacción eliminada',function(){undoRecurringOccurrenceDelete(tx,exclusion);});
+  }
 }
 async function deleteRecurringFromHere(tx){
   var seriesKey=recurrenceSeriesKey(tx);
@@ -5172,22 +5178,35 @@ async function deleteRecurringFromHere(tx){
   setSync('syncing');
   if(isOffline){
     past.forEach(function(item){Object.assign(item,stopFields);queueOp({type:'update',table:'transactions',id:item.id,data:stopFields});});
-    toDelete.forEach(function(item){var v={id:'tv'+Date.now()+Math.random().toString(36).slice(2,7),user_id:currentUser.id,transaction_id:item.id,transaction_data:Object.assign({},item),voided_at:new Date().toISOString()};transactionVoids.push(v);queueOp({type:'insert',table:'transaction_voids',data:v});queueOp({type:'delete',table:'transactions',id:item.id});});
+    toDelete.forEach(function(item){var v={id:'tv'+Date.now()+Math.random().toString(36).slice(2,7),user_id:currentUser.id,transaction_id:item.id,transaction_data:Object.assign({},item,stopFields),voided_at:new Date().toISOString()};transactionVoids.push(v);queueOp({type:'insert',table:'transaction_voids',data:v});queueOp({type:'delete',table:'transactions',id:item.id});});
     var deleteIds={};toDelete.forEach(function(item){deleteIds[item.id]=true;});
     transactions=transactions.filter(function(item){return !deleteIds[item.id];});
     saveLocalCache();setSync('err');refreshTab();showSuccessToast('Recurrencia eliminada');
     return;
   }
   try{
-    if(!tx.recur_series_id){setSync('err');showSuccessToast('Actualiza esta recurrencia una vez antes de cancelarla');return;}
-    var cancelled=await sb.rpc('cancel_fintrack_recurrence_from',{target_id:tx.id});
-    if(cancelled.error){setSync('err');return;}
+    if(!tx.recur_series_id){
+      if(past.length)await sb.from('transactions').update(stopFields).in('id',past.map(function(item){return item.id;}));
+      if(toDelete.length)await sb.from('transactions').delete().in('id',toDelete.map(function(item){return item.id;}));
+    } else {
+      var cancelled=await sb.rpc('cancel_fintrack_recurrence_from',{target_id:tx.id});
+      if(cancelled.error){
+        if(past.length)await sb.from('transactions').update(stopFields).in('id',past.map(function(item){return item.id;}));
+        if(toDelete.length)await sb.from('transactions').delete().in('id',toDelete.map(function(item){return item.id;}));
+      }
+    }
     past.forEach(function(item){Object.assign(item,stopFields);});
-    toDelete.forEach(function(item){transactionVoids.push({id:'tv'+Date.now()+Math.random().toString(36).slice(2,7),user_id:currentUser.id,transaction_id:item.id,transaction_data:Object.assign({},item),voided_at:new Date().toISOString()});});
+    toDelete.forEach(function(item){transactionVoids.push({id:'tv'+Date.now()+Math.random().toString(36).slice(2,7),user_id:currentUser.id,transaction_id:item.id,transaction_data:Object.assign({},item,stopFields),voided_at:new Date().toISOString()});});
     var deleteIds={};toDelete.forEach(function(item){deleteIds[item.id]=true;});
     transactions=transactions.filter(function(item){return !deleteIds[item.id];});
     saveLocalCache();setSync('ok');refreshTab();showSuccessToast('Recurrencia eliminada');
-  }catch(ex){setSync('err');}
+  }catch(ex){
+    past.forEach(function(item){Object.assign(item,stopFields);queueOp({type:'update',table:'transactions',id:item.id,data:stopFields});});
+    toDelete.forEach(function(item){var v={id:'tv'+Date.now()+Math.random().toString(36).slice(2,7),user_id:currentUser.id,transaction_id:item.id,transaction_data:Object.assign({},item,stopFields),voided_at:new Date().toISOString()};transactionVoids.push(v);queueOp({type:'insert',table:'transaction_voids',data:v});queueOp({type:'delete',table:'transactions',id:item.id});});
+    var deleteIds={};toDelete.forEach(function(item){deleteIds[item.id]=true;});
+    transactions=transactions.filter(function(item){return !deleteIds[item.id];});
+    saveLocalCache();setSync('err');refreshTab();showSuccessToast('Recurrencia eliminada');
+  }
 }
 async function deleteTx(id,undoExclusion){
   var tx=transactions.find(function(t){return t.id===id;});
