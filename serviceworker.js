@@ -1,4 +1,4 @@
-var CACHE_NAME='fintrack-cache-v173';
+var CACHE_NAME='fintrack-cache-v174';
 var CACHE_PREFIX='fintrack-cache-';
 var PRECACHE=['./','./index.html','./manifest.json','./supabase-js.min.js','./icon-192.png','./icon-512.png','./vendor/jspdf.umd.min.js','./vendor/exceljs.min.js','./fonts/inter-latin-wght-normal.woff2'];
 
@@ -31,7 +31,17 @@ self.addEventListener('fetch',function(e){
     if(networkRes&&networkRes.status===200)return caches.open(CACHE_NAME).then(function(cache){return cache.put(e.request,networkRes.clone());});
   }).catch(function(){}));
   if(e.request.mode==='navigate'){
-    e.respondWith(caches.match('./index.html').then(function(cached){return cached||network;}));
+    e.respondWith(
+      fetch(e.request).then(function(networkRes){
+        if(networkRes&&networkRes.status===200){
+          var resClone=networkRes.clone();
+          caches.open(CACHE_NAME).then(function(cache){cache.put(e.request,resClone);});
+        }
+        return networkRes;
+      }).catch(function(){
+        return caches.match('./index.html');
+      })
+    );
     return;
   }
   e.respondWith(
