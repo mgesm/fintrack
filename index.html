@@ -356,24 +356,7 @@ body{display:flex;flex-direction:column;width:100%;max-width:430px;margin:0 auto
 .nav-btn:active{background:var(--bg4);transform:scale(0.94);}
 .month-label{font-size:14px;font-weight:600;color:var(--text);min-width:120px;text-align:center;letter-spacing:-0.2px;}
 
-/* SUMMARY CARDS & EXECUTIVE HERO CARD */
-.summary-hero{padding:6px 16px 8px;display:flex;flex-direction:column;gap:8px;}
-.hero-bal-card{background:var(--bg2);border-radius:var(--radius-lg);padding:16px 18px;box-shadow:var(--glass-inner),var(--shadow-sm);border:1px solid var(--card-border);transition:transform 0.15s;}
-.hero-bal-card:active{transform:scale(0.985);}
-.hero-bal-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
-.hero-bal-label{font-size:12px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--text3);}
-.hero-bal-badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:var(--radius-pill);background:var(--bg3);color:var(--text3);border:1px solid var(--separator2);}
-.hero-bal-value{font-family:var(--mono);font-size:26px;font-weight:800;color:var(--text);letter-spacing:-0.6px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.hero-sub-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.hero-sub-card{background:var(--bg2);border-radius:var(--radius-md);padding:12px 14px;box-shadow:var(--glass-inner),var(--shadow-sm);border:1px solid var(--card-border);transition:transform 0.15s;}
-.hero-sub-card:active{transform:scale(0.975);}
-.hero-sub-card.t-inc{background:linear-gradient(160deg,rgba(52,199,89,0.14),var(--bg2) 65%);}
-.hero-sub-card.t-exp{background:linear-gradient(160deg,rgba(255,59,48,0.12),var(--bg2) 65%);}
-.hero-sub-label{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:var(--text3);margin-bottom:4px;}
-.hero-sub-value{font-family:var(--mono);font-size:17px;font-weight:700;letter-spacing:-0.4px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.hero-sub-value.inc{color:var(--green);}.hero-sub-value.exp{color:var(--red);}
-.chart-flip-btn{position:absolute;top:12px;right:14px;width:30px;height:30px;border-radius:50%;background:var(--bg3);border:1px solid var(--separator2);color:var(--text3);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;z-index:10;-webkit-tap-highlight-color:transparent;}
-.chart-flip-btn:active{transform:scale(0.92);background:var(--bg4);}
+/* SUMMARY CARDS */
 .summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:8px 16px;}
 .scard{background:var(--bg2);border-radius:var(--radius-md);padding:15px 14px 14px;box-shadow:var(--glass-inner),var(--shadow-sm);border:1px solid var(--card-border);transition:transform 0.15s;}
 .scard.t-inc{background:linear-gradient(160deg,rgba(52,199,89,0.18),var(--bg2) 62%);}
@@ -381,7 +364,7 @@ body{display:flex;flex-direction:column;width:100%;max-width:430px;margin:0 auto
 .scard.t-bal{background:linear-gradient(160deg,rgba(0,122,255,0.15),var(--bg2) 62%);}
 .scard:active{transform:scale(0.97);}
 .scard-label{font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;}
-.scard-value{font-family:var(--mono);font-size:18px;font-weight:800;color:var(--text);letter-spacing:-0.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.scard-value{font-family:var(--mono);font-size:18px;font-weight:800;color:var(--text);letter-spacing:-0.5px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .scard-value.inc{color:var(--green);}.scard-value.exp{color:var(--red);}
 
 /* TOTAL BUDGET BAR */
@@ -1550,41 +1533,19 @@ button:not(:disabled):active{transform:scale(.97);}
   </div>
 </div>
 <div id="mainChart" style="display:none">
-  <div class="summary-hero">
-    <div class="hero-bal-card" onclick="quickFilterKpi('all')" title="Restablecer filtros de movimiento" style="cursor:pointer;">
-      <div class="hero-bal-top">
-        <span class="hero-bal-label">Balance neto</span>
-        <span class="hero-bal-badge">Mes actual</span>
-      </div>
-      <div class="hero-bal-value" id="totalBal">0 €</div>
-    </div>
-    <div class="hero-sub-grid">
-      <div class="hero-sub-card t-inc" onclick="quickFilterKpi('income')" title="Filtrar solo ingresos" style="cursor:pointer;">
-        <div class="hero-sub-label">
-          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
-          Ingresos
-        </div>
-        <div class="hero-sub-value inc" id="totalInc">0 €</div>
-      </div>
-      <div class="hero-sub-card t-exp" onclick="quickFilterKpi('expense')" title="Filtrar solo gastos" style="cursor:pointer;">
-        <div class="hero-sub-label">
-          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
-          Gastos
-        </div>
-        <div class="hero-sub-value exp" id="totalExp">0 €</div>
-      </div>
-    </div>
+  <div class="summary">
+    <div class="scard t-inc" onclick="quickFilterKpi('income')" title="Filtrar solo ingresos" style="cursor:pointer;"><div class="scard-label">Ingresos</div><div class="scard-value inc" id="totalInc">0 €</div></div>
+    <div class="scard t-exp" onclick="quickFilterKpi('expense')" title="Filtrar solo gastos" style="cursor:pointer;"><div class="scard-label">Gastos</div><div class="scard-value exp" id="totalExp">0 €</div></div>
+    <div class="scard t-bal" onclick="quickFilterKpi('all')" title="Restablecer filtros" style="cursor:pointer;"><div class="scard-label">Balance</div><div class="scard-value" id="totalBal">0 €</div></div>
   </div>
   <div id="totalBudgetBar"></div>
   <div class="flip-card" id="homeFlip">
    <div class="flip-inner" id="homeFlipInner">
-    <div class="chart-area flip-face flip-front">
-      <button class="chart-flip-btn" onclick="toggleFlip('homeFlipInner')" title="Ver mapa de calor diario" aria-label="Ver mapa de calor diario"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg></button>
+    <div class="chart-area flip-face flip-front" onclick="onFrontClick(event)">
       <div class="donut-container"><canvas id="donutCanvas" width="190" height="190"></canvas><div class="donut-center"><div class="dc-pct" id="dcPct">GASTOS</div><div class="dc-amount" id="dcAmt">0 €</div><div class="dc-cat" id="dcCat"></div></div></div>
       <div class="legend" id="legend"></div><div class="balance-adjustment-note" id="balanceAdjustmentNote"></div>
     </div>
-    <div class="chart-area flip-face flip-back">
-      <button class="chart-flip-btn" onclick="toggleFlip('homeFlipInner')" title="Volver al gráfico mensual" aria-label="Volver al gráfico mensual"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 8 8 12 12 16"/><line x1="16" y1="12" x2="8" y2="12"/></svg></button>
+    <div class="chart-area flip-face flip-back" onclick="onBackClick(event)">
       <div class="heatmap-head"><span class="heatmap-title" id="hmTitle">Gasto diario</span><span class="heatmap-tot" id="hmTot"></span></div>
       <div class="heatmap-dow"><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
       <div class="heatmap-grid" id="heatmapGrid"></div>
@@ -1790,7 +1751,7 @@ button:not(:disabled):active{transform:scale(.97);}
 </div>
 
 <script>
-var APP_VERSION='2026.09.17.2';
+var APP_VERSION='2026.09.17.3';
 var APP_PUBLISHED_AT='10/09/2026 13:45 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
@@ -3129,10 +3090,39 @@ function toggleFlip(innerId){
   inner.classList.toggle('flipped');
   setFlipHeight(innerId);
 }
-function onFrontClick(ev){if(ev.target.closest('.donut-container'))return;toggleFlip('homeFlipInner');}
-function onBackClick(ev){if(ev.target.closest('.hm-cell, .heatmap-detail, .heatmap-head'))return;toggleFlip('homeFlipInner');}
-function dtOnFrontClick(ev){if(ev.target.closest('#dtDonutWrap'))return;toggleFlip('dtFlipInner');}
-function dtOnBackClick(ev){if(ev.target.closest('.hm-cell, .heatmap-detail, .heatmap-head'))return;toggleFlip('dtFlipInner');}
+var _chartDragStart=null,_chartWasDragged=false;
+document.addEventListener('touchstart',function(e){
+  var card=e.target.closest&&e.target.closest('.flip-card .chart-area');
+  if(card&&e.touches&&e.touches.length===1){
+    _chartDragStart={x:e.touches[0].clientX,y:e.touches[0].clientY};
+    _chartWasDragged=false;
+  }
+},{passive:true});
+document.addEventListener('touchmove',function(e){
+  if(_chartDragStart&&e.touches&&e.touches.length===1){
+    var dx=e.touches[0].clientX-_chartDragStart.x;
+    var dy=e.touches[0].clientY-_chartDragStart.y;
+    if(Math.hypot(dx,dy)>7){
+      _chartWasDragged=true;
+    }
+  }
+},{passive:true});
+document.addEventListener('touchend',function(){
+  setTimeout(function(){_chartDragStart=null;_chartWasDragged=false;},180);
+},{passive:true});
+
+function onFrontClick(ev){
+  if(_chartWasDragged)return;
+  if(ev.target.closest('.donut-container, button, a, input, select, [data-action]'))return;
+  toggleFlip('homeFlipInner');
+}
+function onBackClick(ev){
+  if(_chartWasDragged)return;
+  if(ev.target.closest('.hm-cell, .heatmap-detail, .heatmap-head, button, a, input, select, [data-action]'))return;
+  toggleFlip('homeFlipInner');
+}
+function dtOnFrontClick(ev){if(ev.target.closest('#dtDonutWrap, button, a, input, select, [data-action]'))return;toggleFlip('dtFlipInner');}
+function dtOnBackClick(ev){if(ev.target.closest('.hm-cell, .heatmap-detail, .heatmap-head, button, a, input, select, [data-action]'))return;toggleFlip('dtFlipInner');}
 var HM_MOBILE={grid:'heatmapGrid',detail:'heatmapDetail',title:'hmTitle',tot:'hmTot',inner:'homeFlipInner'};
 var HM_DESKTOP={grid:'dtHeatmapGrid',detail:'dtHeatmapDetail',title:'dtHmTitle',tot:'dtHmTot',inner:'dtFlipInner'};
 var hmSelDay=null;
@@ -4454,19 +4444,16 @@ function renderAnnualTab(el){
     +'<div class="chart-year-nav"><button class="nav-btn" onclick="chartYear--;switchTab(3)" aria-label="Año anterior">'+prevIcon+'</button><div class="chart-year-label">'+chartYear+'</div><button class="nav-btn" onclick="chartYear++;switchTab(3)" aria-label="Año siguiente">'+nextIcon+'</button></div>'
     +'<div class="annual-nav-pills">'
     +'<button class="annual-pill'+(annualSubView==='charts'?' active':'')+'" id="apCharts" onclick="setAnnualView(\'charts\')">Evolución</button>'
-    +'<button class="annual-pill'+(annualSubView==='compare'?' active':'')+'" id="apCompare" onclick="setAnnualView(\'compare\')">Comparativa</button>'
     +'<button class="annual-pill'+(annualSubView==='stats'?' active':'')+'" id="apStats" onclick="setAnnualView(\'stats\')">Estadísticas</button>'
     +'</div>'
     +'<div id="annualSecCharts" style="display:'+(annualSubView==='charts'?'block':'none')+'">'
-    +'<div class="chart-card"><div class="chart-card-title">Ingresos vs gastos mensuales</div><canvas id="barChartCanvas"></canvas><div class="chart-legend">'+legItem('#34C759','Ingresos')+legItem('#FF3B30','Gastos')+legItem('#FFCC00','Ahorro')+'</div></div>'
-    +'<div class="chart-card"><div class="chart-card-title">Evolución del patrimonio</div><canvas id="lineChartCanvas"></canvas><div class="chart-legend">'+lineLegend+'</div></div>'
-    +'</div>'
-    +'<div id="annualSecCompare" style="display:'+(annualSubView==='compare'?'block':'none')+'">'
     +'<div style="padding:0 0 4px"><div style="font-size:11px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Comparativa con el mes anterior</div>'
     +'<div class="compare-grid">'
     +'<div class="compare-card"><div class="compare-label">Gastos</div><div class="compare-val" style="color:var(--red)">'+fmt(curExp)+'</div><div class="compare-diff" style="color:'+(expDiff>0?'var(--red)':'var(--green)')+'">'+(expDiff>0?upArrowSvg:downArrowSvg)+fmt(Math.abs(expDiff))+' vs día '+prevExpCutoff+' de '+MONTHS_S[prevM]+'</div></div>'
     +'<div class="compare-card"><div class="compare-label">Ingresos</div><div class="compare-val" style="color:var(--green)">'+fmt(curInc)+'</div><div class="compare-diff" style="color:'+(incDiff>=0?'var(--green)':'var(--red)')+'">'+(incDiff>=0?upArrowSvg:downArrowSvg)+fmt(Math.abs(incDiff))+' vs '+MONTHS_S[prevM]+'</div></div>'
     +'</div></div>'
+    +'<div class="chart-card"><div class="chart-card-title">Ingresos vs gastos mensuales</div><canvas id="barChartCanvas"></canvas><div class="chart-legend">'+legItem('#34C759','Ingresos')+legItem('#FF3B30','Gastos')+legItem('#FFCC00','Ahorro')+'</div></div>'
+    +'<div class="chart-card"><div class="chart-card-title">Evolución del patrimonio</div><canvas id="lineChartCanvas"></canvas><div class="chart-legend">'+lineLegend+'</div></div>'
     +'</div>'
     +'<div id="annualSecStats" style="display:'+(annualSubView==='stats'?'block':'none')+'">'
     +statsHtml
@@ -4537,8 +4524,9 @@ function renderAnnualTab(el){
 }
 
 function setAnnualView(v){
+  if(v==='compare') v='charts';
   window._annualSubView=v;
-  ['Charts','Compare','Stats'].forEach(function(k){
+  ['Charts','Stats'].forEach(function(k){
     var pill=document.getElementById('ap'+k);if(pill)pill.classList.toggle('active',v.toLowerCase()===k.toLowerCase());
     var sec=document.getElementById('annualSec'+k);if(sec)sec.style.display=(v.toLowerCase()===k.toLowerCase())?'block':'none';
   });
