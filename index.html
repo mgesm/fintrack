@@ -390,86 +390,194 @@ body{display:flex;flex-direction:column;width:100%;max-width:430px;margin:0 auto
 .leg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
 .balance-adjustment-note{width:100%;text-align:center;margin:8px 0 0;font-size:12px;font-weight:600;min-height:16px;}
 
-/* DONUT ⇄ HEATMAP FLIP */
-.flip-card{margin:4px 16px 0;perspective:1200px;-webkit-perspective:1200px;}
-.flip-card .chart-area{margin:0;}
-.dt-flip-wrap{perspective:1200px;-webkit-perspective:1200px;width:100%;max-width:430px;margin:0 auto;}
-.dt-flip-wrap .flip-face{cursor:pointer;}
-/* Desktop: stack both faces in the same grid cell so the card sizes to the
-   taller face (heatmap) — no absolute overflow, no layout jump on flip. */
-.dt-flip-wrap .flip-inner{display:grid;height:auto!important;}
-.dt-flip-wrap .flip-face{grid-area:1/1;}
-.dt-flip-wrap .flip-front{position:relative;justify-content:center;}
-.dt-flip-wrap .flip-back{position:relative;transform:rotateY(180deg) translateZ(1px);justify-content:flex-start;}
+/* ==========================================================================
+   SISTEMA DE FLIP 3D DE ALTO RENDIMIENTO (GPU COMPOSITOR 60/120 FPS)
+   ========================================================================== */
 
-.flip-inner{
-  position:relative;
-  transition:transform 0.54s cubic-bezier(0.22,1,0.36,1),height 0.44s cubic-bezier(0.22,1,0.36,1);
-  transform-style:preserve-3d;
-  -webkit-transform-style:preserve-3d;
-  will-change:transform,height;
+/* 1. Contenedores de Perspectiva */
+.flip-card,
+.dt-flip-wrap,
+.cat-flip-card {
+  perspective: 1000px;
+  -webkit-perspective: 1000px;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  position: relative;
+  isolation: isolate;
 }
-.flip-inner.flipped{transform:rotateY(180deg);}
-.flip-face{
-  margin:0;
-  width:100%;
-  -webkit-backface-visibility:hidden;
-  backface-visibility:hidden;
-  transform-style:preserve-3d;
-  -webkit-transform-style:preserve-3d;
-  cursor:pointer;
-  -webkit-font-smoothing:subpixel-antialiased;
-}
-.flip-front{
-  position:relative;
-  transform:rotateY(0deg) translateZ(1px);
-  transition:visibility 0s linear 0.27s;
-}
-.flip-back{
-  position:absolute;
-  top:0;
-  left:0;
-  width:100%;
-  transform:rotateY(180deg) translateZ(1px);
-  justify-content:flex-start;
-  transition:visibility 0s linear 0.27s;
-}
-.flip-inner:not(.flipped) .flip-back{visibility:hidden;pointer-events:none;}
-.flip-inner:not(.flipped) .flip-front{visibility:visible;pointer-events:auto;}
-.flip-inner.flipped .flip-front{visibility:hidden;pointer-events:none;}
-.flip-inner.flipped .flip-back{visibility:visible;pointer-events:auto;}
-.donut-container{cursor:default;}
 
-/* CATEGORY ⇄ MONTHLY CHART FLIP */
-.cat-flip-card{margin:0 0 10px 0;perspective:1200px;-webkit-perspective:1200px;}
-.cat-arch-card{margin:0 0 10px 0;}
+.flip-card {
+  margin: 4px 16px 0;
+}
+.flip-card .chart-area {
+  margin: 0;
+  min-height: 310px;
+  justify-content: center;
+}
+.dt-flip-wrap {
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+}
+.dt-flip-wrap .flip-face {
+  cursor: pointer;
+}
+.dt-flip-wrap .flip-inner {
+  min-height: 330px;
+}
+.dt-flip-wrap .flip-front {
+  position: relative;
+  transform: rotateY(0deg) translateZ(1px);
+  justify-content: center;
+}
+.dt-flip-wrap .flip-back {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  transform: rotateY(180deg) translateZ(1px);
+  justify-content: flex-start;
+}
 
-.cat-flip-card .cat-row.flip-front{margin-bottom:0;}
-.cat-flip-card .flip-inner{
-  position:relative;
-  transition:transform 0.54s cubic-bezier(0.22,1,0.36,1),height 0.44s cubic-bezier(0.22,1,0.36,1);
-  transform-style:preserve-3d;
-  -webkit-transform-style:preserve-3d;
-  will-change:transform,height;
+.cat-flip-card {
+  margin: 0 0 10px 0;
 }
-.cat-flip-card .flip-back{
-  padding:16px 18px;
-  box-sizing:border-box;
-  position:absolute!important;
-  top:0;
-  left:0;
-  width:100%;
-  border-radius:22px!important;
-  margin-bottom:0;
-  background:var(--bg2);
-  box-shadow:var(--glass-inner),var(--shadow-sm);
-  border:1px solid var(--card-border);
-  transform:rotateY(180deg) translateZ(1px);
+.cat-arch-card {
+  margin: 0 0 10px 0;
 }
-.cat-flip-card .flip-back.chart-card{border-radius:22px!important;margin-bottom:0;box-shadow:var(--glass-inner),var(--shadow-sm);}
-.cat-drag-handle{cursor:grab;padding:10px;color:var(--text3);touch-action:none;flex-shrink:0;font-size:16px;line-height:1;user-select:none;min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;}
-.cat-flip-card.cat-dragging{opacity:0.9;box-shadow:0 10px 26px rgba(0,0,0,0.22);z-index:60;position:relative;}
-.cat-flip-card.cat-dragging .flip-inner{pointer-events:none;}
+
+/* 2. Rotor 3D (.flip-inner) */
+.flip-inner {
+  position: relative;
+  width: 100%;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  transition: transform 0.48s cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: transform;
+}
+
+.flip-inner.flipped {
+  transform: rotateY(180deg);
+}
+
+/* 3. Caras 3D y Poda de Cara Trasera por Hardware */
+.flip-face {
+  margin: 0;
+  width: 100%;
+  backface-visibility: hidden !important;
+  -webkit-backface-visibility: hidden !important;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  cursor: pointer;
+  -webkit-font-smoothing: subpixel-antialiased;
+  box-sizing: border-box;
+}
+
+/* Cara Frontal */
+.flip-front {
+  position: relative;
+  transform: rotateY(0deg) translateZ(1px);
+  z-index: 2;
+  pointer-events: auto;
+}
+
+/* Cara Trasera */
+.flip-back {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  transform: rotateY(180deg) translateZ(1px);
+  justify-content: flex-start;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Control de interactividad según estado de volteo (sin retardos de visibility) */
+.flip-inner.flipped .flip-front {
+  pointer-events: none;
+}
+.flip-inner.flipped .flip-back {
+  pointer-events: auto;
+}
+.donut-container {
+  cursor: default;
+}
+
+/* 4. Donut ⇄ Heatmap Hero Card (Cero Layout Shifts) */
+#homeFlip .flip-inner {
+  min-height: 310px;
+}
+
+/* 5. Tarjetas de Categorías: Blindaje contra 3D Flattening y Layout Shifts */
+.cat-flip-card .cat-row.flip-front {
+  margin-bottom: 0;
+}
+.cat-flip-card .flip-inner {
+  position: relative;
+  transition: transform 0.48s cubic-bezier(0.2, 0.8, 0.2, 1), height 0.48s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  will-change: transform, height;
+}
+
+/* Neutralización de backdrop-filter dentro del contexto 3D */
+.cat-flip-card .cat-row {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  background: var(--bg2) !important;
+  margin-bottom: 0 !important;
+}
+
+/* Evitar que el estado :active rompa la matriz de rotación 3D */
+.cat-flip-card .cat-row.flip-front:active {
+  transform: rotateY(0deg) translateZ(1px) scale(0.988) !important;
+  opacity: 0.94;
+}
+
+.cat-flip-card .flip-back {
+  padding: 16px 18px;
+  box-sizing: border-box;
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  width: 100%;
+  border-radius: 22px !important;
+  margin-bottom: 0;
+  background: var(--bg2);
+  box-shadow: var(--glass-inner), var(--shadow-sm);
+  border: 1px solid var(--card-border);
+  transform: rotateY(180deg) translateZ(1px);
+}
+.cat-flip-card .flip-back.chart-card {
+  border-radius: 22px !important;
+  margin-bottom: 0;
+  box-shadow: var(--glass-inner), var(--shadow-sm);
+}
+.cat-drag-handle {
+  cursor: grab;
+  padding: 10px;
+  color: var(--text3);
+  touch-action: none;
+  flex-shrink: 0;
+  font-size: 16px;
+  line-height: 1;
+  user-select: none;
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.cat-flip-card.cat-dragging {
+  opacity: 0.9;
+  box-shadow: 0 10px 26px rgba(0,0,0,0.22);
+  z-index: 60;
+  position: relative;
+}
+.cat-flip-card.cat-dragging .flip-inner {
+  pointer-events: none;
+}
 .heatmap-head{width:100%;display:flex;justify-content:space-between;align-items:baseline;padding:2px 4px 12px;}
 .heatmap-title{font-size:13px;font-weight:700;color:var(--text);}
 .heatmap-tot{font-size:12px;font-weight:600;color:var(--text3);}
@@ -720,6 +828,26 @@ html[data-theme="light"] .bnav-pill{
 .subcat-row:last-child{border-bottom:none;}
 .subcat-del-btn{background:none;border:none;cursor:pointer;color:var(--text4);padding:4px;display:inline-flex;align-items:center;justify-content:center;position:relative;border-radius:4px;}
 .subcat-del-btn::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);min-width:44px;min-height:44px;}
+.subcat-toggle-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  background:var(--bg3);
+  border:1px solid var(--card-border);
+  border-radius:var(--radius-pill);
+  padding:5px 12px;
+  font-size:12px;
+  font-weight:600;
+  color:var(--text2);
+  cursor:pointer;
+  transition:all 0.15s ease;
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.subcat-toggle-pill:hover,.subcat-toggle-pill.expanded{background:var(--bg4);color:var(--text);border-color:var(--card-border-hover);}
+.subcat-toggle-pill:active{transform:scale(0.96);}
+.subcat-chevron-icon{transition:transform 0.2s cubic-bezier(0.2,0.8,0.2,1);flex-shrink:0;}
+.cat-normal-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px;gap:8px;}
 
 .add-cat-form{background:var(--bg2);border-radius:var(--radius-md);padding:14px 16px;margin-top:6px;box-shadow:var(--glass-inner),var(--shadow-sm);border:1px solid var(--card-border);}
 .form-row{display:flex;gap:8px;align-items:center;}
@@ -1822,6 +1950,35 @@ button:not(:disabled):active{transform:scale(.97);}
       <button class="btn-save" id="adjustSaveBtn" onclick="saveAdjustModal()">Guardar ajuste</button>
     </div>
     <div class="modal-status" id="adjustModalStatus"></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="budgetModalBg" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="budgetModalTitle">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="budgetModalTitle">Ajustar presupuesto</div>
+
+    <div id="budgetModalAutoBox" style="display:none;margin:10px 0 16px;padding:14px 16px;background:var(--bg3);border-radius:var(--radius-md);border:1px solid var(--card-border);flex-direction:column;gap:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        <span id="budgetModalAutoStatus" style="font-size:12px;font-weight:600;color:var(--text2);"></span>
+        <button type="button" id="budgetModalAutoResetBtn" class="cat-edit-tool-btn" onclick="resetBudgetFromModal()" style="color:var(--amber);border-color:rgba(255,149,0,0.3);background:rgba(255,149,0,0.08);padding:6px 10px;font-size:11px;white-space:nowrap;display:none;">
+          Volver a automático
+        </button>
+      </div>
+      <div id="budgetModalAutoBreakdown" style="font-size:11px;color:var(--text3);display:flex;flex-direction:column;gap:4px;"></div>
+    </div>
+
+    <div class="field-label" id="budgetModalMonthLabel">Presupuesto mensual</div>
+    <input aria-label="Presupuesto mensual" type="number" inputmode="decimal" enterkeyhint="done" class="field-input" id="budgetModalAmount" placeholder="0" min="0" step="1" style="font-family:var(--mono);font-size:22px;font-weight:700;letter-spacing:-0.5px;">
+
+    <div class="field-label" style="margin-top:14px;">Nota o motivo (opcional)</div>
+    <input aria-label="Nota de presupuesto" type="text" class="field-input" id="budgetModalNote" placeholder="¿Qué has tenido en cuenta? (ej. seguro, vacaciones...)" maxlength="200">
+
+    <div class="modal-btns">
+      <button type="button" class="btn-cancel" onclick="closeBudgetModal()">Cancelar</button>
+      <button type="button" class="btn-save" id="budgetModalSaveBtn" onclick="saveBudgetModal()">Guardar presupuesto</button>
+    </div>
+    <div class="modal-status" id="budgetModalStatus"></div>
   </div>
 </div>
 
@@ -3210,28 +3367,47 @@ function fitCenterText(el,maxWidth,baseSize){
 function setCenter(p,a,c){_centerValues={p:p,a:a,c:c};document.getElementById('dcPct').textContent=p;var da=document.getElementById('dcAmt');da.textContent=a;fitCenterText(da,132,21);document.getElementById('dcCat').textContent=c;requestAnimationFrame(function(){fitCenterText(da,132,21);});}
 function setFlipHeight(innerId){
   innerId=innerId||'homeFlipInner';
-  requestAnimationFrame(function(){
-    var inner=document.getElementById(innerId);if(!inner)return;
-    var flipped=inner.classList.contains('flipped');
-    var face=inner.querySelector(flipped?'.flip-back':'.flip-front');
-    if(face&&face.offsetHeight>0)inner.style.height=face.offsetHeight+'px';
-  });
+  var inner=document.getElementById(innerId);if(!inner)return;
+  var flipped=inner.classList.contains('flipped');
+  var face=inner.querySelector(flipped?'.flip-back':'.flip-front');
+  if(face&&face.offsetHeight>0){
+    if(innerId==='homeFlipInner'||innerId==='dtFlipInner'){
+      inner.style.height='';
+    } else {
+      inner.style.height=face.offsetHeight+'px';
+    }
+  }
 }
 function toggleFlip(innerId){
   var inner=document.getElementById(innerId);if(!inner)return;
   var willBeFlipped=!inner.classList.contains('flipped');
   var curFace=inner.querySelector(willBeFlipped?'.flip-front':'.flip-back');
   var nextFace=inner.querySelector(willBeFlipped?'.flip-back':'.flip-front');
-  if(curFace&&nextFace){
+  if(innerId!=='homeFlipInner'&&innerId!=='dtFlipInner'&&curFace&&nextFace){
     var startH=curFace.offsetHeight;
     var targetH=nextFace.offsetHeight;
-    if(startH>0&&targetH>0){
+    if(startH>0&&targetH>0&&Math.abs(startH-targetH)>4){
       inner.style.height=startH+'px';
-      void inner.offsetHeight;
-      inner.style.height=targetH+'px';
+      requestAnimationFrame(function(){
+        inner.style.height=targetH+'px';
+      });
     }
   }
   inner.classList.toggle('flipped');
+}
+function toggleSubcats(e,id,innerId){
+  if(e&&e.stopPropagation)e.stopPropagation();
+  var el=document.getElementById('subcatList_'+id);
+  var btn=document.getElementById('subcatToggle_'+id);
+  if(!el)return;
+  var isHidden=(el.style.display==='none'||!el.style.display);
+  el.style.display=isHidden?'flex':'none';
+  if(btn){
+    var chev=btn.querySelector('.subcat-chevron-icon');
+    if(chev)chev.style.transform=isHidden?'rotate(180deg)':'rotate(0deg)';
+    btn.classList.toggle('expanded',isHidden);
+  }
+  if(innerId)setFlipHeight(innerId);
 }
 var _chartDragStart=null,_chartWasDragged=false;
 document.addEventListener('touchstart',function(e){
@@ -3276,13 +3452,15 @@ function toggleCatEditMode(){
 function onCatFrontClick(ev,innerId,catId){
   if(_chartWasDragged)return;
   if(catEditMode)return;
-  if(ev.target.closest('button, a, input, textarea, select, [data-action], .budget-icon-btn, .cat-drag-handle, .cat-name-editable, .subcat-del-btn'))return;
+  if(ev.target.closest('button, a, input, textarea, select, [data-action], .budget-icon-btn, .subcat-toggle-pill, .cat-drag-handle, .cat-name-editable, .subcat-del-btn'))return;
   var prefix=IS_DESKTOP?'dt':'';
   var canvas=document.getElementById('catChart_'+prefix+catId);
-  if(canvas&&!canvas._drawnCatSig){
-    drawCategoryHistoryChart(canvas,catId);
-  }
   toggleFlip(innerId);
+  if(canvas&&!canvas._drawnCatSig){
+    requestAnimationFrame(function(){
+      drawCategoryHistoryChart(canvas,catId);
+    });
+  }
 }
 
 function onCatBackClick(ev,innerId){
@@ -3310,8 +3488,8 @@ function drawCategoryHistoryChart(canvas,catId){
   });
   var data=[];
   for(var m=0;m<12;m++)data.push(monthly[m]||0);
-  delete canvas._lineSig;
   drawLineChart(canvas,[{label:capitalize(c.name),color:c.color,bold:true,data:data}],null);
+  canvas._drawnCatSig=true;
 }
 var HM_MOBILE={grid:'heatmapGrid',detail:'heatmapDetail',title:'hmTitle',tot:'hmTot',inner:'homeFlipInner'};
 var HM_DESKTOP={grid:'dtHeatmapGrid',detail:'dtHeatmapDetail',title:'dtHmTitle',tot:'dtHmTot',inner:'dtFlipInner'};
@@ -3510,7 +3688,7 @@ document.addEventListener('click',function(e){
   else if(action==='toggle-cat-exclude')toggleCategoryExpenseExclusion(id);
   else if(action==='show-acc-colorform'){var f=document.getElementById('acc_colorform_'+id);if(f)f.style.display=f.style.display==='none'?'block':'none';}
   else if(action==='set-acc-color')saveAccountColor(id,sub);
-  else if(action==='show-budgetform'){var pfx=IS_DESKTOP?'dt':'';var f=document.getElementById('budgetform_'+pfx+id);f.style.display=f.style.display==='none'?'block':'none';if(f.style.display==='block')document.getElementById('budgetinput_'+pfx+id).focus();setFlipHeight(catFlipId(id));}
+  else if(action==='show-budgetform')openBudgetModal(id);
   else if(action==='add-subcat')addSubcat(id);
   else if(action==='save-budget')saveBudget(id);
   else if(action==='reset-budget-auto')resetBudgetToAuto(id);
@@ -3982,19 +4160,10 @@ function renderCatTab(el,prefix){
         +'<div class="cat-bar-fill" style="background:'+barColor+';width:'+pctBar+'%;"></div>'
         +(budget>0?'<div class="cat-budget-marker" style="left:'+budgetPctBar+'%"></div>':'')
         +'</div>'
-        +(subcatHtml?'<div class="subcat-list">'+subcatHtml+'</div>':'')
+        +(subcatHtml?'<div class="subcat-list" id="subcatList_'+prefix+c.id+'" style="display:none;">'+subcatHtml+'</div>':'')
         +'<div class="cat-normal-footer">'
-        +(isInc?'<div></div>':'<button type="button" class="add-sub-btn budget-icon-btn" data-action="show-budgetform" data-id="'+c.id+'" title="Presupuesto" aria-label="Presupuesto"><span class="budget-icon-svg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 7.5h14a3 3 0 0 1 3 3v7a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2v-10Z"/><path d="M3.5 7.5v-1a2 2 0 0 1 2-2h10l2 3"/><path d="M15.5 14h3"/></svg></span>'+(budget>0?'<span class="budget-badge">'+fmt(budget)+'</span>':'')+'</button>')
-        +'</div>'
-        +'<div id="budgetform_'+prefix+c.id+'" style="display:none;margin-top:8px">'
-        +(isAutoSubBudgetCat(c.id)?'<div style="font-size:11px;color:var(--text3);margin-bottom:6px">'+(hasManualBudget(c.id)?'Fijado manualmente. ':'<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:4px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Calculado automáticamente según tus gastos recurrentes de este mes. ')+(hasManualBudget(c.id)?'<span style="color:var(--amber);cursor:pointer;text-decoration:underline" data-action="reset-budget-auto" data-id="'+c.id+'">Volver a automático</span>':'Puedes fijarlo a mano y así dejará de recalcularse.')+'</div>':'')
-        +(autoBreakdown&&autoBreakdown.items.length?'<div style="font-size:11px;color:var(--text3);margin-bottom:8px;display:flex;flex-direction:column;gap:2px">'+autoBreakdown.items.map(function(it){return '<div style="display:flex;justify-content:space-between;gap:8px"><span>'+capEsc(it.label)+(it.count>1?' x'+it.count:'')+'</span><span style="font-family:var(--mono)">'+fmt(it.amount)+'</span></div>';}).join('')+'</div>':'')
-        +'<div class="budget-input-row">'
-        +'<span style="font-size:12px;color:var(--text2);flex:1">Presupuesto de '+capitalize(MONTHS[viewMonth])+'</span>'
-        +'<input type="number" class="budget-input" id="budgetinput_'+prefix+c.id+'" placeholder="0" min="0" step="1" value="'+(formBudget||'')+'">'
-        +'<button class="budget-save-btn" data-action="save-budget" data-id="'+c.id+'">Guardar</button>'
-        +'</div>'
-        +'<div style="margin-top:6px"><input type="text" class="add-input" id="budgetnote_'+prefix+c.id+'" placeholder="Nota (opcional): ¿qué has tenido en cuenta?" maxlength="200" value="'+htmlEscape(budgetNote)+'" style="width:100%"></div>'
+        +(c.subcats&&c.subcats.length>0?'<button type="button" class="subcat-toggle-pill" id="subcatToggle_'+prefix+c.id+'" onclick="toggleSubcats(event,\''+prefix+c.id+'\',\''+innerId+'\')" aria-label="Ver '+c.subcats.length+' subcategorías" title="Desplegar subcategorías"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg><span>'+c.subcats.length+(c.subcats.length===1?' subcategoría':' subcategorías')+'</span><svg class="subcat-chevron-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>':'<div></div>')
+        +(isInc?'<div></div>':'<button type="button" class="add-sub-btn budget-icon-btn" onclick="event.stopPropagation();openBudgetModal(\''+c.id+'\')" title="Presupuesto" aria-label="Presupuesto"><span class="budget-icon-svg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 7.5h14a3 3 0 0 1 3 3v7a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2v-10Z"/><path d="M3.5 7.5v-1a2 2 0 0 1 2-2h10l2 3"/><path d="M15.5 14h3"/></svg></span>'+(budget>0?'<span class="budget-badge">'+fmt(budget)+'</span>':'')+'</button>')
         +'</div>'
         +'</div>'
         +'<div class="flip-face flip-back chart-card" onclick="onCatBackClick(event,\''+innerId+'\')">'
@@ -4469,6 +4638,147 @@ async function saveAdjustModal(){
   }finally{
     if(btn)btn.disabled=false;
   }
+}
+
+var _activeBudgetCatId=null;
+function openBudgetModal(catId){
+  var cat=categories.find(function(c){return c.id===catId;})||catById(catId);
+  if(!cat)return;
+  _activeBudgetCatId=catId;
+
+  var my=monthKey(viewYear,viewMonth);
+  var manual=hasManualBudget(catId);
+  var budgetVal=budgetForCat(catId,viewYear,viewMonth);
+  var noteVal=budgetNoteForCat(catId,viewYear,viewMonth);
+
+  var titleEl=document.getElementById('budgetModalTitle');
+  if(titleEl)titleEl.textContent='Presupuesto · '+capEsc(cat.name);
+
+  var monthLbl=document.getElementById('budgetModalMonthLabel');
+  if(monthLbl)monthLbl.textContent='Presupuesto de '+capitalize(MONTHS[viewMonth])+(homeAnnualMode?' '+viewYear:'');
+
+  var amtInput=document.getElementById('budgetModalAmount');
+  if(amtInput){
+    amtInput.value=(budgetVal>0)?budgetVal:'';
+  }
+
+  var noteInput=document.getElementById('budgetModalNote');
+  if(noteInput){
+    noteInput.value=noteVal||'';
+  }
+
+  var autoBox=document.getElementById('budgetModalAutoBox');
+  var autoStatus=document.getElementById('budgetModalAutoStatus');
+  var autoResetBtn=document.getElementById('budgetModalAutoResetBtn');
+  var autoBreakdownEl=document.getElementById('budgetModalAutoBreakdown');
+
+  if(!isIncomeCat(catId)&&isAutoSubBudgetCat(catId)&&!homeAnnualMode){
+    if(autoBox)autoBox.style.display='flex';
+    var breakdown=autoRecurBudgetBreakdown(catId,viewYear,viewMonth);
+    if(manual){
+      if(autoStatus)autoStatus.innerHTML='<span style="color:var(--amber);font-weight:600;">Fijado manualmente.</span> Dejó de recalcularse automáticamente.';
+      if(autoResetBtn)autoResetBtn.style.display='inline-flex';
+    }else{
+      if(autoStatus)autoStatus.innerHTML='<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Calculado automáticamente según tus gastos recurrentes de este mes.';
+      if(autoResetBtn)autoResetBtn.style.display='none';
+    }
+    if(breakdown&&breakdown.items&&breakdown.items.length){
+      if(autoBreakdownEl){
+        autoBreakdownEl.innerHTML='<div style="font-weight:600;margin-top:2px;color:var(--text2);">Desglose recurrente:</div>'+breakdown.items.map(function(it){
+          return '<div style="display:flex;justify-content:space-between;gap:8px"><span>'+capEsc(it.label)+(it.count>1?' x'+it.count:'')+'</span><span style="font-family:var(--mono);font-weight:600">'+fmt(it.amount)+'</span></div>';
+        }).join('');
+        autoBreakdownEl.style.display='flex';
+      }
+    }else if(autoBreakdownEl){
+      autoBreakdownEl.style.display='none';
+      autoBreakdownEl.innerHTML='';
+    }
+  }else if(autoBox){
+    autoBox.style.display='none';
+  }
+
+  var status=document.getElementById('budgetModalStatus');
+  if(status){status.textContent='';status.className='modal-status';}
+
+  var modal=document.getElementById('budgetModalBg');
+  if(modal){
+    modal.classList.add('visible');
+    modal.setAttribute('aria-hidden','false');
+  }
+  setTimeout(function(){if(amtInput)amtInput.focus();},120);
+}
+
+function closeBudgetModal(){
+  var modal=document.getElementById('budgetModalBg');
+  if(modal){
+    modal.classList.remove('visible');
+    modal.setAttribute('aria-hidden','true');
+  }
+  _activeBudgetCatId=null;
+}
+
+async function saveBudgetModal(){
+  if(!_activeBudgetCatId)return;
+  var catId=_activeBudgetCatId;
+  var amtInput=document.getElementById('budgetModalAmount');
+  var val=parseFloat(amtInput.value);
+  var status=document.getElementById('budgetModalStatus');
+  if(!Number.isFinite(val)||val<0){
+    if(status){status.textContent='Introduce un presupuesto válido (mínimo 0 €)';status.className='modal-status status-err';}
+    return;
+  }
+  var noteInput=document.getElementById('budgetModalNote');
+  var note=noteInput?(noteInput.value.trim().slice(0,200)||null):null;
+  var my=monthKey(viewYear,viewMonth);
+  var existing=budgets.find(function(b){return b.category_id===catId&&!b.is_total&&b.month_year===my;});
+
+  var saveBtn=document.getElementById('budgetModalSaveBtn');
+  if(saveBtn)saveBtn.disabled=true;
+
+  setSync('syncing');
+  try{
+    if(isOffline){
+      if(existing){
+        existing.amount=val;existing.note=note;
+        queueOp({type:'update',table:'budgets',id:existing.id,data:{amount:val,note:note}});
+      }else{
+        var offlineBudget={id:'b'+Date.now(),category_id:catId,amount:val,is_total:false,month_year:my,note:note,user_id:currentUser.id};
+        budgets.push(offlineBudget);
+        queueOp({type:'insert',table:'budgets',data:offlineBudget});
+      }
+      saveLocalCache();setSync('err');
+      showSuccessToast('Presupuesto pendiente de sincronizar');
+      closeBudgetModal();
+      refreshTab();
+      return;
+    }
+
+    if(existing){
+      var ru=await sb.from('budgets').update({amount:val,note:note}).eq('id',existing.id);
+      if(ru.error){setSync('err');return;}
+      existing.amount=val;existing.note=note;
+    }else{
+      var nb={id:'b'+Date.now(),category_id:catId,amount:val,is_total:false,month_year:my,note:note,user_id:currentUser.id};
+      var r=await sb.from('budgets').insert(nb).select();
+      if(r.error){setSync('err');return;}
+      budgets.push(r.data?r.data[0]:nb);
+    }
+
+    saveLocalCache();setSync('ok');
+    showSuccessToast('Presupuesto guardado');
+    closeBudgetModal();
+    refreshTab();
+  }finally{
+    if(saveBtn)saveBtn.disabled=false;
+  }
+}
+
+async function resetBudgetFromModal(){
+  if(!_activeBudgetCatId)return;
+  var catId=_activeBudgetCatId;
+  await resetBudgetToAuto(catId);
+  closeBudgetModal();
+  showSuccessToast('Presupuesto restaurado a automático');
 }
 function balanceAdjustmentCategorySpec(type){
   return type==='income'
@@ -7572,6 +7882,8 @@ function enableKeyboardControls(){
 }
 enableKeyboardControls();
 document.getElementById('modalBg').addEventListener('click',function(e){if(e.target===document.getElementById('modalBg'))closeModal();});
+var _adjBg=document.getElementById('adjustModalBg');if(_adjBg)_adjBg.addEventListener('click',function(e){if(e.target===_adjBg)closeAdjustModal();});
+var _budBg=document.getElementById('budgetModalBg');if(_budBg)_budBg.addEventListener('click',function(e){if(e.target===_budBg)closeBudgetModal();});
 document.addEventListener('keydown',function(e){
   var openBg=document.querySelector('.modal-bg.visible');
   if(e.key==='Tab'&&openBg){
@@ -7581,6 +7893,8 @@ document.addEventListener('keydown',function(e){
   if(e.key!=='Escape')return;
   if(document.getElementById('recurrenceDeleteBg').classList.contains('visible')){closeRecurringDeleteDialog();return;}
   if(document.getElementById('exportModalBg').classList.contains('visible')){closeExportModal();return;}
+  if(document.getElementById('adjustModalBg')&&document.getElementById('adjustModalBg').classList.contains('visible')){closeAdjustModal();return;}
+  if(document.getElementById('budgetModalBg')&&document.getElementById('budgetModalBg').classList.contains('visible')){closeBudgetModal();return;}
   if(document.getElementById('modalBg').classList.contains('visible'))closeModal();
 });
 (function(){
