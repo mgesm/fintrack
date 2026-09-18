@@ -334,7 +334,7 @@ body{display:flex;flex-direction:column;width:100%;max-width:430px;margin:0 auto
 .magic-sent small{font-size:13px;color:var(--text3);margin-top:10px;display:block;}
 
 /* HEADER */
-.header{display:flex;align-items:center;gap:10px;padding:calc(10px + var(--safe-top)) 16px 10px;background:var(--bg);background:color-mix(in srgb,var(--bg) 72%,transparent);-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);position:sticky;top:0;z-index:50;border-bottom:0.5px solid var(--separator2);}
+.header{display:flex;align-items:center;gap:10px;padding:calc(10px + var(--safe-top)) 16px 10px;background:var(--bg);position:sticky;top:0;z-index:50;border-bottom:0.5px solid var(--separator2);}
 .app-mark{height:28px;display:flex;align-items:center;font-family:var(--logo-font);font-size:23px;font-weight:800;letter-spacing:-1.4px;color:var(--text);}
 .app-mark .mark-accent{color:var(--brand-green);}
 .header-right{display:flex;align-items:center;gap:8px;margin-left:auto;}
@@ -647,103 +647,275 @@ body{display:flex;flex-direction:column;width:100%;max-width:430px;margin:0 auto
 @media(hover:hover){.scard:hover,.cat-row:hover{transform:translateY(-2px);} .filter-chip:hover{background:var(--bg3);}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;}}
 
-/* LIQUID GLASS BOTTOM NAV — iOS 26 */
-.bottom-nav{
-  position:fixed;
-  bottom:calc(12px + var(--safe-bottom));
-  left:50%;transform:translateX(-50%);
-  width:calc(100% - 24px);
-  max-width:406px;
-  background:var(--nav-glass);
-  -webkit-backdrop-filter:blur(18px) saturate(200%) brightness(1.06);
-  backdrop-filter:blur(18px) saturate(200%) brightness(1.06);
-  border-radius:999px;
-  border:none;
+/* ==========================================================================
+   LIQUID GLASS BOTTOM NAV — iOS 27 REVOLUTION
+   Optical refraction, multi-layered suspension, wet-glass conic bevel
+   and liquid crystal lens active capsule with organic spring inertia.
+   ========================================================================== */
+.bottom-nav {
+  position: fixed;
+  bottom: calc(12px + var(--safe-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 24px);
+  max-width: 408px;
+  background: linear-gradient(
+    135deg,
+    rgba(32, 34, 44, 0.48) 0%,
+    rgba(18, 20, 26, 0.38) 50%,
+    rgba(28, 30, 38, 0.45) 100%
+  );
+  -webkit-backdrop-filter: blur(28px) saturate(210%) brightness(1.08) contrast(102%);
+  backdrop-filter: blur(28px) saturate(210%) brightness(1.08) contrast(102%);
+  border-radius: 9999px;
+  border: none;
   box-shadow:
-    0 1px 0 rgba(255,255,255,0.4) inset,
-    0 -2px 6px rgba(255,255,255,0.08) inset,
-    0 16px 40px rgba(0,0,0,0.2),
-    0 4px 10px rgba(0,0,0,0.1);
-  display:flex;
-  z-index:60;
-  padding:5px;
-  gap:2px;
-  overflow:hidden;
-  isolation:isolate;
-  transition:transform 0.3s cubic-bezier(0.32,0.72,0,1);
+    0 1px 0.5px rgba(255, 255, 255, 0.42) inset,
+    0 -1.5px 3px rgba(0, 0, 0, 0.25) inset,
+    0 0 16px rgba(255, 255, 255, 0.04) inset,
+    0 4px 12px -2px rgba(0, 0, 0, 0.35),
+    0 16px 36px -6px rgba(0, 0, 0, 0.45),
+    0 30px 60px -12px rgba(0, 0, 0, 0.35);
+  display: flex;
+  z-index: 60;
+  padding: 5px;
+  gap: 2px;
+  overflow: hidden;
+  isolation: isolate;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
-/* Wet-glass refractive rim — uneven light around the whole edge (liquid glass) */
-.bottom-nav::before{
-  content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;
-  background:conic-gradient(from 120deg,
-    rgba(255,255,255,0.45),rgba(255,255,255,0.06) 25%,
-    rgba(255,255,255,0.3) 50%,rgba(255,255,255,0.03) 70%,rgba(255,255,255,0.4));
-  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor;mask-composite:exclude;
-  pointer-events:none;z-index:3;
+
+/* Wet-glass refractive rim — cáusticas y ángulo crítico de Fresnel */
+.bottom-nav::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.15px;
+  background: conic-gradient(
+    from 135deg at 50% 50%,
+    rgba(255, 255, 255, 0.65) 0deg,
+    rgba(255, 255, 255, 0.28) 42deg,
+    rgba(255, 255, 255, 0.06) 95deg,
+    rgba(255, 255, 255, 0.38) 180deg,
+    rgba(255, 255, 255, 0.04) 235deg,
+    rgba(255, 255, 255, 0.32) 305deg,
+    rgba(255, 255, 255, 0.65) 360deg
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 3;
 }
-/* Top-left light bloom — the specular catch of a glass slab */
-.bottom-nav::after{
-  content:'';position:absolute;inset:0;border-radius:inherit;
-  background:radial-gradient(120% 140% at 28% -10%,rgba(255,255,255,0.16),transparent 45%);
-  pointer-events:none;z-index:0;
+
+/* Specular Catch — reflejo especular sobre la curvatura superior */
+.bottom-nav::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse 65% 50% at 28% -8%, rgba(255, 255, 255, 0.28), transparent 60%),
+    radial-gradient(ellipse 55% 45% at 76% -6%, rgba(255, 255, 255, 0.16), transparent 55%);
+  pointer-events: none;
+  z-index: 0;
 }
-/* Sliding active pill — clear glass capsule (iOS 26 style) */
-.bnav-pill{
-  position:absolute;
-  top:5px;bottom:5px;
-  border-radius:999px;
-  background:rgba(255,255,255,0.16);
-  border:0.5px solid rgba(255,255,255,0.38);
+
+/* Cápsula activa (.bnav-pill) — lente de cristal líquido con inercia orgánica */
+.bnav-pill {
+  position: absolute;
+  top: 4.5px;
+  bottom: 4.5px;
+  border-radius: 9999px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.20) 0%,
+    rgba(255, 255, 255, 0.08) 100%
+  );
+  border: 0.5px solid rgba(255, 255, 255, 0.40);
   box-shadow:
-    0 1px 0 rgba(255,255,255,0.45) inset,
-    0 -1px 3px rgba(0,0,0,0.06) inset,
-    0 5px 14px rgba(0,0,0,0.12);
-  transition:left 0.42s cubic-bezier(0.34,1.3,0.64,1),width 0.42s cubic-bezier(0.34,1.3,0.64,1);
-  pointer-events:none;
-  z-index:0;
-  -webkit-backdrop-filter:blur(10px) saturate(180%);
-  backdrop-filter:blur(10px) saturate(180%);
+    0 1.5px 0 rgba(255, 255, 255, 0.52) inset,
+    0 -1px 2px rgba(0, 0, 0, 0.16) inset,
+    0 4px 16px -2px rgba(0, 0, 0, 0.22),
+    0 1px 3px rgba(0, 0, 0, 0.12);
+  transition:
+    left 0.44s cubic-bezier(0.22, 1.28, 0.36, 1),
+    width 0.44s cubic-bezier(0.22, 1.28, 0.36, 1);
+  pointer-events: none;
+  z-index: 0;
+  will-change: left, width;
+  -webkit-backdrop-filter: blur(14px) saturate(200%) brightness(1.12);
+  backdrop-filter: blur(14px) saturate(200%) brightness(1.12);
 }
-@media(prefers-color-scheme:light){
-  .bnav-pill{background:rgba(255,255,255,0.78);border-color:rgba(255,255,255,0.95);box-shadow:0 1px 0 #fff inset,0 3px 10px rgba(0,0,0,0.08);}
+
+/* Modo claro nativo */
+@media (prefers-color-scheme: light) {
+  .bottom-nav {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.68) 0%,
+      rgba(244, 246, 250, 0.48) 50%,
+      rgba(255, 255, 255, 0.60) 100%
+    );
+    box-shadow:
+      0 1px 0.5px rgba(255, 255, 255, 0.95) inset,
+      0 -1px 2px rgba(0, 0, 0, 0.04) inset,
+      0 0 20px rgba(255, 255, 255, 0.40) inset,
+      0 3px 8px -1px rgba(20, 30, 50, 0.06),
+      0 12px 28px -4px rgba(20, 30, 50, 0.09),
+      0 24px 50px -10px rgba(20, 30, 50, 0.07);
+  }
+  .bottom-nav::before {
+    background: conic-gradient(
+      from 135deg at 50% 50%,
+      rgba(255, 255, 255, 0.95) 0deg,
+      rgba(255, 255, 255, 0.60) 45deg,
+      rgba(255, 255, 255, 0.15) 100deg,
+      rgba(255, 255, 255, 0.70) 180deg,
+      rgba(255, 255, 255, 0.12) 240deg,
+      rgba(255, 255, 255, 0.55) 305deg,
+      rgba(255, 255, 255, 0.95) 360deg
+    );
+  }
+  .bottom-nav::after {
+    background:
+      radial-gradient(ellipse 65% 50% at 28% -8%, rgba(255, 255, 255, 0.60), transparent 60%),
+      radial-gradient(ellipse 55% 45% at 76% -6%, rgba(255, 255, 255, 0.40), transparent 55%);
+  }
+  .bnav-pill {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.90) 0%,
+      rgba(255, 255, 255, 0.72) 100%
+    );
+    border-color: rgba(255, 255, 255, 0.98);
+    box-shadow:
+      0 1.5px 0.5px #FFFFFF inset,
+      0 -1px 2px rgba(0, 0, 0, 0.04) inset,
+      0 4px 14px rgba(0, 0, 0, 0.08),
+      0 1px 3px rgba(0, 0, 0, 0.04);
+  }
 }
-html[data-theme="light"] .bnav-pill{
-  background:rgba(255,255,255,0.78);border-color:rgba(255,255,255,0.95);box-shadow:0 1px 0 #fff inset,0 3px 10px rgba(0,0,0,0.08);
+
+/* Modo claro forzado por atributo data-theme */
+html[data-theme="light"] .bottom-nav {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.68) 0%,
+    rgba(244, 246, 250, 0.48) 50%,
+    rgba(255, 255, 255, 0.60) 100%
+  );
+  box-shadow:
+    0 1px 0.5px rgba(255, 255, 255, 0.95) inset,
+    0 -1px 2px rgba(0, 0, 0, 0.04) inset,
+    0 0 20px rgba(255, 255, 255, 0.40) inset,
+    0 3px 8px -1px rgba(20, 30, 50, 0.06),
+    0 12px 28px -4px rgba(20, 30, 50, 0.09),
+    0 24px 50px -10px rgba(20, 30, 50, 0.07);
 }
-.bnav-btn{
-  flex:1;
-  padding:5px 6px 4px;
-  background:none;border:none;cursor:pointer;
-  display:flex;flex-direction:column;align-items:center;gap:2px;
-  -webkit-tap-highlight-color:transparent;
-  position:relative;z-index:1;
-  min-width:0;
-  border-radius:0;
-  transition:transform 0.18s cubic-bezier(0.34,1.56,0.64,1);
+html[data-theme="light"] .bottom-nav::before {
+  background: conic-gradient(
+    from 135deg at 50% 50%,
+    rgba(255, 255, 255, 0.95) 0deg,
+    rgba(255, 255, 255, 0.60) 45deg,
+    rgba(255, 255, 255, 0.15) 100deg,
+    rgba(255, 255, 255, 0.70) 180deg,
+    rgba(255, 255, 255, 0.12) 240deg,
+    rgba(255, 255, 255, 0.55) 305deg,
+    rgba(255, 255, 255, 0.95) 360deg
+  );
 }
-.bnav-btn:active{transform:scale(0.84);}
-.bnav-icon-wrap{
-  width:22px;height:22px;
-  display:flex;align-items:center;justify-content:center;
-  transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+html[data-theme="light"] .bottom-nav::after {
+  background:
+    radial-gradient(ellipse 65% 50% at 28% -8%, rgba(255, 255, 255, 0.60), transparent 60%),
+    radial-gradient(ellipse 55% 45% at 76% -6%, rgba(255, 255, 255, 0.40), transparent 55%);
 }
-.bnav-btn.active .bnav-icon-wrap{transform:scale(1.1);}
-.bnav-icon-wrap svg{width:19px;height:19px;transition:color 0.2s;}
-.bnav-label{
-  font-size:10px;font-weight:600;
-  color:var(--text2);
-  color:color-mix(in srgb,var(--text) 66%,transparent);
-  transition:color 0.2s;letter-spacing:-0.1px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;
+html[data-theme="light"] .bnav-pill {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.90) 0%,
+    rgba(255, 255, 255, 0.72) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.98);
+  box-shadow:
+    0 1.5px 0.5px #FFFFFF inset,
+    0 -1px 2px rgba(0, 0, 0, 0.04) inset,
+    0 4px 14px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.04);
 }
-.bnav-btn.active .bnav-label{color:var(--accent);text-shadow:none;font-weight:700;}
-.bnav-btn svg{
-  color:var(--text2);
-  color:color-mix(in srgb,var(--text) 72%,transparent);
-  filter:drop-shadow(0 0.5px 1px rgba(0,0,0,0.12));
+
+/* Botones de navegación */
+.bnav-btn {
+  flex: 1;
+  padding: 5.5px 4px 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2.5px;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  border-radius: 9999px;
+  transition: transform 0.18s cubic-bezier(0.25, 1, 0.5, 1);
 }
-.bnav-btn.active svg{color:var(--accent);filter:drop-shadow(0 1px 2px rgba(0,0,0,0.18));}
+.bnav-btn:active {
+  transform: scale(0.88);
+}
+
+/* Contenedor de micro-iconos */
+.bnav-icon-wrap {
+  width: 23px;
+  height: 23px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.bnav-btn.active .bnav-icon-wrap {
+  transform: translateY(-0.5px) scale(1.08);
+}
+.bnav-icon-wrap svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+  transition: color 0.22s ease, filter 0.22s ease;
+}
+
+/* Tipografía de micro-etiqueta */
+.bnav-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--text) 68%, transparent);
+  transition: color 0.22s ease, font-weight 0.22s ease, transform 0.22s ease;
+  letter-spacing: -0.12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  line-height: 1.15;
+}
+.bnav-btn.active .bnav-label {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* Estado de los trazos SVG */
+.bnav-btn svg {
+  color: color-mix(in srgb, var(--text) 72%, transparent);
+  filter: drop-shadow(0 0.5px 1px rgba(0, 0, 0, 0.12));
+}
+.bnav-btn.active svg {
+  color: var(--accent);
+  filter: drop-shadow(0 1.5px 3.5px color-mix(in srgb, var(--accent) 42%, transparent));
+}
 
 /* TAB CONTENT */
 .tab-content{padding:10px 16px 150px;display:flex;flex-direction:column;gap:8px;}
@@ -1805,49 +1977,56 @@ button:not(:disabled):active{transform:scale(.97);}
    </div>
   </div>
 </div>
-<div class="bottom-nav" id="bottomNav" style="display:none"><div class="bnav-pill" id="bnavPill"></div>
-  <button class="bnav-btn active" id="bn0" onclick="switchTab(0)">
+<div class="bottom-nav" id="bottomNav" style="display:none" role="tablist" aria-label="Navegación principal"><div class="bnav-pill" id="bnavPill" aria-hidden="true"></div>
+  <button class="bnav-btn active" id="bn0" onclick="switchTab(0)" role="tab" aria-selected="true" aria-label="Inicio">
     <div class="bnav-icon-wrap">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M3 9.5L12 3L21 9.5V20C21 20.55 20.55 21 20 21H15V15H9V21H4C3.45 21 3 20.55 3 20V9.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-        <path d="M9 21V15H15V21" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9.5L12 3L21 9.5V20C21 20.55 20.55 21 20 21H15V15H9V21H4C3.45 21 3 20.55 3 20V9.5Z"/>
+        <path d="M9 21V15H15V21"/>
       </svg>
     </div>
     <span class="bnav-label">Inicio</span>
   </button>
-  <button class="bnav-btn" id="bn1" onclick="switchTab(1)">
+  <button class="bnav-btn" id="bn1" onclick="switchTab(1)" role="tab" aria-selected="false" aria-label="Categorías">
     <div class="bnav-icon-wrap">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-        <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2.5L2.5 7.5L12 12.5L21.5 7.5L12 2.5Z"/>
+        <path d="M2.5 12L12 17L21.5 12"/>
+        <path d="M2.5 16.5L12 21.5L21.5 16.5"/>
       </svg>
     </div>
-    <span class="bnav-label">Categ.</span>
+    <span class="bnav-label">Categorías</span>
   </button>
-  <button class="bnav-btn" id="bn2" onclick="switchTab(2)">
+  <button class="bnav-btn" id="bn2" onclick="switchTab(2)" role="tab" aria-selected="false" aria-label="Cuentas">
     <div class="bnav-icon-wrap">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="2" y="5" width="20" height="14" rx="3" stroke="currentColor" stroke-width="1.8"/>
-        <path d="M2 10H22" stroke="currentColor" stroke-width="1.8"/>
-        <path d="M6 15H10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-        <circle cx="17" cy="15" r="1.5" fill="currentColor"/>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="5" width="20" height="14" rx="3.2"/>
+        <line x1="2" y1="10" x2="22" y2="10"/>
+        <line x1="6" y1="15" x2="10.5" y2="15"/>
+        <circle cx="16.5" cy="15" r="1.3" fill="currentColor" stroke="none"/>
       </svg>
     </div>
     <span class="bnav-label">Cuentas</span>
   </button>
-  <button class="bnav-btn" id="bn3" onclick="switchTab(3)">
+  <button class="bnav-btn" id="bn3" onclick="switchTab(3)" role="tab" aria-selected="false" aria-label="Análisis">
     <div class="bnav-icon-wrap">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <polyline points="3,17 8,11 12,14 17,8 21,10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-        <polyline points="17,8 21,8 21,12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-        <line x1="3" y1="21" x2="21" y2="21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.3"/>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="20.5" x2="21" y2="20.5"/>
+        <rect x="4.5" y="12" width="3.6" height="8.5" rx="1.2"/>
+        <rect x="10.2" y="5" width="3.6" height="15.5" rx="1.2"/>
+        <rect x="15.9" y="8.5" width="3.6" height="12" rx="1.2"/>
       </svg>
     </div>
-    <span class="bnav-label">Anual</span>
+    <span class="bnav-label">Análisis</span>
   </button>
-  <button class="bnav-btn" id="bn4" onclick="switchTab(4)">
-    <div class="bnav-icon-wrap"><svg viewBox="0 0 24 24" fill="none"><path d="M4 18V10M10 18V6M16 18v-4M22 18H2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 8l5-4 5 4 7-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <button class="bnav-btn" id="bn4" onclick="switchTab(4)" role="tab" aria-selected="false" aria-label="Inversión">
+    <div class="bnav-icon-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="20.5" x2="21" y2="20.5"/>
+        <polyline points="3 16 8.5 10.5 13 13.5 19.5 7"/>
+        <polyline points="15 7 19.5 7 19.5 11.5"/>
+      </svg>
+    </div>
     <span class="bnav-label">Inversión</span>
   </button>
 </div>
@@ -2038,11 +2217,12 @@ button:not(:disabled):active{transform:scale(.97);}
         <span>Cuentas</span>
       </button>
       <button class="dt-nav-item" data-tab="3" onclick="switchTab(3)">
-        <svg viewBox="0 0 24 24" fill="none"><polyline points="3,17 8,11 12,14 17,8 21,10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><polyline points="17,8 21,8 21,12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span>Anual</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="20.5" x2="21" y2="20.5"/><rect x="4.5" y="12" width="3.6" height="8.5" rx="1.2"/><rect x="10.2" y="5" width="3.6" height="15.5" rx="1.2"/><rect x="15.9" y="8.5" width="3.6" height="12" rx="1.2"/></svg>
+        <span>Análisis</span>
       </button>
       <button class="dt-nav-item" data-tab="4" onclick="switchTab(4)">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M4 18V10M10 18V6M16 18v-4M22 18H2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 8l5-4 5 4 7-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Inversión</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="20.5" x2="21" y2="20.5"/><polyline points="3 16 8.5 10.5 13 13.5 19.5 7"/><polyline points="15 7 19.5 7 19.5 11.5"/></svg>
+        <span>Inversión</span>
       </button>
     </nav>
     <button class="dt-add-btn" onclick="openModal()">
@@ -2064,8 +2244,8 @@ button:not(:disabled):active{transform:scale(.97);}
 </div>
 
 <script>
-var APP_VERSION='2026.09.17.4';
-var APP_PUBLISHED_AT='10/09/2026 13:45 CEST';
+var APP_VERSION='2026.09.18.1';
+var APP_PUBLISHED_AT='18/09/2026 09:45 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
 var sb=window.supabase.createClient(SB_URL,SB_KEY);
@@ -3618,6 +3798,7 @@ document.getElementById('nextMonth').onclick=function(){if(homeAnnualMode){viewY
 function switchTab(i){
   var prev=activeTab;
   hideChartTip();
+  if(i!==prev&&navigator.vibrate){try{navigator.vibrate(10);}catch(vh){}}
   try{
     document.querySelectorAll('.flip-inner.flipped').forEach(function(el){
       el.classList.remove('flipped');
@@ -3642,7 +3823,14 @@ function switchTab(i){
       document.querySelectorAll('.dt-nav-item').forEach(function(btn){btn.classList.toggle('active',parseInt(btn.getAttribute('data-tab'))===i);});
       if(typeof dtRender==='function')dtRender();
     } else {
-      for(var j=0;j<5;j++){var bn=document.getElementById('bn'+j);if(bn)bn.classList.toggle('active',j===i);}
+      for(var j=0;j<5;j++){
+        var bn=document.getElementById('bn'+j);
+        if(bn){
+          var isActive=(j===i);
+          bn.classList.toggle('active',isActive);
+          bn.setAttribute('aria-selected',isActive?'true':'false');
+        }
+      }
       document.getElementById('mainChart').style.display=(i===0)?'block':'none';
       if(i===0)setFlipHeight('homeFlipInner');
       document.getElementById('fabBtn').classList.toggle('fab-hidden',i!==0);
@@ -3677,13 +3865,21 @@ function movePill(i){
   var nav=document.getElementById('bottomNav');
   if(!pill||!nav)return;
   var btn=document.getElementById('bn'+i);
-  if(!btn){pill.style.opacity='0';return;}
+  if(!btn||nav.style.display==='none'||btn.offsetWidth===0){pill.style.opacity='0';return;}
   pill.style.opacity='1';
   var navRect=nav.getBoundingClientRect();
   var btnRect=btn.getBoundingClientRect();
   pill.style.left=(btnRect.left-navRect.left)+'px';
   pill.style.width=btnRect.width+'px';
 }
+window.addEventListener('resize',function(){
+  if(!IS_DESKTOP&&typeof activeTab==='number')movePill(activeTab);
+},{passive:true});
+window.addEventListener('orientationchange',function(){
+  setTimeout(function(){
+    if(!IS_DESKTOP&&typeof activeTab==='number')movePill(activeTab);
+  },120);
+});
 if(document.fonts&&document.fonts.ready){
   document.fonts.ready.then(function(){
     movePill(activeTab);
@@ -7751,7 +7947,7 @@ function dtRender(){
     btn.classList.toggle('active',parseInt(btn.getAttribute('data-tab'))===activeTab);
   });
   // Page title
-  var titles=['Inicio','Categorías','Cuentas','Anual','Inversiones','Ajustes'];
+  var titles=['Inicio','Categorías','Cuentas','Análisis','Inversiones','Ajustes'];
   var pt=document.getElementById('dtPageTitle');if(pt)pt.textContent=titles[activeTab]||'';
   // User info
   if(currentUser){
