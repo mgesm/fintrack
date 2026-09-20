@@ -7391,6 +7391,12 @@ async function exportPDF(range) {
   var incs = txs.filter(function(t) { return !t.is_balance_adjustment && txIncomeImpact(t) > 0; });
   var tExp = txs.reduce(function(s, t) { return s + txExpenseImpact(t); }, 0);
   var tInc = txs.reduce(function(s, t) { return s + txIncomeImpact(t); }, 0);
+  var tExpNoCalc = txs.reduce(function(s, t) {
+    if (t.type === 'expense' && !t.is_balance_adjustment && (isTxExcludedFromCalc(t) || (t.category && isCategoryExcludedFromExpense(t.category, t.date)))) {
+      return s + Number(t.amount || 0);
+    }
+    return s;
+  }, 0);
   var bal = tInc - tExp;
   var savRate = tInc > 0 ? ((bal / tInc) * 100) : 0;
   var email = currentUser ? (currentUser.email || '') : '';
@@ -7464,6 +7470,11 @@ async function exportPDF(range) {
   } else {
     doc.setTextColor(148, 163, 184); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
     doc.text('No hay gastos registrados en este periodo.', lx, ly + 12);
+  }
+
+  if (tExpNoCalc > 0) {
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.8); doc.setTextColor(148, 163, 184);
+    doc.text('Gastos no computados en el gráfico: ' + fmt(tExpNoCalc), M + 6, y + analyticsH - 2.8);
   }
 
   y += analyticsH + 5;
@@ -7605,9 +7616,10 @@ async function exportPDF(range) {
   if (y > 185) { doc.addPage(); y = 14; }
   doc.setTextColor(15, 23, 42); doc.setFontSize(10.5); doc.setFont('helvetica', 'bold');
   doc.text('Libro Detallado de Movimientos', M, y);
-  doc.setFontSize(7.8); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 116, 139);
+  doc.setFontSize(7.6); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 116, 139);
   var netSign = bal >= 0 ? '+' : '';
-  doc.text(range.label + ' · ' + txs.length + ' movimientos registrados · Balance del periodo: ' + netSign + fmt(bal), M, y + 5.0);
+  var ledgerSub = range.label + ' · ' + txs.length + ' movimientos registrados · Balance: ' + netSign + fmt(bal) + (tExpNoCalc > 0 ? ' · Gastos no computados: ' + fmt(tExpNoCalc) : '');
+  doc.text(ledgerSub, M, y + 5.0);
   y += 11;
 
   // Agrupación cronológica por jornada
@@ -7689,6 +7701,8 @@ async function exportPDF(range) {
       var textX = M + 9.8;
       var isTra = t.type === 'transfer';
       var isAdj = !!t.is_balance_adjustment;
+      var isExp = t.type === 'expense', isInc = t.type === 'income';
+      var isNoCalc = isTxExcludedFromCalc(t) || (isExp && !isAdj && t.category && isCategoryExcludedFromExpense(t.category, t.date));
       var c = txDisplayCategory(t);
       var mainTitle = isTra ? (accNameById(t.account_id) + ' -> ' + accNameById(t.to_account_id)) : (isAdj ? 'Ajuste de saldo' : capitalize(c.name));
 
@@ -7708,7 +7722,7 @@ async function exportPDF(range) {
         curLine1X += doc.getTextWidth(subText);
       }
 
-      if (isTxExcludedFromCalc(t)) {
+      if (isNoCalc) {
         curLine1X += 2.2;
         doc.setFillColor(241, 245, 249); doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.12);
         doc.roundedRect(curLine1X, line1Y - 2.5, 14, 3.2, 0.7, 0.7, 'FD');
@@ -7740,8 +7754,6 @@ async function exportPDF(range) {
       if (line2Text) doc.text(line2Text, textX, line2Y);
 
       // Importe (columna derecha)
-      var isExp = t.type === 'expense', isInc = t.type === 'income';
-      var isNoCalc = isTxExcludedFromCalc(t);
       var sign = isExp ? '-' : (isInc ? '+' : '');
       if (isNoCalc) {
         doc.setTextColor(148, 163, 184);
@@ -7772,30 +7784,56 @@ async function exportPDF(range) {
   y += 2;
   doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.25);
   doc.line(M, y, PW - M, y); y += 4.5;
-  doc.setFontSize(7.2); doc.setFont('helvetica', 'bold');
+  doc.setFontSize(6.8); doc.setFont('helvetica', 'bold');
 
   // Total Movimientos
   doc.setTextColor(100, 116, 139);
-  doc.text('TOTAL MOVIMIENTOS: ', M + 2, y);
-  var tmW = doc.getTextWidth('TOTAL MOVIMIENTOS: ');
+  doc.text('MOVIMIENTOS: ', M + 2, y);
+  var tmW = doc.getTextWidth('MOVIMIENTOS: ');
   doc.setTextColor(15, 23, 42);
   doc.text(String(txs.length), M + 2 + tmW, y);
 
-  // Gastos (en rojo)
-  var gx = M + 56;
-  doc.setTextColor(100, 116, 139);
-  doc.text('GASTOS: ', gx, y);
-  var gw = doc.getTextWidth('GASTOS: ');
-  doc.setTextColor(220, 38, 38);
-  doc.text('-' + fmt(tExp), gx + gw, y);
+  if (tExpNoCalc > 0) {
+    // Gastos
+    var gx = M + 38;
+    doc.setTextColor(100, 116, 139);
+    doc.text('GASTOS: ', gx, y);
+    var gw = doc.getTextWidth('GASTOS: ');
+    doc.setTextColor(220, 38, 38);
+    doc.text('-' + fmt(tExp), gx + gw, y);
 
-  // Ingresos (en verde)
-  var ix = M + 104;
-  doc.setTextColor(100, 116, 139);
-  doc.text('INGRESOS: ', ix, y);
-  var iw = doc.getTextWidth('INGRESOS: ');
-  doc.setTextColor(22, 163, 74);
-  doc.text('+' + fmt(tInc), ix + iw, y);
+    // Ingresos
+    var ix = M + 76;
+    doc.setTextColor(100, 116, 139);
+    doc.text('INGRESOS: ', ix, y);
+    var iw = doc.getTextWidth('INGRESOS: ');
+    doc.setTextColor(22, 163, 74);
+    doc.text('+' + fmt(tInc), ix + iw, y);
+
+    // No computados
+    var ncx = M + 116;
+    doc.setTextColor(100, 116, 139);
+    doc.text('NO COMPUTADOS: ', ncx, y);
+    var ncw = doc.getTextWidth('NO COMPUTADOS: ');
+    doc.setTextColor(148, 163, 184);
+    doc.text('-' + fmt(tExpNoCalc), ncx + ncw, y);
+  } else {
+    // Gastos
+    var gx = M + 56;
+    doc.setTextColor(100, 116, 139);
+    doc.text('GASTOS: ', gx, y);
+    var gw = doc.getTextWidth('GASTOS: ');
+    doc.setTextColor(220, 38, 38);
+    doc.text('-' + fmt(tExp), gx + gw, y);
+
+    // Ingresos
+    var ix = M + 104;
+    doc.setTextColor(100, 116, 139);
+    doc.text('INGRESOS: ', ix, y);
+    var iw = doc.getTextWidth('INGRESOS: ');
+    doc.setTextColor(22, 163, 74);
+    doc.text('+' + fmt(tInc), ix + iw, y);
+  }
 
   // Balance Neto (azul oscuro si >= 0, rojo si < 0)
   var netValStr = (bal >= 0 ? '+' : '') + fmt(bal);
