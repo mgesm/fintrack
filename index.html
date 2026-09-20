@@ -2451,6 +2451,62 @@ function saveCategoryExpenseExclusions(map){
     }
   }catch(e){}
 }
+var _catIconsCache=null;
+function getCategoryCustomIcons(){
+  if(_catIconsCache)return _catIconsCache;
+  var map={};
+  try{
+    var rawGlobal=localStorage.getItem('ft_cat_icons');
+    if(rawGlobal){
+      var parsedG=JSON.parse(rawGlobal);
+      if(parsedG&&typeof parsedG==='object')Object.assign(map,parsedG);
+    }
+    if(currentUser&&currentUser.id){
+      var rawUser=localStorage.getItem('ft_cat_icons_'+currentUser.id);
+      if(rawUser){
+        var parsedU=JSON.parse(rawUser);
+        if(parsedU&&typeof parsedU==='object')Object.assign(map,parsedU);
+      }
+      if(currentUser.user_metadata&&currentUser.user_metadata.category_icons){
+        Object.assign(map,currentUser.user_metadata.category_icons);
+      }
+    }
+  }catch(e){}
+  _catIconsCache=map;
+  return _catIconsCache;
+}
+function saveCategoryCustomIcons(map){
+  _catIconsCache=map||{};
+  try{
+    var s=JSON.stringify(_catIconsCache);
+    localStorage.setItem('ft_cat_icons',s);
+    if(currentUser&&currentUser.id){
+      localStorage.setItem('ft_cat_icons_'+currentUser.id,s);
+    }
+  }catch(e){}
+  try{saveLocalCache();}catch(e){}
+  try{
+    if(currentUser&&sb&&sb.auth&&typeof sb.auth.updateUser==='function'){
+      sb.auth.updateUser({data:{category_icons:_catIconsCache}}).catch(function(){});
+    }
+  }catch(e){}
+}
+function applyCategoryCustomIcons(){
+  var iconMap=getCategoryCustomIcons();
+  var updated=false;
+  (categories||[]).forEach(function(c){
+    if(!c)return;
+    if(iconMap[c.id]){
+      c.icon=iconMap[c.id];
+    } else if(c.icon){
+      iconMap[c.id]=c.icon;
+      updated=true;
+    }
+  });
+  if(updated){
+    saveCategoryCustomIcons(iconMap);
+  }
+}
 function isCategoryExcludedFromExpense(catId,dateOrYm){
   if(!catId)return false;
   var ym=typeof dateOrYm==='string'?dateOrYm.slice(0,7):monthKey(viewYear,viewMonth);
@@ -2469,7 +2525,18 @@ function toggleCategoryExpenseExclusion(catId,ym){
   showSuccessToast(willExclude?'Categoría excluida de gastos en este mes':'Categoría incluida en gastos de este mes');
   refreshTab();
 }
-function catById(id){if(!id)return {name:'',color:'#8E8E93',icon:'otros',subcats:[]};return categories.find(function(c){return c.id===id;})||{name:'(cat. eliminada)',color:'#8E8E93',icon:'otros',subcats:[],ghost:true};}
+function catById(id){
+  if(!id)return {name:'',color:'#8E8E93',icon:'otros',subcats:[]};
+  var c=categories.find(function(item){return item.id===id;});
+  if(c){
+    if(!c.icon){
+      var iconMap=getCategoryCustomIcons();
+      if(iconMap[c.id])c.icon=iconMap[c.id];
+    }
+    return c;
+  }
+  return {name:'(cat. eliminada)',color:'#8E8E93',icon:'otros',subcats:[],ghost:true};
+}
 function txDisplayCategory(t){
   if(t&&t.is_balance_adjustment)return {name:'Actualización de saldo',color:t.type==='expense'?'#FF3B30':'#34C759',icon:'balance',subcats:[]};
   return catById(t&&t.category);
@@ -2527,6 +2594,10 @@ var CAT_ICON_FALLBACK='<path d="M3 7C3 5.9 3.9 5 5 5H9L11 7H19C20.1 7 21 7.9 21 
 function catIconSvg(c,size){
   size=size||18;
   var iconKey=String((c&&c.icon)||'').toLowerCase().trim();
+  if(!iconKey && c && c.id){
+    var iconMap=getCategoryCustomIcons();
+    if(iconMap[c.id]) iconKey=String(iconMap[c.id]).toLowerCase().trim();
+  }
   var nameKey=String((c&&c.name)||'').toLowerCase().trim();
   var inner=(iconKey&&CAT_ICON_PATHS[iconKey])||CAT_ICON_PATHS[nameKey]||CAT_ICON_FALLBACK;
   return '<svg viewBox="0 0 24 24" width="'+size+'" height="'+size+'" fill="none" stroke="'+((c&&c.color)||'currentColor')+'" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+inner+'</svg>';
@@ -3184,7 +3255,7 @@ async function readSecureLocalCache(uid){
     return null;
   }
 }
-function currentCachePayload(){return {transactions:transactions,categories:categories,accounts:accounts,patrimony:patrimony,budgets:budgets,recurrenceExclusions:recurrenceExclusions,transactionVoids:transactionVoids,investmentOperations:investmentOperations,categoryExclusions:getCategoryExpenseExclusions()};}
+function currentCachePayload(){return {transactions:transactions,categories:categories,accounts:accounts,patrimony:patrimony,budgets:budgets,recurrenceExclusions:recurrenceExclusions,transactionVoids:transactionVoids,investmentOperations:investmentOperations,categoryExclusions:getCategoryExpenseExclusions(),categoryIcons:getCategoryCustomIcons()};}
 async function loadData(force){
   if(!currentUser)return false;
   if(loadDataInFlight)return false;
@@ -3209,6 +3280,10 @@ async function loadData(force){
       var localEx=getCategoryExpenseExclusions();
       var merged=Object.assign({},cd.categoryExclusions||{},localEx||{});
       saveCategoryExpenseExclusions(merged);
+      var localIcons=getCategoryCustomIcons();
+      var mergedIcons=Object.assign({},cd.categoryIcons||{},localIcons||{});
+      saveCategoryCustomIcons(mergedIcons);
+      applyCategoryCustomIcons();
     }
   }catch(e){}
   try{
@@ -3242,13 +3317,14 @@ async function loadData(force){
     var failedRead=res.find(function(x){return x&&x.error;});
     if(failedRead)throw failedRead.error;
     categories=res[0].data||[];transactions=res[1].data||[];accounts=res[2].data||[];
+    applyCategoryCustomIcons();
     transactions.forEach(function(t){if(t.exclude_from_calc===undefined)t.exclude_from_calc=!!(Array.isArray(t.tags)&&t.tags.includes('_no_calc'));});
     patrimony=res[3].data||[];budgets=res[4].data||[];recurrenceExclusions=res[5].data||[];transactionVoids=res[6].data||[];investmentOperations=res[7].data||[];
     // Repara movimientos de actualización que falten en ajustes antiguos o
     // que quedaron a medias por una caída de red.
     try{var repaired=await withLoadTimeout(sb.rpc('repair_fintrack_balance_adjustments'),5000,'reparación de ajustes');if(!repaired.error&&repaired.data&&repaired.data.length){transactions=transactions.concat(repaired.data);transactions.forEach(function(t){if(t.exclude_from_calc===undefined)t.exclude_from_calc=!!(Array.isArray(t.tags)&&t.tags.includes('_no_calc'));});}}catch(repairError){}
     
-    if(categories.length===0){var cd2=DEFAULT_CATS.map(function(c){return Object.assign({},c,{user_id:uid});});var ins=await withLoadTimeout(sb.from('categories').insert(cd2).select(),LOAD_REMOTE_TIMEOUT_MS,'La creación de categorías iniciales ha tardado demasiado');if(ins.error)throw ins.error;categories=ins.data||cd2;}
+    if(categories.length===0){var cd2=DEFAULT_CATS.map(function(c){return Object.assign({},c,{user_id:uid});});var ins=await withLoadTimeout(sb.from('categories').insert(cd2).select(),LOAD_REMOTE_TIMEOUT_MS,'La creación de categorías iniciales ha tardado demasiado');if(ins.error)throw ins.error;categories=ins.data||cd2;applyCategoryCustomIcons();}
     if(!isActiveLoad(uid,generation))return false;
     await withLoadTimeout(ensureRevolutAnchor(uid),LOAD_REMOTE_TIMEOUT_MS,'La configuración inicial ha tardado demasiado');
     // Vaciar la cola offline ANTES de generar recurrencias: si se canceló una
@@ -6541,7 +6617,34 @@ async function restoreCat(cat,catBudgets,affectedTx){
 async function addSubcat(catId){var pfx=IS_DESKTOP?'dt':'';var inp=document.getElementById('subinput_'+pfx+catId);var name=inp.value.trim().toLowerCase();if(!name)return;var cat=categories.find(function(c){return c.id===catId;});if(!cat||name.length>60||(cat.subcats||[]).some(function(s){return String(s).toLowerCase()===name.toLowerCase();}))return;cat.subcats=Array.isArray(cat.subcats)?cat.subcats:[];cat.subcats.push(name);setSync('syncing');if(isOffline){if(queueOp({type:'update',table:'categories',id:catId,data:{subcats:cat.subcats}})){saveLocalCache();inp.value='';setSync('err');refreshTab();}return;}var r=await sb.from('categories').update({subcats:cat.subcats}).eq('id',catId);if(!r.error){saveLocalCache();setSync('ok');inp.value='';refreshTab();}else{setSync('err');var ix=cat.subcats.indexOf(name);if(ix>=0)cat.subcats.splice(ix,1);}}
 async function deleteSubcat(catId,sub){var cat=categories.find(function(c){return c.id===catId;});if(!cat)return;if(!confirm('¿Quitar esta subcategoría de las nuevas transacciones? Los movimientos históricos conservarán su referencia.'))return;var previous=(cat.subcats||[]).slice();cat.subcats=previous.filter(function(s){return s!==sub;});setSync('syncing');if(isOffline){if(queueOp({type:'update',table:'categories',id:catId,data:{subcats:cat.subcats}})){saveLocalCache();setSync('err');refreshTab();}else{cat.subcats=previous;}return;}var r=await sb.from('categories').update({subcats:cat.subcats}).eq('id',catId);if(!r.error){saveLocalCache();setSync('ok');refreshTab();}else{setSync('err');cat.subcats=previous;}}
 async function saveCatColor(catId,color){var cat=categories.find(function(c){return c.id===catId;});if(!cat)return;var prev=cat.color;cat.color=color;setSync('syncing');if(isOffline){if(queueOp({type:'update',table:'categories',id:catId,data:{color:color}})){saveLocalCache();setSync('err');refreshTab();}else cat.color=prev;return;}var r=await sb.from('categories').update({color:color}).eq('id',catId);if(!r.error){saveLocalCache();setSync('ok');refreshTab();}else{setSync('err');cat.color=prev;}}
-async function saveCatIcon(catId,iconKey){var cat=categories.find(function(c){return c.id===catId;});if(!cat)return;var prev=cat.icon;cat.icon=iconKey;setSync('syncing');if(isOffline){if(queueOp({type:'update',table:'categories',id:catId,data:{icon:iconKey}})){saveLocalCache();setSync('err');refreshTab();}else cat.icon=prev;return;}var r=await sb.from('categories').update({icon:iconKey}).eq('id',catId);if(!r.error){saveLocalCache();setSync('ok');refreshTab();showSuccessToast('Icono de categoría actualizado');}else{saveLocalCache();setSync('ok');refreshTab();showSuccessToast('Icono de categoría actualizado');}}
+async function saveCatIcon(catId,iconKey){
+  var cat=categories.find(function(c){return c.id===catId;});
+  if(!cat)return;
+  var prev=cat.icon;
+  cat.icon=iconKey;
+  var iconMap=getCategoryCustomIcons();
+  iconMap[catId]=iconKey;
+  saveCategoryCustomIcons(iconMap);
+  setSync('syncing');
+  if(isOffline){
+    if(queueOp({type:'update',table:'categories',id:catId,data:{icon:iconKey}})){
+      saveLocalCache();setSync('err');refreshTab();showSuccessToast('Icono de categoría actualizado');
+    }else{cat.icon=prev;}
+    return;
+  }
+  try{
+    var r=await sb.from('categories').update({icon:iconKey}).eq('id',catId);
+    if(r&&r.error){
+      console.warn('Supabase categories update icon info:',r.error.message||r.error);
+    }
+  }catch(err){
+    console.warn('Error al actualizar icono en Supabase:',err);
+  }
+  saveLocalCache();
+  setSync('ok');
+  refreshTab();
+  showSuccessToast('Icono de categoría actualizado');
+}
 async function saveAccountColor(accountId,color){var acc=accounts.find(function(a){return a.id===accountId;});if(!acc)return;var prev=acc.color;acc.color=color;clearBalanceCache();setSync('syncing');if(isOffline){if(queueOp({type:'update',table:'accounts',id:accountId,data:{color:color}})){saveLocalCache();setSync('err');refreshTab();}else acc.color=prev;return;}var r=await sb.from('accounts').update({color:color}).eq('id',accountId);if(!r.error){saveLocalCache();setSync('ok');refreshTab();showSuccessToast('Color de cuenta actualizado');}else{setSync('err');acc.color=prev;}}
 async function renameCat(id,newName){
   var cat=categories.find(function(c){return c.id===id;});if(!cat)return;
@@ -6574,7 +6677,7 @@ function promptRenameCat(id){
 }
 
 // EXPORT
-function exportJSON(){var json=JSON.stringify({version:4,transactions:transactions,categories:categories,accounts:accounts,patrimony:patrimony,budgets:budgets,recurrenceExclusions:recurrenceExclusions,transactionVoids:transactionVoids,investmentOperations:investmentOperations,categoryExclusions:getCategoryExpenseExclusions()},null,2);var blob=new Blob([json],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fintrack_backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();}
+function exportJSON(){var json=JSON.stringify({version:4,transactions:transactions,categories:categories,accounts:accounts,patrimony:patrimony,budgets:budgets,recurrenceExclusions:recurrenceExclusions,transactionVoids:transactionVoids,investmentOperations:investmentOperations,categoryExclusions:getCategoryExpenseExclusions(),categoryIcons:getCategoryCustomIcons()},null,2);var blob=new Blob([json],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fintrack_backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();}
 // ── export period selection ───────────────────────────────────────
 function todayStr(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
 function currentMonthRange(){var from=viewYear+'-'+pad(viewMonth+1)+'-01';var to=lastDayOfMonthStr(viewYear,viewMonth+1);return {from:from,to:to,label:capitalize(MONTHS[viewMonth])+' '+viewYear};}
@@ -7886,7 +7989,8 @@ function normalizeImportedBackup(data){
       recurrenceExclusions:source.recurrenceExclusions||source.recurrence_exclusions||[],
       transactionVoids:source.transactionVoids||source.transaction_voids||[],
       investmentOperations:source.investmentOperations||source.investment_operations||[],
-      categoryExclusions:source.categoryExclusions||source.category_exclusions||data.categoryExclusions||{}
+      categoryExclusions:source.categoryExclusions||source.category_exclusions||data.categoryExclusions||{},
+      categoryIcons:source.categoryIcons||source.category_icons||data.categoryIcons||{}
     };
   }
   return data;
@@ -7908,6 +8012,9 @@ async function importJSON(rawInput,statusEl){
     if(atomicImport.error)throw new Error('importación: '+atomicImport.error.message);
     if(d.categoryExclusions){
       saveCategoryExpenseExclusions(d.categoryExclusions);
+    }
+    if(d.categoryIcons){
+      saveCategoryCustomIcons(d.categoryIcons);
     }
     s.textContent=d.transactions.length+' transacciones importadas';s.className='status-msg status-ok';
     await loadData();
