@@ -6655,11 +6655,104 @@ async function runExport(fmt){
     }
     if(fmt==='xlsx'&&typeof ExcelJS==='undefined')await loadScript('./vendor/exceljs.min.js');
   }catch(e){alert('No se pudo cargar la librería necesaria. Comprueba tu conexión e inténtalo de nuevo.');return;}
-  if(fmt==='pdf')exportPDF(range);else if(fmt==='xlsx')exportXLSX(range);else if(fmt==='csv')exportCSV(range);
+  if(fmt==='pdf')await exportPDF(range);else if(fmt==='xlsx')exportXLSX(range);else if(fmt==='csv')exportCSV(range);
   closeExportModal();
 }
 // ── shared helpers for chart images & brand header in PDF/Excel exports ───
 function hexToRgb(h){h=(h||'#888').replace('#','');if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];return [parseInt(h.substr(0,2),16)||0,parseInt(h.substr(2,2),16)||0,parseInt(h.substr(4,2),16)||0];}
+
+// ── Iconos de categoría de alta definición para PDF ──────────────────────────
+var _catIconPdfCache = {};
+function getTxIconSvgData(t) {
+  if (t.type === 'transfer') {
+    var transferInner = '<polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>';
+    return { inner: transferInner, color: '#2563EB', key: 'transfer|#2563EB' };
+  }
+  var c = txDisplayCategory(t);
+  var iconKey = String((c && c.icon) || '').toLowerCase().trim();
+  var nameKey = String((c && c.name) || '').toLowerCase().trim();
+  var inner = (iconKey && CAT_ICON_PATHS[iconKey]) || CAT_ICON_PATHS[nameKey] || CAT_ICON_FALLBACK;
+  var col = (c && c.color) || '#8E8E93';
+  return { inner: inner, color: col, key: (iconKey || nameKey || 'otros') + '|' + col };
+}
+
+function renderCategoryIconToDataURL(innerSvg, colorHex) {
+  var key = innerSvg + '|' + colorHex;
+  if (_catIconPdfCache[key]) return Promise.resolve(_catIconPdfCache[key]);
+  return new Promise(function(resolve) {
+    try {
+      var col = colorHex || '#8E8E93';
+      var svgStr = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="' + col + '" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" color="' + col + '">' + innerSvg + '</svg>';
+      var img = new Image();
+      var svgBlob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+      var url = URL.createObjectURL(svgBlob);
+      var timeout = setTimeout(function() {
+        URL.revokeObjectURL(url);
+        resolve(null);
+      }, 1200);
+      img.onload = function() {
+        clearTimeout(timeout);
+        try {
+          var px = 72; // Hi-DPI Retina 72x72 px
+          var cv = document.createElement('canvas');
+          cv.width = px; cv.height = px;
+          var ctx = cv.getContext('2d');
+          var rgb = hexToRgb(col);
+          
+          // Fondo squircle con tinte sutil (14% opacidad)
+          ctx.fillStyle = 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ', 0.14)';
+          var r = 22;
+          if (ctx.roundRect) {
+            ctx.beginPath();
+            ctx.roundRect(0, 0, px, px, r);
+            ctx.fill();
+          } else {
+            ctx.fillRect(0, 0, px, px);
+          }
+          
+          // Dibujar icono centrado (38x38 dentro de 72x72)
+          var iconPx = 38;
+          var offset = (px - iconPx) / 2;
+          ctx.drawImage(img, offset, offset, iconPx, iconPx);
+          
+          var dataUrl = cv.toDataURL('image/png');
+          _catIconPdfCache[key] = dataUrl;
+          URL.revokeObjectURL(url);
+          resolve(dataUrl);
+        } catch (e) {
+          URL.revokeObjectURL(url);
+          resolve(null);
+        }
+      };
+      img.onerror = function() {
+        clearTimeout(timeout);
+        URL.revokeObjectURL(url);
+        resolve(null);
+      };
+      img.src = url;
+    } catch (ex) {
+      resolve(null);
+    }
+  });
+}
+
+async function prepareTxIconMap(txs) {
+  var iconMap = {};
+  var promises = [];
+  (txs || []).forEach(function(t) {
+    var iconData = getTxIconSvgData(t);
+    if (!iconMap[iconData.key]) {
+      iconMap[iconData.key] = true;
+      promises.push(
+        renderCategoryIconToDataURL(iconData.inner, iconData.color).then(function(dataUrl) {
+          if (dataUrl) iconMap[iconData.key] = dataUrl;
+        })
+      );
+    }
+  });
+  await Promise.all(promises);
+  return iconMap;
+}
 
 // ── MEMBRETE EDITORIAL PREMIUM "WHITE EDITION" (Outfit 800 + Inter) ────────
 function exportBrandHeaderDataURL(w, h, rangeLabel, userEmail, dateStr) {
@@ -7182,7 +7275,7 @@ async function exportAnnualPDF(year) {
   doc.save('fintrack_anual_' + year + '.pdf');
   showSuccessToast('PDF Anual descargado con éxito');
 }
-function exportPDF(range) {
+async function exportPDF(range) {
   if (typeof window.jspdf === 'undefined') { alert('Librería PDF no cargada, inténtalo en unos segundos.'); return; }
   range = range || currentMonthRange();
   var rb = rangeBounds(range);
@@ -7190,6 +7283,7 @@ function exportPDF(range) {
   var doc = new window.jspdf.jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   var PW = 210, PH = 297, M = 14, UW = PW - 2 * M; // 182mm usable width
   var txs = getExportTx(range).sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+  var iconMap = await prepareTxIconMap(txs);
   var exps = txs.filter(function(t) { return !t.is_balance_adjustment && txExpenseImpact(t) > 0; });
   var incs = txs.filter(function(t) { return !t.is_balance_adjustment && txIncomeImpact(t) > 0; });
   var tExp = txs.reduce(function(s, t) { return s + txExpenseImpact(t); }, 0);
@@ -7404,122 +7498,170 @@ function exportPDF(range) {
     y += 4;
   }
 
-  // 7. DETAILED TRANSACTIONS LEDGER (Espaciado amplio sin solapes, chips uniformes centrados, fecha con día)
-  if (y > 190) { doc.addPage(); y = 14; }
+  // 7. DETAILED TRANSACTIONS LEDGER (Agrupado por días y con iconos de categoría)
+  if (y > 185) { doc.addPage(); y = 14; }
   doc.setTextColor(15, 23, 42); doc.setFontSize(10.5); doc.setFont('helvetica', 'bold');
   doc.text('Libro Detallado de Movimientos', M, y);
   doc.setFontSize(7.8); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 116, 139);
   var netSign = bal >= 0 ? '+' : '';
   doc.text(range.label + ' · ' + txs.length + ' movimientos registrados · Balance del periodo: ' + netSign + fmt(bal), M, y + 5.0);
-  y += 13;
+  y += 11;
 
-  function drawTxHeader(topY) {
-    var headerH = 7;
-    doc.setFillColor(248, 250, 252); doc.rect(M, topY - 4.8, UW, headerH, 'F');
-    doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.25);
-    doc.line(M, topY - 4.8, PW - M, topY - 4.8);
-    doc.line(M, topY + 2.2, PW - M, topY + 2.2);
+  // Agrupación cronológica por jornada
+  var groups = {};
+  txs.forEach(function(t) {
+    var dKey = t.date;
+    if (!groups[dKey]) groups[dKey] = [];
+    groups[dKey].push(t);
+  });
+  var dateKeys = Object.keys(groups).sort().reverse();
+  var daysOfWeek = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  var dayHeaderH = 6.2;
+  var rowH = 8.6;
+  var dayGap = 3.2;
 
-    doc.setTextColor(71, 85, 105); doc.setFontSize(6.8); doc.setFont('helvetica', 'bold');
-    doc.text('FECHA', M + 2, topY);
-    doc.text('CONCEPTO / DESCRIPCIÓN', M + 26, topY);
-    doc.text('CATEGORÍA', M + 88 + 14, topY, { align: 'center' });
-    doc.text('CUENTA', M + 120, topY);
-    doc.text('IMPORTE', PW - M - 2, topY, { align: 'right' });
-  }
-
-  drawTxHeader(y); y += 6.8;
-  var rowH = 7.2;
-  var dayGap = 2.2;
-  var dayTxIdx = 0;
-  var daysOfWeek = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-
-  txs.forEach(function(t, i) {
-    var isDayChange = (i > 0 && txs[i - 1].date !== t.date);
-    var nextRowSpace = rowH + (isDayChange ? dayGap : 0);
-    var isNewPage = false;
-
-    if (y + nextRowSpace > 274) {
-      doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.15);
-      doc.line(M, y - 4.2, PW - M, y - 4.2);
-      doc.addPage(); y = 14; drawTxHeader(y); y += 6.8;
-      isNewPage = true;
-      isDayChange = false;
-    }
-
-    // Separador simétrico entre jornadas o micro-guía intra-día
-    if (isDayChange) {
-      // Línea divisoria en el centro exacto del gap (1.1mm a cada celda, 2.6mm a cada chip)
-      var sepLineY = (y - 4.2) + (dayGap / 2);
-      doc.setDrawColor(203, 213, 225); doc.setLineWidth(0.18);
-      doc.line(M, sepLineY, PW - M, sepLineY);
-      y += dayGap;
-      dayTxIdx = 0;
-    } else {
-      if (i > 0 && !isNewPage) {
-        doc.setDrawColor(241, 245, 249); doc.setLineWidth(0.10);
-        doc.line(M, y - 4.2, PW - M, y - 4.2);
-      }
-      dayTxIdx++;
-    }
-
-    // Fondo alterno por jornada: la 1ª fila de cada día es siempre limpia
-    if (dayTxIdx % 2 === 1) {
-      doc.setFillColor(251, 252, 253);
-      doc.rect(M, y - 4.2, UW, rowH, 'F');
-    }
-
-    // Fecha con día de la semana
-    var dObj = new Date(t.date + 'T12:00:00');
+  dateKeys.forEach(function(dateStr) {
+    var dayTxs = groups[dateStr];
+    var dObj = new Date(dateStr + 'T12:00:00');
     var dayName = !isNaN(dObj.getDay()) ? daysOfWeek[dObj.getDay()] : '';
-    var dateFormatted = (dayName ? dayName + ' ' : '') + t.date.slice(8, 10) + '/' + t.date.slice(5, 7) + '/' + t.date.slice(0, 4);
-    doc.setTextColor(100, 116, 139); doc.setFontSize(7.0); doc.setFont('helvetica', 'normal');
-    doc.text(dateFormatted, M + 2, y);
+    var dayNum = parseInt(dateStr.slice(8, 10), 10);
+    var mIdx = parseInt(dateStr.slice(5, 7), 10) - 1;
+    var monthName = (mIdx >= 0 && mIdx < 12) ? MONTHS[mIdx] : '';
+    var yearNum = dateStr.slice(0, 4);
+    var dayTitle = (dayName ? capitalize(dayName) + ', ' : '') + dayNum + ' de ' + monthName + (yearNum !== String(year) ? ' de ' + yearNum : '');
 
-    // Concepto
-    var desc = t.type === 'transfer' ? (accNameById(t.account_id) + ' → ' + accNameById(t.to_account_id)) : (t.is_balance_adjustment ? ('Ajuste de saldo' + (t.note ? ' · ' + t.note : '')) : (t.note || t.subcategory || 'Movimiento ordinario'));
-    doc.setTextColor(15, 23, 42); doc.setFontSize(7.5); doc.setFont('helvetica', 'bold');
-    var cleanDesc = desc.replace(/→/g, '->'); if(cleanDesc.length > 36) cleanDesc = cleanDesc.slice(0, 33) + '...'; doc.text(cleanDesc, M + 26, y);
-
-    // Categoría: chip centrado milimétricamente en la fila (margen 1.5mm superior e inferior)
-    var c = catById(t.category);
-    var catLabel = t.type === 'transfer' ? 'Transferencia' : (t.is_balance_adjustment ? 'Ajuste' : capitalize(c.name));
-    var rgb = hexToRgb(t.type === 'transfer' ? '#2563EB' : (t.is_balance_adjustment ? '#64748B' : c.color));
-
-    var pillW = 28, pillH = 4.2, pillX = M + 88, pillY = y - 2.7;
-    doc.setFillColor(Math.round(rgb[0] * 0.12 + 255 * 0.88), Math.round(rgb[1] * 0.12 + 255 * 0.88), Math.round(rgb[2] * 0.12 + 255 * 0.88));
-    doc.roundedRect(pillX, pillY, pillW, pillH, 1, 1, 'F');
-    doc.setTextColor(rgb[0], rgb[1], rgb[2]); doc.setFontSize(6.4); doc.setFont('helvetica', 'bold');
-    doc.text(catLabel.slice(0, 16), pillX + pillW / 2, y - 0.05, { align: 'center' });
-
-    // Cuenta
-    var accName = accNameById(t.account_id) || '—';
-    doc.setTextColor(100, 116, 139); doc.setFontSize(7.0); doc.setFont('helvetica', 'normal');
-    doc.text(accName.slice(0, 15), M + 120, y);
-
-    // Importe tabular
-    var isExp = t.type === 'expense', isInc = t.type === 'income';
-    var isNoCalc = isTxExcludedFromCalc(t);
-    var sign = isExp ? '-' : (isInc ? '+' : '');
-    if (isNoCalc) {
-      doc.setTextColor(148, 163, 184);
-    } else if (isExp) {
-      doc.setTextColor(220, 38, 38);
-    } else if (isInc) {
-      doc.setTextColor(21, 128, 61);
-    } else {
-      doc.setTextColor(37, 99, 235);
-    }
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(8.0);
-    doc.text(sign + fmt(t.amount), PW - M - 2, y, { align: 'right' });
-
-    // Borde inferior de la última fila
-    if (i === txs.length - 1) {
-      doc.setDrawColor(241, 245, 249); doc.setLineWidth(0.12);
-      doc.line(M, y + 3.0, PW - M, y + 3.0);
+    // Salto de página preventivo si no cabe la cabecera del día y al menos un movimiento
+    if (y + dayHeaderH + rowH > 274) {
+      doc.addPage();
+      y = 14;
     }
 
-    y += rowH;
+    // Cabecera de día
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(M, y - 4.0, UW, dayHeaderH, 1.2, 1.2, 'F');
+    doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.18);
+    doc.line(M, y - 4.0, PW - M, y - 4.0);
+    doc.line(M, y - 4.0 + dayHeaderH, PW - M, y - 4.0 + dayHeaderH);
+
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.6); doc.setTextColor(30, 41, 59);
+    doc.text(dayTitle, M + 3.2, y + 0.3);
+
+    var countLabel = dayTxs.length + (dayTxs.length === 1 ? ' movimiento' : ' movimientos');
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.8); doc.setTextColor(100, 116, 139);
+    doc.text(countLabel, PW - M - 3.2, y + 0.3, { align: 'right' });
+    y += dayHeaderH + 1.2;
+
+    dayTxs.forEach(function(t, txIdx) {
+      if (y + rowH > 274) {
+        doc.addPage();
+        y = 14;
+        doc.setFillColor(248, 250, 252);
+        doc.roundedRect(M, y - 4.0, UW, dayHeaderH, 1.2, 1.2, 'F');
+        doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.18);
+        doc.line(M, y - 4.0, PW - M, y - 4.0);
+        doc.line(M, y - 4.0 + dayHeaderH, PW - M, y - 4.0 + dayHeaderH);
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(7.6); doc.setTextColor(30, 41, 59);
+        doc.text(dayTitle + ' (cont.)', M + 3.2, y + 0.3);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(6.8); doc.setTextColor(100, 116, 139);
+        doc.text(countLabel, PW - M - 3.2, y + 0.3, { align: 'right' });
+        y += dayHeaderH + 1.2;
+      }
+
+      var rowTop = y - 3.8;
+      var iconSize = 5.6;
+      var iconX = M + 2.0;
+      var iconY = rowTop + (rowH - iconSize) / 2;
+      var iconData = getTxIconSvgData(t);
+      var iconUrl = iconMap && iconMap[iconData.key];
+      var rgb = hexToRgb(iconData.color);
+
+      // Icono de categoría
+      if (iconUrl) {
+        doc.addImage(iconUrl, 'PNG', iconX, iconY, iconSize, iconSize);
+      } else {
+        doc.setFillColor(Math.round(rgb[0] * 0.14 + 255 * 0.86), Math.round(rgb[1] * 0.14 + 255 * 0.86), Math.round(rgb[2] * 0.14 + 255 * 0.86));
+        doc.roundedRect(iconX, iconY, iconSize, iconSize, 1.4, 1.4, 'F');
+      }
+
+      var textX = M + 9.8;
+      var isTra = t.type === 'transfer';
+      var isAdj = !!t.is_balance_adjustment;
+      var c = txDisplayCategory(t);
+      var mainTitle = isTra ? (accNameById(t.account_id) + ' -> ' + accNameById(t.to_account_id)) : (isAdj ? 'Ajuste de saldo' : capitalize(c.name));
+
+      // Línea 1: Categoría / concepto + subcategoría + insignias
+      var line1Y = rowTop + 3.2;
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(7.6); doc.setTextColor(15, 23, 42);
+      var cleanTitle = mainTitle.replace(/→/g, '->');
+      doc.text(cleanTitle, textX, line1Y);
+
+      var titleW = doc.getTextWidth(cleanTitle);
+      var curLine1X = textX + titleW;
+
+      if (!isTra && !isAdj && t.subcategory) {
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(7.0); doc.setTextColor(100, 116, 139);
+        var subText = ' · ' + capitalize(t.subcategory);
+        doc.text(subText, curLine1X, line1Y);
+        curLine1X += doc.getTextWidth(subText);
+      }
+
+      if (isTxExcludedFromCalc(t)) {
+        curLine1X += 2.2;
+        doc.setFillColor(241, 245, 249); doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.12);
+        doc.roundedRect(curLine1X, line1Y - 2.5, 14, 3.2, 0.7, 0.7, 'FD');
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(5.6); doc.setTextColor(100, 116, 139);
+        doc.text('No computa', curLine1X + 7, line1Y - 0.3, { align: 'center' });
+        curLine1X += 15;
+      }
+
+      if (t.recurring) {
+        curLine1X += 2.2;
+        doc.setFillColor(240, 253, 244); doc.setDrawColor(187, 247, 208); doc.setLineWidth(0.12);
+        doc.roundedRect(curLine1X, line1Y - 2.5, 14, 3.2, 0.7, 0.7, 'FD');
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(5.6); doc.setTextColor(22, 163, 74);
+        doc.text('Recurrente', curLine1X + 7, line1Y - 0.3, { align: 'center' });
+      }
+
+      // Línea 2: Nota / detalle y Cuenta bancaria
+      var line2Y = rowTop + 6.6;
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(6.8); doc.setTextColor(100, 116, 139);
+      var line2Parts = [];
+      if (t.note) line2Parts.push(t.note.replace(/→/g, '->'));
+      if (!isTra) {
+        var accName = accNameById(t.account_id);
+        if (accName && accName !== '?') line2Parts.push('Cuenta ' + accName);
+      }
+      var line2Text = line2Parts.join(' · ');
+      if (!line2Text && isTra && t.note) line2Text = t.note.replace(/→/g, '->');
+      if (line2Text.length > 58) line2Text = line2Text.slice(0, 55) + '...';
+      if (line2Text) doc.text(line2Text, textX, line2Y);
+
+      // Importe (columna derecha)
+      var isExp = t.type === 'expense', isInc = t.type === 'income';
+      var isNoCalc = isTxExcludedFromCalc(t);
+      var sign = isExp ? '-' : (isInc ? '+' : '');
+      if (isNoCalc) {
+        doc.setTextColor(148, 163, 184);
+      } else if (isExp) {
+        doc.setTextColor(220, 38, 38);
+      } else if (isInc) {
+        doc.setTextColor(21, 128, 61);
+      } else {
+        doc.setTextColor(37, 99, 235);
+      }
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(8.2);
+      doc.text(sign + fmt(t.amount), PW - M - 2.0, rowTop + 4.9, { align: 'right' });
+
+      // Línea divisoria suave inferior entre filas del mismo día
+      if (txIdx < dayTxs.length - 1) {
+        doc.setDrawColor(241, 245, 249); doc.setLineWidth(0.12);
+        doc.line(textX, rowTop + rowH, PW - M, rowTop + rowH);
+      }
+
+      y += rowH;
+    });
+
+    y += dayGap;
   });
 
   // Totales de cierre
