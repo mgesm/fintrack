@@ -9,17 +9,30 @@ const headers = {
 };
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers });
 const readTables = ["accounts","categories","transactions","patrimony","budgets","recurrence_exclusions","transaction_voids","investment_operations"];
-const deleteOrder = ["investment_operations","transaction_voids","recurrence_exclusions","budgets","patrimony","transactions","categories","accounts"];
-const insertOrder = ["accounts","categories","transactions","patrimony","budgets","recurrence_exclusions","transaction_voids","investment_operations"];
 
 function counts(data: Record<string, unknown[]>) {
   return Object.fromEntries(readTables.filter((table) => table !== "audit_log").map((table) => [table, Array.isArray(data?.[table]) ? data[table].length : 0]));
 }
+
+async function fetchAllRows(client: any, table: string, userId: string) {
+  const pageSize = 1000;
+  let from = 0;
+  let all: any[] = [];
+  while (true) {
+    const { data, error } = await client.from(table).select("*").eq("user_id", userId).order("id").range(from, from + pageSize - 1);
+    if (error) throw new Error(table + ": " + error.message);
+    if (!data || data.length === 0) break;
+    all.push(...data);
+    if (data.length < pageSize) break;
+    from += pageSize;
+  }
+  return all;
+}
+
 async function snapshot(client: any, userId: string) {
   const entries = await Promise.all(readTables.map(async (table) => {
-    const { data, error } = await client.from(table).select("*").eq("user_id", userId);
-    if (error) throw new Error(table + ": " + error.message);
-    return [table, data ?? []] as const;
+    const rows = await fetchAllRows(client, table, userId);
+    return [table, rows] as const;
   }));
   const now = new Date(), path = userId + "/fintrack-before-restore-" + now.toISOString().replace(/[:.]/g, "-") + ".json";
   const payload = { version: 2, exported_at: now.toISOString(), user_id: userId, reason: "before_restore", data: Object.fromEntries(entries) };
@@ -31,6 +44,7 @@ async function snapshot(client: any, userId: string) {
   if (oldRuns?.length) { await client.storage.from("fintrack-backups").remove(oldRuns.map((run: any) => run.path)); await client.from("backup_runs").delete().in("id", oldRuns.map((run: any) => run.id)); }
   return path;
 }
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
@@ -54,11 +68,7 @@ Deno.serve(async (req) => {
   const userClient = createClient(url, key, { global: { headers: { Authorization: "Bearer " + token } }, auth: { persistSession: false } });
   const { error: rpcError } = await userClient.rpc("replace_fintrack_data", { payload: backup.data });
   if (rpcError) {
-    for (const table of deleteOrder) { const { error: delError } = await admin.from(table).delete().eq("user_id", user.id); if (delError) return json({ error: table + ": " + delError.message, safety_backup: safetyPath }, 500); }
-    for (const table of insertOrder) {
-      const rows = backup.data?.[table] || [];
-      if (rows.length) { const { error: insertError } = await admin.from(table).insert(rows); if (insertError) return json({ error: table + ": " + insertError.message, safety_backup: safetyPath }, 500); }
-    }
+    return json({ error: "Error en la restauración atómica: " + rpcError.message, safety_backup: safetyPath }, 500);
   }
   return json({ ok: true, restored: summary, safety_backup: safetyPath });
 });

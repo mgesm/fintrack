@@ -1,6 +1,10 @@
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://mgesm.github.io",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Content-Type": "application/json; charset=utf-8",
 };
 const safe = (value: unknown, max = 64) => String(value || "").trim().slice(0, max);
@@ -16,8 +20,13 @@ const knownFunds: Record<string, { symbol: string; twelveSymbol: string; name: s
   IE00B03HCZ61: { symbol: "0P00000RQC.F", twelveSymbol: "", name: "Vanguard Global Stock Index Inv EUR Acc", lastPublishedNav: 53.12, navDate: "2026-09-04" },
 };
 
+const yahooHeaders = {
+  "Accept": "application/json, text/plain, */*",
+  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+};
+
 async function getYahooSearch(query: string) {
-  const response = await fetch("https://query1.finance.yahoo.com/v1/finance/search?q=" + encodeURIComponent(query) + "&quotesCount=12&newsCount=0");
+  const response = await fetch("https://query1.finance.yahoo.com/v1/finance/search?q=" + encodeURIComponent(query) + "&quotesCount=12&newsCount=0", { headers: yahooHeaders });
   if (!response.ok) throw new Error("No se ha podido buscar el fondo");
   return await response.json();
 }
@@ -33,10 +42,7 @@ async function yahooSymbolFor(input: string) {
   if (!match?.symbol) throw new Error("No se ha encontrado una cotización para este ISIN");
   return String(match.symbol);
 }
-const yahooHeaders = {
-  "Accept": "application/json, text/plain, */*",
-  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
-};
+
 async function yahooChart(symbol: string, range: string, interval: string) {
   const path = "/v8/finance/chart/" + encodeURIComponent(symbol) + "?range=" + encodeURIComponent(range) + "&interval=" + encodeURIComponent(interval) + "&includePrePost=false&events=div%2Csplits";
   const hosts = ["https://query1.finance.yahoo.com", "https://query2.finance.yahoo.com"];
@@ -56,112 +62,56 @@ async function yahooChart(symbol: string, range: string, interval: string) {
   }
   throw new Error("Yahoo Finance no ha devuelto datos para este fondo. " + failures.join(" · "));
 }
-// Respaldo para clases de fondos que Yahoo Finance no sirve desde sus endpoints
-// públicos. La ficha de Investing contiene el último NAV publicado y su cierre.
-async function investingFundQuote(input: string) {
-  if (input.toUpperCase() !== "IE00BYX5MX67") throw new Error("No hay una fuente alternativa para este fondo");
-  const response = await fetch("https://www.investing.com/funds/ie00byx5mx67", { headers: yahooHeaders });
-  const raw = await response.text();
-  if (!response.ok) throw new Error("La fuente alternativa no está disponible (" + response.status + ")");
-  const readNumber = (patterns: RegExp[]) => {
-    for (const pattern of patterns) {
-      const match = raw.match(pattern);
-      if (match?.[1]) {
-        const value = Number(match[1].replace(/,/g, ""));
-        if (Number.isFinite(value)) return value;
-      }
-    }
-    return null;
-  };
-  const price = readNumber([
-    /"last_last"\s*:\s*"?([0-9]+(?:[.,][0-9]+)?)"?/i,
-    /"last"\s*:\s*"?([0-9]+(?:[.,][0-9]+)?)"?/i,
-    /data-test="instrument-header-details"[\s\S]{0,800}?([0-9]+\.[0-9]{2,4})/i,
-  ]);
-  const previous = readNumber([
-    /"last_close"\s*:\s*"?([0-9]+(?:[.,][0-9]+)?)"?/i,
-    /Prev\. Close[\s\S]{0,160}?([0-9]+\.[0-9]{2,4})/i,
-  ]) || price;
-  if (!price) throw new Error("La fuente alternativa no ha incluido el valor liquidativo");
-  return { symbol: "IE00BYX5MX67", close: price, price, previous_close: previous, percent_change: previous ? (price - previous) / previous * 100 : 0, currency: "EUR", volume: null, source: "investing-fund" };
-}
-async function twelveFundQuote(input: string) {
-  const known = knownFunds[input.toUpperCase()];
-  const key = Deno.env.get("TWELVE_DATA_API_KEY");
-  if (!known || !key) throw new Error("No se ha configurado la fuente alternativa de fondos");
-  const url = new URL("https://api.twelvedata.com/quote");
-  url.searchParams.set("symbol", known.twelveSymbol);
-  url.searchParams.set("apikey", key);
-  const response = await fetch(url);
-  const data = await response.json();
-  // En Twelve Data, price es la última cotización; close puede ser el cierre
-  // anterior durante la sesión. Para valorar una cartera se usa el precio actual.
-  const price = Number(data?.price || data?.close);
-  const previous = Number(data?.previous_close || data?.close || price);
-  if (!response.ok || data?.status === "error" || !Number.isFinite(price)) throw new Error(data?.message || "Twelve Data no ha devuelto NAV para este fondo");
-  return { symbol: input.toUpperCase(), close: price, price, previous_close: previous, percent_change: previous ? (price - previous) / previous * 100 : 0, currency: data?.currency || "EUR", volume: null, source: "twelve-fund" };
-}
-function publishedFundNav(input: string) {
-  const known = knownFunds[input.toUpperCase()];
-  if (!known) throw new Error("No hay un NAV publicado de respaldo para este fondo");
-  return { symbol: input.toUpperCase(), close: known.lastPublishedNav, price: known.lastPublishedNav, previous_close: known.lastPublishedNav, percent_change: 0, currency: "EUR", volume: null, source: "published-fund-nav", as_of: known.navDate };
-}
-function yahooSearchItems(data: any, input: string) {
-  return (data?.quotes || []).filter((q: any) => q?.symbol).map((q: any) => ({
-    // Conservamos el ISIN: así las posteriores consultas de precio e histórico
-    // vuelven a pasar por el resolver de fondos, no por Twelve Data.
-    symbol: isIsin(input) ? input.toUpperCase() : q.symbol,
-    instrument_name: q.longname || q.shortname || q.symbol,
-    instrument_type: q.quoteType === "MUTUALFUND" ? "Fondo de inversión" : q.quoteType === "ETF" ? "ETF" : q.quoteType || "Producto de inversión",
+
+function yahooSearchItems(data: any, originalInput: string) {
+  const quotes = data?.quotes || [];
+  return quotes.slice(0, 8).map((q: any) => ({
+    symbol: originalInput.toUpperCase(),
+    instrument_name: q?.shortname || q?.longname || q?.name || originalInput.toUpperCase(),
+    instrument_type: "Fondo de inversión",
+    currency: q?.currency || "EUR",
   }));
 }
+
 async function yahooQuote(input: string) {
   const symbol = await yahooSymbolFor(input);
-  try {
-    const result = await yahooChart(symbol, "7d", "1d");
-    const closes = (result?.indicators?.quote?.[0]?.close || [])
-      .filter((v: unknown) => v !== null && v !== undefined && v !== "" && Number.isFinite(Number(v)) && Number(v) > 0)
-      .map(Number);
-    let close = closes.length ? closes[closes.length - 1] : NaN;
-    let previous = closes.length > 1 ? closes[closes.length - 2] : NaN;
-    if (!Number.isFinite(close) || close <= 0) {
-      const metaPrice = Number(result?.meta?.regularMarketPrice);
-      if (Number.isFinite(metaPrice) && metaPrice > 0) {
-        close = metaPrice;
-      }
-    }
-    if (!Number.isFinite(previous) || previous <= 0) {
-      previous = Number(result?.meta?.chartPreviousClose || result?.meta?.previousClose || close);
-    }
-    if (!Number.isFinite(close) || close <= 0) throw new Error("El fondo todavía no tiene un valor liquidativo disponible");
-    return {
-      symbol: input.toUpperCase(),
-      close,
-      price: close,
-      previous_close: previous,
-      percent_change: (previous && previous > 0) ? (close - previous) / previous * 100 : 0,
-      currency: result?.meta?.currency || "EUR",
-      volume: null,
-      source: "yahoo-fund"
-    };
-  } catch (error) {
-    if (isIsin(input)) {
-      try { return await twelveFundQuote(input); }
-      catch { try { return await investingFundQuote(input); }
-      catch { return publishedFundNav(input); } }
-    }
-    throw error;
+  const result = await yahooChart(symbol, "1mo", "1d");
+  const meta = result?.meta;
+  const closes = (result?.indicators?.quote?.[0]?.close || []).filter(
+    (v: any) => v !== null && v !== undefined && Number.isFinite(Number(v)) && Number(v) > 0
+  );
+  const price = closes.length ? Number(closes[closes.length - 1]) : Number(meta?.regularMarketPrice);
+  if (!Number.isFinite(price) || price <= 0) {
+    const known = knownFunds[input.toUpperCase()];
+    if (known) return { symbol: input.toUpperCase(), name: known.name, price: String(known.lastPublishedNav), currency: "EUR", is_backup_nav: true, nav_date: known.navDate };
+    throw new Error("No se ha podido obtener el valor liquidativo de este fondo");
   }
+  const prevClose = closes.length > 1 ? Number(closes[closes.length - 2]) : Number(meta?.chartPreviousClose || meta?.previousClose || price);
+  const change = price - prevClose;
+  const percent_change = prevClose > 0 ? (change / prevClose) * 100 : 0;
+  return {
+    symbol: input.toUpperCase(),
+    name: meta?.shortName || meta?.longName || knownFunds[input.toUpperCase()]?.name || input.toUpperCase(),
+    price: String(price),
+    close: String(price),
+    previous_close: String(prevClose),
+    change: String(change),
+    percent_change: String(percent_change),
+    currency: meta?.currency || "EUR",
+    datetime: meta?.regularMarketTime ? new Date(meta.regularMarketTime * 1000).toISOString() : new Date().toISOString(),
+  };
 }
+
 async function yahooHistory(input: string, interval: string, outputsize: number) {
   const symbol = await yahooSymbolFor(input);
-  // Los fondos publican NAV diario; no inventamos datos intradía cuando se elige 1D.
-  const isIntraday = false;
-  const range = isIntraday ? "5d" : interval === "1week" ? "5y" : outputsize <= 35 ? "3mo" : outputsize <= 190 ? "1y" : "5y";
-  const yahooInterval = isIntraday ? "5m" : interval === "1week" ? "1wk" : "1d";
+  const isIntraday = interval === "5min";
+  const range = isIntraday ? "5d" : outputsize <= 35 ? "1mo" : outputsize <= 190 ? "1y" : "5y";
+  const yahooInterval = isIntraday ? "5m" : "1d";
   const result = await yahooChart(symbol, range, yahooInterval);
-  const values = (result.timestamp || []).map((ts: number, i: number) => {
-    const close = result?.indicators?.quote?.[0]?.close?.[i];
+  const timestamps = result?.timestamp || [];
+  const closes = result?.indicators?.quote?.[0]?.close || [];
+  const values = timestamps.map((ts: number, i: number) => {
+    const close = closes[i];
     if (close === null || close === undefined || !Number.isFinite(Number(close)) || Number(close) <= 0) return null;
     const iso = new Date(ts * 1000).toISOString();
     return { datetime: isIntraday ? iso.slice(0, 16) : iso.slice(0, 10), close: String(close) };
@@ -172,6 +122,20 @@ async function yahooHistory(input: string, interval: string, outputsize: number)
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
+    // Autenticación obligatoria con JWT del usuario
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return Response.json({ error: "Cabecera Authorization requerida" }, { status: 401, headers: corsHeaders });
+    }
+    const token = authHeader.replace(/^Bearer\s+/i, "");
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !user) {
+      return Response.json({ error: "Sesión no válida o expirada" }, { status: 401, headers: corsHeaders });
+    }
+
     const body = await req.json();
     const action = safe(body?.action, 16);
     const input = safe(action === "search" ? body?.query : body?.symbol, 64);
