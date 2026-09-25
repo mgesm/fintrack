@@ -101,7 +101,7 @@ async function exportPdf(title: string, income: number, expense: number, balance
     if (i % 2 === 0) page.drawRectangle({ x: M, y: y - 6, width: W - 2 * M, height: 14, color: rgb(0.98, 0.99, 1.0) });
     text(String(t.date || "").slice(8, 10) + "/" + String(t.date || "").slice(5, 7), M + 6, 8, false, rgb(0.4, 0.45, 0.5));
     text((t.category_name || "Transferencia").slice(0, 20), M + 70, 8, true, rgb(0.2, 0.25, 0.3));
-    text((t.note || t.subcategory || "").slice(0, 36), M + 190, 8, false, rgb(0.35, 0.4, 0.45));
+    text(((t.note || t.subcategory || "") + (t.calc_badge ? " " + t.calc_badge : "")).slice(0, 36), M + 190, 8, false, rgb(0.35, 0.4, 0.45));
     page.drawText((t.type === "expense" ? "-" : t.type === "income" ? "+" : "") + money(Number(t.amount)), {
       x: W - M - 52, y, size: 8, font: bold,
       color: t.type === "expense" ? rgb(0.86, 0.15, 0.15) : t.type === "income" ? rgb(0.09, 0.64, 0.29) : rgb(0.12, 0.23, 0.54)
@@ -151,11 +151,16 @@ async function sendMonthlyReportForUser(db: any, targetUserId: string, targetEma
   ]);
   if (txError || !resendKey) throw new Error(txError?.message || "Email sender not configured");
   const voided = new Set((voids ?? []).map((x: any) => x.transaction_id));
-  const isExcluded = (x: any) => x.exclude_from_calc || (Array.isArray(x.tags) && x.tags.includes("_no_calc"));
-  const active = (tx ?? []).filter((x: any) => !voided.has(x.id) && x.type !== "transfer" && !x.is_balance_adjustment && !isExcluded(x));
-  const expensesTx = active.filter((x: any) => x.type === "expense");
-  const income = active.filter((x: any) => x.type === "income").reduce((s: number, x: any) => s + Number(x.amount), 0);
+  const isExcludedFromExpense = (x: any) => (x.exclude_from_calc === true || x.exclude_from_calc === 1 || x.exclude_from_calc === 2 || x.exclude_from_calc === "1" || x.exclude_from_calc === "2") || (Array.isArray(x.tags) && (x.tags.includes("_no_calc") || x.tags.includes("_no_expense")));
+  const isExcludedFromBalance = (x: any) => (x.exclude_from_calc === true || x.exclude_from_calc === 2 || x.exclude_from_calc === "2") || (Array.isArray(x.tags) && x.tags.includes("_no_calc"));
+  const nonVoided = (tx ?? []).filter((x: any) => !voided.has(x.id) && x.type !== "transfer" && !x.is_balance_adjustment);
+  const activeExp = nonVoided.filter((x: any) => !isExcludedFromExpense(x));
+  const activeBal = nonVoided.filter((x: any) => !isExcludedFromBalance(x));
+  const expensesTx = activeExp.filter((x: any) => x.type === "expense");
+  const income = activeExp.filter((x: any) => x.type === "income").reduce((s: number, x: any) => s + Number(x.amount), 0);
   const expense = expensesTx.reduce((s: number, x: any) => s + Number(x.amount), 0);
+  const balExpense = activeBal.filter((x: any) => x.type === "expense").reduce((s: number, x: any) => s + Number(x.amount), 0);
+  const balance = income - balExpense;
   const names = new Map((cats ?? []).map((x: any) => [x.id, x.name]));
   const budgetByCategory = new Map((budgets ?? []).filter((x: any) => x.category_id).map((x: any) => [x.category_id, Number(x.amount)]));
   const totals = new Map<string, number>();
@@ -163,9 +168,13 @@ async function sendMonthlyReportForUser(db: any, targetUserId: string, targetEma
   const categories = Array.from(new Set([...totals.keys(), ...budgetByCategory.keys()])).map(id => ({ name: names.get(id) ?? "Sin categoría", spent: totals.get(id) ?? 0, budget: budgetByCategory.get(id) ?? 0 }));
   const med = median(expensesTx.map((x: any) => Number(x.amount)));
   const unusual = expensesTx.filter((x: any) => med > 0 && Number(x.amount) >= Math.max(med * 2.5, 100)).sort((a: any, b: any) => Number(b.amount) - Number(a.amount)).slice(0, 6).map((x: any) => ({ note: x.note, amount: Number(x.amount) }));
-  const namedTransactions = active.map((x: any) => ({ ...x, category_name: names.get(x.category) ?? "Sin categoría" }));
+  const namedTransactions = nonVoided.map((x: any) => ({
+    ...x,
+    category_name: names.get(x.category) ?? "Sin categoría",
+    calc_badge: isExcludedFromBalance(x) ? "[No computa]" : isExcludedFromExpense(x) ? "[Solo balance]" : ""
+  }));
   const monthTitle = new Intl.DateTimeFormat("es-ES", { month: "long", year: "numeric" }).format(start);
-  const bytes = await exportPdf(monthTitle, income, expense, income - expense, namedTransactions, categories, unusual, accountRows ?? [], patrimonyRows ?? [], to);
+  const bytes = await exportPdf(monthTitle, income, expense, balance, namedTransactions, categories, unusual, accountRows ?? [], patrimonyRows ?? [], to);
   const path = targetUserId + "/" + (preview ? "vista-previa-" + key + "-" + Date.now() : "informe-" + key) + ".pdf";
   const { error: uploadError } = await db.storage.from("fintrack-reports").upload(path, bytes, { contentType: "application/pdf", upsert: false });
   if (uploadError) throw new Error(uploadError.message);

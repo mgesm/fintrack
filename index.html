@@ -1155,6 +1155,7 @@ html[data-theme="light"] .bnav-btn.active svg {
 .cat-bar-fill{height:5px;border-radius:999px;transition:width 0.45s cubic-bezier(0.2,0.8,0.2,1);will-change:width;}
 .cat-status-badge{font-size:11px;font-weight:600;}
 .cat-status-excluded{color:var(--red);}
+.cat-status-bal-only{color:var(--amber);}
 .budget-alert-ok{color:var(--brand-green);font-weight:500;}
 .budget-alert-warn{color:#B25E00;font-weight:600;}
 @media(prefers-color-scheme:dark){.budget-alert-warn{color:#FFB340;}}
@@ -1411,20 +1412,32 @@ select.field-input option{background:var(--bg2);}
 .tags-text-input::placeholder{color:var(--text4);}
 .recurring-toggle{display:flex;align-items:center;gap:12px;background:var(--bg3);border-radius:var(--radius-md);padding:13px 14px;cursor:pointer;}
 .tx-amount-row{display:flex;gap:10px;align-items:flex-start;width:100%;}
-.tx-amount-col{flex:1.1;min-width:0;}
-.tx-calc-col{flex:0.9;min-width:0;}
-.exclude-calc-toggle{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--card-border);border-radius:var(--radius-md);padding:0 10px;height:48px;box-sizing:border-box;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;transition:all 0.2s ease;}
-.exclude-calc-toggle:hover{background:var(--bg4);}
-.exclude-calc-toggle:active{opacity:0.8;}
-.exclude-calc-toggle.active{border-color:rgba(255,159,10,0.45);background:rgba(255,159,10,0.06);}
-.exclude-calc-text{font-size:12px;font-weight:600;color:var(--text2);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.exclude-calc-toggle.active .exclude-calc-text{color:var(--text);font-weight:700;}
-#excludeCalcSwitch.on{background:var(--amber);}
+.tx-amount-col{flex:1.05;min-width:0;}
+.tx-calc-col{flex:0.95;min-width:0;}
+.tx-calc-pill{display:flex;align-items:center;gap:7px;background:var(--bg3);border:1px solid var(--card-border);border-radius:var(--radius-md);padding:0 8px;height:48px;width:100%;box-sizing:border-box;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;transition:all 0.18s cubic-bezier(0.16,1,0.3,1);text-align:left;font-family:var(--font);}
+.tx-calc-pill:active{transform:scale(0.97);}
+.tx-calc-pill[data-mode="0"]{background:var(--bg3);border-color:var(--card-border);color:var(--text);}
+.tx-calc-pill[data-mode="0"] .tx-calc-pill-icon{background:var(--bg4);color:var(--text3);}
+.tx-calc-pill[data-mode="1"]{background:rgba(255,159,10,0.08);border-color:rgba(255,159,10,0.38);color:var(--text);}
+.tx-calc-pill[data-mode="1"] .tx-calc-pill-icon{background:rgba(255,159,10,0.18);color:var(--amber);}
+.tx-calc-pill[data-mode="1"] .tx-calc-pill-label{color:var(--amber);}
+.tx-calc-pill[data-mode="2"]{background:rgba(255,59,48,0.08);border-color:rgba(255,59,48,0.32);color:var(--text);}
+.tx-calc-pill[data-mode="2"] .tx-calc-pill-icon{background:rgba(255,59,48,0.18);color:var(--red);}
+.tx-calc-pill[data-mode="2"] .tx-calc-pill-label{color:var(--red);}
+.tx-calc-pill-icon{width:22px;height:22px;border-radius:var(--radius-xs);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.18s ease;}
+.tx-calc-pill-texts{display:flex;flex-direction:column;min-width:0;flex:1;}
+.tx-calc-pill-label{font-size:11.5px;font-weight:700;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-0.2px;}
+.tx-calc-pill-sub{font-size:9.5px;font-weight:500;color:var(--text3);line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tx-calc-pill-dots{display:flex;flex-direction:column;gap:2.5px;margin-left:auto;flex-shrink:0;padding-left:2px;}
+.tx-calc-pill-dot{width:3px;height:3px;border-radius:50%;background:var(--separator);transition:all 0.2s ease;}
+.tx-calc-pill[data-mode="0"] .dot-0{background:var(--text3);transform:scale(1.3);}
+.tx-calc-pill[data-mode="1"] .dot-1{background:var(--amber);transform:scale(1.3);}
+.tx-calc-pill[data-mode="2"] .dot-2{background:var(--red);transform:scale(1.3);}
+.cat-edit-tool-btn.cat-calc-pill{position:relative;transition:all 0.18s ease;}
+.cat-edit-tool-btn.cat-calc-pill::after{content:'';position:absolute;inset:-6px -4px;}
+.cat-edit-tool-btn.cat-calc-pill.is-bal-only{color:var(--amber);background:rgba(255,159,10,0.08);border-color:rgba(255,159,10,0.35);}
+.cat-edit-tool-btn.cat-calc-pill.is-excluded{color:var(--red);background:rgba(255,59,48,0.08);border-color:rgba(255,59,48,0.30);}
 .tx-no-calc-badge{font-size:10px;font-weight:600;color:var(--text3);background:var(--bg4);padding:1px 6px;border-radius:var(--radius-pill);margin-top:2px;display:inline-block;letter-spacing:0.02em;}
-.toggle-switch{width:36px;height:22px;background:var(--bg4);border-radius:var(--radius-pill);position:relative;transition:background 0.25s;flex-shrink:0;}
-.toggle-switch.on{background:var(--amber);}
-.toggle-knob{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:white;transition:left 0.25s;box-shadow:0 1px 4px rgba(0,0,0,0.2);}
-.toggle-switch.on .toggle-knob{left:16px;}
 .modal-btns{display:flex;gap:12px;margin-top:24px;}
 
 /* ANNUAL SEGMENTED CONTROL */
@@ -2259,9 +2272,19 @@ button:not(:disabled):active{transform:scale(.97);}
       </div>
       <div class="tx-calc-col" id="txExcludeCalcWrap">
         <div class="field-label">Cálculo</div>
-        <div class="exclude-calc-toggle" id="txExcludeCalcBtn" onclick="toggleExcludeFromCalc()" role="button" tabindex="0" title="Excluir del cálculo de ingresos/gastos">
-          <div class="toggle-switch" id="excludeCalcSwitch"><div class="toggle-knob"></div></div>
-          <span class="exclude-calc-text">No computar</span>
+        <div class="tx-calc-pill" id="txExcludeCalcBtn" onclick="cycleTxCalcMode()" role="button" tabindex="0" data-mode="0" title="Modo de cómputo en gastos y balance">
+          <div class="tx-calc-pill-icon" id="txCalcPillIcon">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="tx-calc-pill-texts">
+            <span class="tx-calc-pill-label" id="txCalcPillLabel">Computar todo</span>
+            <span class="tx-calc-pill-sub" id="txCalcPillSub">Gastos y balance</span>
+          </div>
+          <div class="tx-calc-pill-dots">
+            <span class="tx-calc-pill-dot dot-0"></span>
+            <span class="tx-calc-pill-dot dot-1"></span>
+            <span class="tx-calc-pill-dot dot-2"></span>
+          </div>
         </div>
       </div>
     </div>
@@ -2500,8 +2523,8 @@ button:not(:disabled):active{transform:scale(.97);}
 </div>
 
 <script>
-var APP_VERSION='2026.09.23.1';
-var APP_PUBLISHED_AT='23/09/2026 14:30 CEST';
+var APP_VERSION='2026.09.25.1';
+var APP_PUBLISHED_AT='25/09/2026 13:30 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
 var sb=window.supabase.createClient(SB_URL,SB_KEY);
@@ -2687,23 +2710,52 @@ function applyCategoryCustomIcons(){
     saveCategoryCustomIcons(iconMap);
   }
 }
-function isCategoryExcludedFromExpense(catId,dateOrYm){
-  if(!catId)return false;
+function getCategoryCalcMode(catId,dateOrYm){
+  if(!catId)return 0;
   var ym=typeof dateOrYm==='string'?dateOrYm.slice(0,7):monthKey(viewYear,viewMonth);
   var map=getCategoryExpenseExclusions();
-  return !!map[catId+'|'+ym];
+  var val=map[catId+'|'+ym];
+  if(val===true||val===2||val==='2'||val==='all')return 2;
+  if(val===1||val==='1'||val==='balance')return 1;
+  return 0;
 }
-function toggleCategoryExpenseExclusion(catId,ym){
+function isCategoryExcludedFromExpense(catId,dateOrYm){
+  var m=getCategoryCalcMode(catId,dateOrYm);
+  return m===1||m===2;
+}
+function isCategoryExcludedFromBalance(catId,dateOrYm){
+  var m=getCategoryCalcMode(catId,dateOrYm);
+  return m===2;
+}
+function cycleCategoryCalcMode(catId,ym){
   var current=getCategoryExpenseExclusions();
   var map=Object.assign({},current);
   var targetYm=ym||monthKey(viewYear,viewMonth);
   var key=catId+'|'+targetYm;
-  var willExclude=!map[key];
-  if(willExclude)map[key]=true;
-  else delete map[key];
+  var curMode=getCategoryCalcMode(catId,targetYm);
+  var nextMode=(curMode+1)%3;
+  if(nextMode===0)delete map[key];
+  else map[key]=nextMode;
   saveCategoryExpenseExclusions(map);
-  showSuccessToast(willExclude?'Categoría excluida de gastos en este mes':'Categoría incluida en gastos de este mes');
+  var toastMsgs=[
+    'Categoría: cuenta en todo',
+    'Categoría: solo en balance (fuera de gastos)',
+    'Categoría: no computa en gastos ni balance'
+  ];
+  showSuccessToast(toastMsgs[nextMode]);
   refreshTab();
+}
+function toggleCategoryExpenseExclusion(catId,ym){
+  cycleCategoryCalcMode(catId,ym);
+}
+function getCatCalcPillContent(mode){
+  if(mode===1){
+    return '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="3" x2="12" y2="21"/><polyline points="17 8 12 3 7 8"/><polyline points="7 16 12 21 17 16"/></svg> Solo en balance';
+  }
+  if(mode===2){
+    return '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg> No computa';
+  }
+  return '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Cuenta en todo';
 }
 function catById(id){
   if(!id)return {name:'',color:'#8E8E93',icon:'otros',subcats:[]};
@@ -2721,10 +2773,37 @@ function txDisplayCategory(t){
   if(t&&t.is_balance_adjustment)return {name:'Actualización de saldo',color:t.type==='expense'?'#FF3B30':'#34C759',icon:'balance',subcats:[]};
   return catById(t&&t.category);
 }
-function isTxExcludedFromCalc(t){
+function getTxCalcMode(t){
+  if(!t)return 0;
+  if(Array.isArray(t.tags)){
+    if(t.tags.includes('_no_calc'))return 2;
+    if(t.tags.includes('_no_expense'))return 1;
+  }
+  if(t.exclude_from_calc===2||t.exclude_from_calc==='2'||t.exclude_from_calc==='all'||t.exclude_from_calc===true)return 2;
+  if(t.exclude_from_calc===1||t.exclude_from_calc==='1'||t.exclude_from_calc==='expense'||t.exclude_from_calc==='balance')return 1;
+  return 0;
+}
+function getEffectiveTxCalcMode(t){
+  var m=getTxCalcMode(t);
+  if(m!==0)return m;
+  if(t&&t.category){
+    var catM=getCategoryCalcMode(t.category,t.date);
+    if(catM!==0)return catM;
+  }
+  return 0;
+}
+function isTxExcludedFromExpense(t){
   if(!t)return false;
-  if(t.exclude_from_calc!==undefined)return !!t.exclude_from_calc;
-  return Array.isArray(t.tags)&&t.tags.includes('_no_calc');
+  var m=getEffectiveTxCalcMode(t);
+  return m===1||m===2;
+}
+function isTxExcludedFromBalance(t){
+  if(!t)return false;
+  var m=getEffectiveTxCalcMode(t);
+  return m===2;
+}
+function isTxExcludedFromCalc(t){
+  return isTxExcludedFromExpense(t);
 }
 function parseCurrencyInput(val){
   if(val==null)return NaN;
@@ -2754,15 +2833,28 @@ function txExpenseImpact(t){
   if(!t)return 0;
   if(t.is_balance_adjustment)return 0;
   if(t.type!=='expense')return 0;
-  if(isTxExcludedFromCalc(t))return 0;
-  if(t.category&&isCategoryExcludedFromExpense(t.category,t.date))return 0;
+  if(isTxExcludedFromExpense(t))return 0;
+  return Number(t.amount);
+}
+function txBalanceExpenseImpact(t){
+  if(!t)return 0;
+  if(t.is_balance_adjustment)return 0;
+  if(t.type!=='expense')return 0;
+  if(isTxExcludedFromBalance(t))return 0;
   return Number(t.amount);
 }
 function txIncomeImpact(t){
   if(!t)return 0;
   if(t.is_balance_adjustment)return 0;
   if(t.type!=='income')return 0;
-  if(isTxExcludedFromCalc(t))return 0;
+  if(isTxExcludedFromExpense(t))return 0;
+  return Number(t.amount);
+}
+function txBalanceIncomeImpact(t){
+  if(!t)return 0;
+  if(t.is_balance_adjustment)return 0;
+  if(t.type!=='income')return 0;
+  if(isTxExcludedFromBalance(t))return 0;
   return Number(t.amount);
 }
 var CAT_ICON_PATHS={
@@ -3892,8 +3984,9 @@ function render(){
   var exps=txs.filter(function(t){return !t.is_balance_adjustment&&txExpenseImpact(t)>0;});
   var incs=txs.filter(function(t){return txIncomeImpact(t)>0;});
   var tExp=Math.round(txs.reduce(function(s,t){return s+txExpenseImpact(t);},0)*100)/100;
+  var tBalExp=Math.round(txs.reduce(function(s,t){return s+txBalanceExpenseImpact(t);},0)*100)/100;
   var tInc=Math.round(txs.reduce(function(s,t){return s+txIncomeImpact(t);},0)*100)/100;
-  var bal=Math.round((tInc-tExp)*100)/100;
+  var bal=Math.round((tInc-tBalExp)*100)/100;
   if(Math.abs(bal)<0.005)bal=0;
   var incEl=document.getElementById('totalInc'),expEl=document.getElementById('totalExp'),bel=document.getElementById('totalBal');
   bel.style.color=bal>=0?'var(--green-text)':'var(--red)';
@@ -3937,7 +4030,7 @@ function renderBalanceAdjustmentNote(txs,id){
 function renderUncomputedExpensesNote(txs,id){
   var el=document.getElementById(id);if(!el)return;
   var uncomputed=(txs||[]).reduce(function(s,t){
-    if(t&&t.type==='expense'&&!t.is_balance_adjustment&&(isTxExcludedFromCalc(t)||(t.category&&isCategoryExcludedFromExpense(t.category,t.date)))){
+    if(t&&t.type==='expense'&&!t.is_balance_adjustment&&isTxExcludedFromExpense(t)){
       return s+(Number(t.amount)||0);
     }
     return s;
@@ -4228,8 +4321,9 @@ function renderHeatmap(exps,cfg){
     if(b2){
       var yTxs=getYearTx().filter(function(t){return !t.is_balance_adjustment;});
       var yExp=yTxs.filter(function(t){return t.type==='expense';}).reduce(function(s,t){return s+txExpenseImpact(t);},0);
+      var yBalExp=yTxs.filter(function(t){return t.type==='expense';}).reduce(function(s,t){return s+txBalanceExpenseImpact(t);},0);
       var yInc=yTxs.filter(function(t){return t.type==='income';}).reduce(function(s,t){return s+txIncomeImpact(t);},0);
-      var ySav=yInc-yExp,savRate=yInc>0?Math.round((ySav/yInc)*100):0;
+      var ySav=yInc-yBalExp,savRate=yInc>0?Math.round((ySav/yInc)*100):0;
       b2.innerHTML='<div class="annual-flip-kpi" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:6px 0;">'
         +'<div class="annual-kpi-card"><small>Gastos</small><strong style="color:var(--red);">−'+fmt(yExp)+'</strong></div>'
         +'<div class="annual-kpi-card"><small>Ingresos</small><strong style="color:var(--green);">+'+fmt(yInc)+'</strong></div>'
@@ -4611,8 +4705,10 @@ function renderTxList(){
       if(normStr(c.name).includes(q))return true;
       if(t.note&&normStr(t.note).includes(q))return true;
       if(t.subcategory&&normStr(t.subcategory).includes(q))return true;
-      if((t.tags||[]).some(function(g){return g!=='_no_calc'&&normStr(g).includes(q);}))return true;
-      if(isTxExcludedFromCalc(t)&&'no computa'.includes(q))return true;
+      if((t.tags||[]).some(function(g){return g!=='_no_calc'&&g!=='_no_expense'&&normStr(g).includes(q);}))return true;
+      var effMode=getEffectiveTxCalcMode(t);
+      if(effMode===1&&normStr('solo balance').includes(q))return true;
+      if(effMode===2&&normStr('no computa').includes(q))return true;
       if(t.type==='transfer'){
         if(normStr('transferencia').includes(q)||normStr('traspaso').includes(q))return true;
         var fromAcc=accounts.find(function(a){return a.id===t.account_id;});
@@ -4701,7 +4797,13 @@ function buildTxItem(t){
   }
   var c=txDisplayCategory(t);var sign=t.is_balance_adjustment?(t.type==='expense'?'−':'+'):(t.type==='expense'?'−':'+');var col=t.type==='expense'?'var(--red)':'var(--green)';
   var sub=t.subcategory?'<span class="tx-subcat">'+capitalize(htmlEscape(t.subcategory))+'</span>':'';
-  var noCalcBadge=t.exclude_from_calc?'<span class="tx-no-calc-badge" style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:var(--text3);background:var(--bg3);border:1px solid var(--separator2);border-radius:20px;padding:1px 6px;margin-left:4px;vertical-align:middle;"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>No computa</span>':'';
+  var txMode=getEffectiveTxCalcMode(t);
+  var noCalcBadge='';
+  if(txMode===1){
+    noCalcBadge='<span class="tx-no-calc-badge tx-bal-only-badge" style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:var(--amber);background:rgba(255,159,10,0.1);border:1px solid rgba(255,159,10,0.3);border-radius:20px;padding:1px 6px;margin-left:4px;vertical-align:middle;"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="3" x2="12" y2="21"/><polyline points="17 8 12 3 7 8"/><polyline points="7 16 12 21 17 16"/></svg>Solo balance</span>';
+  } else if(txMode===2){
+    noCalcBadge='<span class="tx-no-calc-badge" style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:var(--text3);background:var(--bg3);border:1px solid var(--separator2);border-radius:20px;padding:1px 6px;margin-left:4px;vertical-align:middle;"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>No computa</span>';
+  }
   var rec=t.recurring?'<div class="tx-recurring-badge" style="display:inline-flex;align-items:center;gap:3px;"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Recurrente</div>':'';
   var delBtn=IS_DESKTOP?'<div class="tx-actions"><button class="tx-btn edit" data-action="edit-tx" data-id="'+t.id+'" title="Editar" aria-label="Editar"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="tx-btn del" data-action="del-tx" data-id="'+t.id+'" title="Eliminar" aria-label="Eliminar"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>':'';
   var hideTx=portfolioValueHidden()&&isAccountInvestment(t.account_id);
@@ -4816,6 +4918,7 @@ function renderCatTab(el,prefix){
 
   activeCats.forEach(function(c){
     var isInc=isIncomeCat(c.id);
+    var catMode=isInc?0:getCategoryCalcMode(c.id,curYm);
     var isExcluded=!isInc&&isCategoryExcludedFromExpense(c.id,curYm);
     var amt=isInc?(bycatInc[c.id]||0):(bycat[c.id]||0);
     var pctDenom=isInc?totalInc:totalExp;
@@ -4829,8 +4932,12 @@ function renderCatTab(el,prefix){
 
     var statusText='', alertClass='cat-status-badge';
     var amtColor='var(--text)';
-    if(isExcluded){
-      statusText='Excluida de gastos este mes';
+    if(catMode===1){
+      statusText='Solo en balance este mes';
+      alertClass+=' cat-status-bal-only';
+      amtColor='var(--text3)';
+    } else if(catMode===2){
+      statusText='No computa este mes';
       alertClass+=' cat-status-excluded';
       amtColor='var(--text3)';
     } else if(budget>0){
@@ -4905,7 +5012,7 @@ function renderCatTab(el,prefix){
         +(subcatHtml?'<div class="subcat-list">'+subcatHtml+'</div>':'')
         +'<div class="cat-edit-tools">'
         +'<button type="button" class="cat-edit-tool-btn" data-action="show-subform" data-id="'+c.id+'"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Subcategoría</button>'
-        +(isInc?'':'<button type="button" class="cat-edit-tool-btn cat-exclude-pill'+(isExcluded?' is-excluded':'')+'" data-action="toggle-cat-exclude" data-id="'+c.id+'">'+(isExcluded?'<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg> Excluida de gastos':'<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Cuenta en gastos')+'</button>')
+        +(isInc?'':'<button type="button" class="cat-edit-tool-btn cat-calc-pill'+(catMode===1?' is-bal-only':(catMode===2?' is-excluded':''))+'" data-action="toggle-cat-exclude" data-id="'+c.id+'" title="Cambiar modo de cómputo">'+getCatCalcPillContent(catMode)+'</button>')
         +'</div>'
         +'<div id="subform_'+prefix+c.id+'" style="display:none;margin-top:6px">'
         +'<div class="form-row"><input type="text" class="add-input" id="subinput_'+prefix+c.id+'" placeholder="Nombre de la subcategoría...">'
@@ -5877,10 +5984,10 @@ function renderAnnualTab(el){
     return !isPriv || !(a.is_investment || a.id==='__investments__' || isAccountInvestment(a.id));
   });
   var lineLegend=visibleAccounts.length?visibleAccounts.map(function(a){return legItem(a.color,capEsc(a.name));}).join(''):legItem('#8E8E93','Sin datos');
-  var incData=Array(12).fill(0),expData=Array(12).fill(0),savData=[];
+  var incData=Array(12).fill(0),expData=Array(12).fill(0),balExpData=Array(12).fill(0),savData=[];
   var yearTxs=_txByYearStr[String(chartYear)]||[];
-  yearTxs.forEach(function(t){if(t.is_balance_adjustment)return;var m=parseInt(String(t.date).slice(5,7),10)-1;if(m>=0&&m<12){if(t.type==='income')incData[m]+=txIncomeImpact(t);else if(t.type==='expense')expData[m]+=txExpenseImpact(t);}});
-  for(var m=0;m<12;m++)savData.push(incData[m]-expData[m]);
+  yearTxs.forEach(function(t){if(t.is_balance_adjustment)return;var m=parseInt(String(t.date).slice(5,7),10)-1;if(m>=0&&m<12){if(t.type==='income')incData[m]+=txIncomeImpact(t);else if(t.type==='expense'){expData[m]+=txExpenseImpact(t);balExpData[m]+=txBalanceExpenseImpact(t);}}});
+  for(var m=0;m<12;m++)savData.push(incData[m]-balExpData[m]);
   var statsHtml='';
   var realNow=new Date(),realY=realNow.getFullYear(),realM=realNow.getMonth();
   // Excluye meses estrictamente futuros (transacciones adelantadas): un mes que
@@ -5902,9 +6009,10 @@ function renderAnnualTab(el){
       var minExpIdx=pastMonthsWithData.reduce(function(a,b){return expData[b]<expData[a]?b:a;});
       var maxSavIdx=pastMonthsWithData.reduce(function(a,b){return savData[b]>savData[a]?b:a;});
       var sumExpPast=pastMonthsWithData.reduce(function(s,i){return s+expData[i];},0);
+      var sumBalExpPast=pastMonthsWithData.reduce(function(s,i){return s+balExpData[i];},0);
       var sumIncPast=pastMonthsWithData.reduce(function(s,i){return s+incData[i];},0);
       var avgExpPast=sumExpPast/pastMonthsWithData.length;
-      var savAmount=sumIncPast-sumExpPast;
+      var savAmount=sumIncPast-sumBalExpPast;
       var avgSavPast=pastMonthsWithData.length?(savAmount/pastMonthsWithData.length):0;
       var savRate=sumIncPast>0?savAmount/sumIncPast*100:null;
       var pastMonthsLabel='sobre '+pastMonthsWithData.length+' mes'+(pastMonthsWithData.length===1?'':'es')+' cerrado'+(pastMonthsWithData.length===1?'':'s');
@@ -6482,17 +6590,47 @@ async function clearTxs(){
   transactions=[];recurrenceExclusions=[];transactionVoids=[];saveLocalCache();setSync('ok');refreshTab();
 }
 
-// TX MODAL
+// TX MODAL - CÁLCULO TRI-ESTADO
+var txCalcMode=0; // 0: Computar todo, 1: Solo balance, 2: No computa
+function updateTxCalcPill(mode){
+  txCalcMode=(mode===1||mode===2)?mode:0;
+  var btn=document.getElementById('txExcludeCalcBtn');
+  var icon=document.getElementById('txCalcPillIcon');
+  var label=document.getElementById('txCalcPillLabel');
+  var sub=document.getElementById('txCalcPillSub');
+  if(!btn)return;
+  btn.setAttribute('data-mode',String(txCalcMode));
+  if(txCalcMode===1){
+    if(icon)icon.innerHTML='<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="3" x2="12" y2="21"/><polyline points="17 8 12 3 7 8"/><polyline points="7 16 12 21 17 16"/></svg>';
+    if(label)label.textContent='Solo balance';
+    if(sub)sub.textContent='Fuera de gastos';
+    btn.setAttribute('title','Solo computa en balance (fuera de presupuestos y donut)');
+  } else if(txCalcMode===2){
+    if(icon)icon.innerHTML='<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>';
+    if(label)label.textContent='No computa';
+    if(sub)sub.textContent='Ni gastos ni bal.';
+    btn.setAttribute('title','No computa ni en gastos ni en balance mensual');
+  } else {
+    if(icon)icon.innerHTML='<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    if(label)label.textContent='Computar todo';
+    if(sub)sub.textContent='Gastos y balance';
+    btn.setAttribute('title','Computa en gastos y en balance mensual');
+  }
+}
+function setTxCalcMode(mode){
+  updateTxCalcPill(mode);
+}
+function cycleTxCalcMode(){
+  var next=(txCalcMode+1)%3;
+  setTxCalcMode(next);
+}
 var isExcludeFromCalc=false;
 function setExcludeFromCalc(val){
-  isExcludeFromCalc=!!val;
-  var sw=document.getElementById('excludeCalcSwitch');
-  var btn=document.getElementById('txExcludeCalcBtn');
-  if(sw)sw.classList.toggle('on',isExcludeFromCalc);
-  if(btn)btn.classList.toggle('active',isExcludeFromCalc);
+  if(typeof val==='number')setTxCalcMode(val);
+  else setTxCalcMode(val?2:0);
 }
 function toggleExcludeFromCalc(){
-  setExcludeFromCalc(!isExcludeFromCalc);
+  cycleTxCalcMode();
 }
 function sanitizeRemoteTxPayload(p){
   if(!p||typeof p!=='object')return p;
@@ -6587,7 +6725,7 @@ function renderMonthPickerGrid(){
 var lastModalTrigger=null;
 function openModal(){
   lastModalTrigger=document.activeElement;
-  editingTxId=null;txTags=[];isRecurring=false;setExcludeFromCalc(false);
+  editingTxId=null;txTags=[];isRecurring=false;setTxCalcMode(0);
   document.getElementById('modalTitle').textContent='Nueva transacción';
   var _dn=new Date();document.getElementById('txDate').value=_dn.getFullYear()+'-'+pad(_dn.getMonth()+1)+'-'+pad(_dn.getDate());
   document.getElementById('txAmount').value='';document.getElementById('txNote').value='';
@@ -6610,7 +6748,7 @@ function editTx(id){
     showUndoToast('Desactiva el modo privado para ver o editar movimientos de inversión');
     return;
   }
-  editingTxId=id;txTags=Array.isArray(tx.tags)?tx.tags.slice():[];isRecurring=!!tx.recurring;setExcludeFromCalc(isTxExcludedFromCalc(tx));
+  editingTxId=id;txTags=Array.isArray(tx.tags)?tx.tags.slice():[];isRecurring=!!tx.recurring;setTxCalcMode(getTxCalcMode(tx));
   document.getElementById('modalTitle').textContent='Editar transacción';
   setType(tx.type);populateCats();
   if(tx.type==='transfer'){
@@ -6799,8 +6937,10 @@ async function saveTx(){
     if(accounts.length===1&&!accountId){
       accountId=accounts[0].id;
     }
-    if(isExcludeFromCalc){if(!txTags.includes('_no_calc'))txTags.push('_no_calc');}else{txTags=txTags.filter(function(g){return g!=='_no_calc';});}
-    payload={type:txType,amount:amount,category:category,subcategory:subcategory,note:note,date:date,recurring:isRecurring,recur_interval:recurInterval,recur_end_date:recurEndDate,tags:txTags,account_id:accountId,to_account_id:null,exclude_from_calc:isExcludeFromCalc};
+    txTags=txTags.filter(function(g){return g!=='_no_calc'&&g!=='_no_expense';});
+    if(txCalcMode===1){txTags.push('_no_expense');}
+    else if(txCalcMode===2){txTags.push('_no_calc');}
+    payload={type:txType,amount:amount,category:category,subcategory:subcategory,note:note,date:date,recurring:isRecurring,recur_interval:recurInterval,recur_end_date:recurEndDate,tags:txTags,account_id:accountId,to_account_id:null,exclude_from_calc:(txCalcMode===2)};
   }
   status.textContent='guardando...';status.className='modal-status';setSync('syncing');
   var queuedFallback=false;
@@ -7901,14 +8041,15 @@ async function exportPDF(range) {
   var exps = txs.filter(function(t) { return !t.is_balance_adjustment && txExpenseImpact(t) > 0; });
   var incs = txs.filter(function(t) { return !t.is_balance_adjustment && txIncomeImpact(t) > 0; });
   var tExp = txs.reduce(function(s, t) { return s + txExpenseImpact(t); }, 0);
+  var tBalExp = txs.reduce(function(s, t) { return s + txBalanceExpenseImpact(t); }, 0);
   var tInc = txs.reduce(function(s, t) { return s + txIncomeImpact(t); }, 0);
   var tExpNoCalc = txs.reduce(function(s, t) {
-    if (t.type === 'expense' && !t.is_balance_adjustment && (isTxExcludedFromCalc(t) || (t.category && isCategoryExcludedFromExpense(t.category, t.date)))) {
+    if (t.type === 'expense' && !t.is_balance_adjustment && isTxExcludedFromExpense(t)) {
       return s + Number(t.amount || 0);
     }
     return s;
   }, 0);
-  var bal = tInc - tExp;
+  var bal = tInc - tBalExp;
   var savRate = tInc > 0 ? ((bal / tInc) * 100) : 0;
   var email = currentUser ? (currentUser.email || '') : '';
   var dateStr = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -8213,7 +8354,7 @@ async function exportPDF(range) {
       var isTra = t.type === 'transfer';
       var isAdj = !!t.is_balance_adjustment;
       var isExp = t.type === 'expense', isInc = t.type === 'income';
-      var isNoCalc = isTxExcludedFromCalc(t) || (isExp && !isAdj && t.category && isCategoryExcludedFromExpense(t.category, t.date));
+      var txEffMode = getEffectiveTxCalcMode(t);
       var c = txDisplayCategory(t);
       var mainTitle = isTra ? (accNameById(t.account_id) + ' -> ' + accNameById(t.to_account_id)) : (isAdj ? 'Ajuste de saldo' : capitalize(c.name));
 
@@ -8233,7 +8374,14 @@ async function exportPDF(range) {
         curLine1X += doc.getTextWidth(subText);
       }
 
-      if (isNoCalc) {
+      if (txEffMode === 1) {
+        curLine1X += 2.2;
+        doc.setFillColor(254, 243, 199); doc.setDrawColor(251, 191, 36); doc.setLineWidth(0.12);
+        doc.roundedRect(curLine1X, line1Y - 2.5, 16, 3.2, 0.7, 0.7, 'FD');
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(5.6); doc.setTextColor(180, 83, 9);
+        doc.text('Solo balance', curLine1X + 8, line1Y - 0.3, { align: 'center' });
+        curLine1X += 17;
+      } else if (txEffMode === 2) {
         curLine1X += 2.2;
         doc.setFillColor(241, 245, 249); doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.12);
         doc.roundedRect(curLine1X, line1Y - 2.5, 14, 3.2, 0.7, 0.7, 'FD');
@@ -8626,13 +8774,14 @@ function exportXLSX(range){
     var mtx=getExportTx(range);
     var mExp=mtx.filter(function(t){return txExpenseImpact(t)>0;});
     var tExp=Math.round(mtx.reduce(function(s,t){return s+txExpenseImpact(t);},0)*100)/100;
+    var tBalExp=Math.round(mtx.reduce(function(s,t){return s+txBalanceExpenseImpact(t);},0)*100)/100;
     var tInc=Math.round(mtx.reduce(function(s,t){return s+txIncomeImpact(t);},0)*100)/100;
     var kr=ws0.addRow(['Ingresos','Gastos','Balance']);kr.height=18;
     kr.getCell(1).style=hdrStyle(C.green,C.white,10,true,'center');
     kr.getCell(2).style=hdrStyle(C.red,C.white,10,true,'center');
     kr.getCell(3).style=hdrStyle(C.blue,C.white,10,true,'center');
-    var balVal=Math.round((tInc-tExp)*100)/100;
-    var vr=ws0.addRow([tInc,tExp,{formula:'A'+(kr.number+1)+'-B'+(kr.number+1),result:balVal}]);vr.height=22;
+    var balVal=Math.round((tInc-tBalExp)*100)/100;
+    var vr=ws0.addRow([tInc,tExp,balVal]);vr.height=22;
     vr.getCell(1).style=dataStyle(C.greenLight,C.green,'center',moneyFmt,true);vr.getCell(1).numFmt=moneyFmt;
     vr.getCell(2).style=dataStyle(C.redLight,C.red,'center',moneyFmt,true);vr.getCell(2).numFmt=moneyFmt;
     vr.getCell(3).style=dataStyle(C.blueLight,C.blue,'center',moneyFmtRed,true);vr.getCell(3).numFmt=moneyFmtRed;
@@ -8671,16 +8820,24 @@ function exportXLSX(range){
   h1.eachCell(function(cell){cell.style=hdrStyle(C.dark,C.white,10,true,'center');});
 
   var txSorted=getExportTx(range).slice().sort(function(a,b){return new Date(a.date)-new Date(b.date);});
-  var totalInc=0,totalExp=0;
+  var totalInc=0,totalExp=0,totalBalExp=0;
   txSorted.forEach(function(t,i){
     var isExp=t.type==='expense';
     var isInc=t.type==='income';
     var bg=i%2===0?C.white:C.light;
     var amount=isExp?-t.amount:t.amount;
-    if(isInc)totalInc+=txIncomeImpact(t);else if(isExp)totalExp+=txExpenseImpact(t);
+    if(isInc)totalInc+=txIncomeImpact(t);
+    else if(isExp){
+      totalExp+=txExpenseImpact(t);
+      totalBalExp+=txBalanceExpenseImpact(t);
+    }
     var typeLabel=t.is_balance_adjustment?'Ajuste de saldo':(isExp?'Gasto':isInc?'Ingreso':'Transferencia');
     var catLabel=t.is_balance_adjustment?'Actualización de saldo':(t.type==='transfer'?(accNameById(t.account_id)+' → '+accNameById(t.to_account_id)):catById(t.category).name);
-    var row=ws1.addRow([t.date,typeLabel,catLabel,t.subcategory||'',t.note||'',(t.tags||[]).filter(function(g){return g!=='_no_calc';}).concat(isTxExcludedFromCalc(t)?['no computa']:[]).join(', '),t.recurring?'Sí':'No',amount]);
+    var rowTags=(t.tags||[]).filter(function(g){return g!=='_no_calc'&&g!=='_no_expense';});
+    var mEff=getEffectiveTxCalcMode(t);
+    if(mEff===1)rowTags.push('solo balance');
+    else if(mEff===2)rowTags.push('no computa');
+    var row=ws1.addRow([t.date,typeLabel,catLabel,t.subcategory||'',t.note||'',rowTags.join(', '),t.recurring?'Sí':'No',amount]);
     row.height=18;
     var typeColor=isExp?C.red:isInc?C.green:C.text2;
     row.getCell(1).style=dataStyle(bg,C.text,'center');
@@ -8696,7 +8853,8 @@ function exportXLSX(range){
   ws1.addRow([]);
   totalInc=Math.round(totalInc*100)/100;
   totalExp=Math.round(totalExp*100)/100;
-  var netBalVal=Math.round((totalInc-totalExp)*100)/100;
+  totalBalExp=Math.round(totalBalExp*100)/100;
+  var netBalVal=Math.round((totalInc-totalBalExp)*100)/100;
   var rIncRow=ws1.addRow(['','','','','','','Ingresos totales:',totalInc]);rIncRow.height=20;
   var rExpRow=ws1.addRow(['','','','','','','Gastos totales:',-totalExp]);rExpRow.height=20;
   var rBalRow=ws1.addRow(['','','','','','','Balance neto:',netBalVal]);rBalRow.height=20;
@@ -8908,8 +9066,9 @@ function dtRender(){
   var exps=txs.filter(function(t){return !t.is_balance_adjustment&&txExpenseImpact(t)>0;});
   var incs=txs.filter(function(t){return txIncomeImpact(t)>0;});
   var tExp=Math.round(txs.reduce(function(s,t){return s+txExpenseImpact(t);},0)*100)/100;
+  var tBalExp=Math.round(txs.reduce(function(s,t){return s+txBalanceExpenseImpact(t);},0)*100)/100;
   var tInc=Math.round(txs.reduce(function(s,t){return s+txIncomeImpact(t);},0)*100)/100;
-  var bal=Math.round((tInc-tExp)*100)/100;
+  var bal=Math.round((tInc-tBalExp)*100)/100;
   if(Math.abs(bal)<0.005)bal=0;
   var tb=totalBudget();
   // Build by-cat for donut
