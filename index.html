@@ -2523,7 +2523,7 @@ button:not(:disabled):active{transform:scale(.97);}
 </div>
 
 <script>
-var APP_VERSION='2026.10.01.3';
+var APP_VERSION='2026.10.01.4';
 var APP_PUBLISHED_AT='01/10/2026 09:30 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
@@ -8286,9 +8286,11 @@ async function exportPDF(range) {
   });
   var dateKeys = Object.keys(groups).sort().reverse();
   var daysOfWeek = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-  var dayHeaderH = 4.4;
+  var dayBoxH = 4.6;
+  var dayBoxOffset = 3.3;
+  var dayHeaderAdvance = 5.6;
   var rowH = 8.6;
-  var dayGap = 0.8;
+  var dayGap = 1.0;
 
   dateKeys.forEach(function(dateStr) {
     var dayTxs = groups[dateStr];
@@ -8301,29 +8303,41 @@ async function exportPDF(range) {
     var dayTitle = (dayName ? capitalize(dayName) + ', ' : '') + dayNum + ' de ' + monthName + (yearNum !== String(year) ? ' de ' + yearNum : '');
 
     // Salto de página preventivo si no cabe la cabecera del día y al menos un movimiento
-    if (y + dayHeaderH + rowH > 274) {
+    if (y + dayHeaderAdvance + rowH > 274) {
       doc.addPage();
-      y = 16.5;
+      y = 17.5;
     }
 
-    // Cabecera de día tipográfica sobria y compacta en negrita (sin caja gris)
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.6); doc.setTextColor(15, 23, 42);
-    doc.text(dayTitle, M + 2.0, y);
+    // Cabecera de día con contenedor fino estilizado (4.6mm)
+    var boxTop = y - dayBoxOffset;
+    doc.setFillColor(248, 250, 252);
+    doc.setDrawColor(226, 232, 240);
+    doc.setLineWidth(0.12);
+    doc.roundedRect(M, boxTop, UW, dayBoxH, 1.0, 1.0, 'FD');
+
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.4); doc.setTextColor(30, 41, 59);
+    doc.text(dayTitle, M + 3.0, y);
 
     var countLabel = dayTxs.length + (dayTxs.length === 1 ? ' movimiento' : ' movimientos');
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.8); doc.setTextColor(100, 116, 139);
-    doc.text(countLabel, PW - M - 2.0, y, { align: 'right' });
-    y += dayHeaderH;
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.6); doc.setTextColor(100, 116, 139);
+    doc.text(countLabel, PW - M - 3.0, y, { align: 'right' });
+    y += dayHeaderAdvance;
 
     dayTxs.forEach(function(t, txIdx) {
       if (y + rowH > 274) {
         doc.addPage();
-        y = 16.5;
-        doc.setFont('helvetica', 'bold'); doc.setFontSize(7.6); doc.setTextColor(15, 23, 42);
-        doc.text(dayTitle + ' (cont.)', M + 2.0, y);
-        doc.setFont('helvetica', 'normal'); doc.setFontSize(6.8); doc.setTextColor(100, 116, 139);
-        doc.text(countLabel, PW - M - 2.0, y, { align: 'right' });
-        y += dayHeaderH;
+        y = 17.5;
+        var contBoxTop = y - dayBoxOffset;
+        doc.setFillColor(248, 250, 252);
+        doc.setDrawColor(226, 232, 240);
+        doc.setLineWidth(0.12);
+        doc.roundedRect(M, contBoxTop, UW, dayBoxH, 1.0, 1.0, 'FD');
+
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(7.4); doc.setTextColor(30, 41, 59);
+        doc.text(dayTitle + ' (cont.)', M + 3.0, y);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(6.6); doc.setTextColor(100, 116, 139);
+        doc.text(countLabel, PW - M - 3.0, y, { align: 'right' });
+        y += dayHeaderAdvance;
       }
 
       var rowTop = y - 3.8;
