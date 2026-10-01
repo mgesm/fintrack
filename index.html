@@ -2523,8 +2523,8 @@ button:not(:disabled):active{transform:scale(.97);}
 </div>
 
 <script>
-var APP_VERSION='2026.09.25.1';
-var APP_PUBLISHED_AT='25/09/2026 13:30 CEST';
+var APP_VERSION='2026.10.01.1';
+var APP_PUBLISHED_AT='01/10/2026 09:30 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
 var sb=window.supabase.createClient(SB_URL,SB_KEY);
@@ -5213,8 +5213,7 @@ function accountTheoreticalFromLastRealReset(accountId,dateStr){
   var live=pool.filter(function(t){
     return !t.is_balance_adjustment&&accountTouchesAccount(t,accountId)&&t.date>baseDate&&t.date<=dateStr;
   }).reduce(function(sum,t){return sum+accountTxDelta(t,accountId);},0);
-  var seenV0={};var voids=transactionVoids.filter(function(v){var k=v.transaction_id||v.id;if(!k||seenV0[k])return false;seenV0[k]=true;return true;}).reduce(function(sum,v){return sum+accountVoidDelta(v,accountId,baseDate,dateStr);},0);
-  return Math.round((base+live+voids)*100)/100;
+  return Math.round((base+live)*100)/100;
 }
 function snapshotTheoreticalAmount(snapshot,accountId){
   if(!snapshot)return 0;
@@ -5251,15 +5250,9 @@ function accountTxDelta(t,accountId){
 }
 function accountTouchesAccount(t,accountId){return !t.is_balance_adjustment&&(t.account_id===accountId||t.to_account_id===accountId||(!t.account_id&&t.type!=='transfer'&&accounts.length===1));}
 function accountVoidDelta(voided,accountId,baseDate,asOfDate){
-  var tx=voided&&voided.transaction_data;if(!tx||!accountTouchesAccount(tx,accountId))return 0;
-  var voidedDate=localIsoDate(voided.voided_at)||(String(voided.voided_at||'').slice(0,10));
-  // Solo compensa una anulación posterior a la fotografía real: los movimientos
-  // posteriores ya desaparecen del cálculo normal al haber sido borrados.
-  // Una anulación anterior o realizada el mismo día que la fotografía ya está
-  // incorporada en el saldo real que usamos como base. Solo compensa las
-  // anulaciones posteriores al ajuste.
-  if(!voidedDate||voidedDate<=baseDate||voidedDate>asOfDate||tx.date>baseDate)return 0;
-  return -accountTxDelta(tx,accountId);
+  // Una anulación en FinTrack no introduce saldo fantasma tras una conciliación real:
+  // el saldo de la fotografía base es la realidad física observada en la cuenta bancaria.
+  return 0;
 }
 function investmentPositionsAsOf(accountId,dateStr){
   var ops=(investmentOperations||[]).filter(function(o){
@@ -5311,8 +5304,7 @@ function accountCalcBalance(accountId,yr,mo){
   ensureTxIndices();
   var pool=_txByAccount[accountId]||[];
   var live=pool.filter(function(t){return accountTouchesAccount(t,accountId)&&t.date>baseDate&&t.date<cutoff;}).reduce(function(s,t){return s+accountTxDelta(t,accountId);},0);
-  var seenV={};var voids=transactionVoids.filter(function(v){var k=v.transaction_id||v.id;if(!k||seenV[k])return false;seenV[k]=true;return true;}).reduce(function(s,v){return s+accountVoidDelta(v,accountId,baseDate,lastDayOfMonthStr(yr,mo));},0);
-  return Math.round((base+live+voids)*100)/100;
+  return Math.round((base+live)*100)/100;
 }
 function accountCalcBalanceAsOf(accountId,dateStr){
   var hist=accountHistory(accountId).filter(function(p){var d=p.reset_date||lastDayOfMonthStr(p.year,p.month);return d<=dateStr;});
@@ -5322,8 +5314,7 @@ function accountCalcBalanceAsOf(accountId,dateStr){
   ensureTxIndices();
   var pool=_txByAccount[accountId]||[];
   var live=pool.filter(function(t){return accountTouchesAccount(t,accountId)&&t.date>baseDate&&t.date<=dateStr;}).reduce(function(s,t){return s+accountTxDelta(t,accountId);},0);
-  var seenV2={};var voids=transactionVoids.filter(function(v){var k=v.transaction_id||v.id;if(!k||seenV2[k])return false;seenV2[k]=true;return true;}).reduce(function(s,v){return s+accountVoidDelta(v,accountId,baseDate,dateStr);},0);
-  return Math.round((base+live+voids)*100)/100;
+  return Math.round((base+live)*100)/100;
 }
 function accountCalcTheoreticalAsOf(accountId,dateStr){
   return accountTheoreticalFromLastRealReset(accountId,dateStr);

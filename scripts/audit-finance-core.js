@@ -1,4 +1,4 @@
-﻿/**
+/**
  * AUDITORÍA INTEGRAL DEL NÚCLEO FINANCIERO DE FINTRACK (AGENTE 3)
  * Cuentas, Patrimonio, Saldo Real vs Teórico, Desfase e Indexación _txByAccount
  */
@@ -119,11 +119,9 @@ function accountTxDelta(t, accountId) {
 }
 
 function accountVoidDelta(voided, accountId, baseDate, asOfDate) {
-  var tx = voided && voided.transaction_data;
-  if (!tx || !accountTouchesAccount(tx, accountId)) return 0;
-  var voidedDate = String(voided.voided_at || '').slice(0, 10);
-  if (!voidedDate || voidedDate <= baseDate || voidedDate > asOfDate || tx.date > baseDate) return 0;
-  return -accountTxDelta(tx, accountId);
+  // Una anulación en FinTrack no introduce saldo fantasma tras una conciliación real:
+  // el saldo de la fotografía base es la realidad física observada en la cuenta bancaria.
+  return 0;
 }
 
 function accountHistory(accountId) {
@@ -618,7 +616,7 @@ test('accountVoidDelta: compensación selectiva según fecha de anulación y sna
     voided_at: '2026-01-20T10:00:00.000Z'
   };
   var deltaA = accountVoidDelta(vHistorical, testAccId, baseDate, '2026-01-25');
-  assert.strictEqual(deltaA, 50, 'Compensa sumando +50€ al saldo');
+  assert.strictEqual(deltaA, 0, 'Devuelve 0 para evitar saldo fantasma tras snapshot real');
 
   // Caso 4B: Gasto posterior (18-ene > baseDate 15-ene) anulado el 20-ene
   var vRecent = {

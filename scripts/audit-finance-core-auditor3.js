@@ -117,11 +117,9 @@ function accountTxDelta(t, accountId) {
 }
 
 function accountVoidDelta(voided, accountId, baseDate, asOfDate) {
-  var tx = voided && voided.transaction_data;
-  if (!tx || !accountTouchesAccount(tx, accountId)) return 0;
-  var voidedDate = String(voided.voided_at || '').slice(0, 10);
-  if (!voidedDate || voidedDate <= baseDate || voidedDate > asOfDate || tx.date > baseDate) return 0;
-  return -accountTxDelta(tx, accountId);
+  // Una anulación en FinTrack no introduce saldo fantasma tras una conciliación real:
+  // el saldo de la fotografía base es la realidad física observada en la cuenta bancaria.
+  return 0;
 }
 
 function accountHistory(accountId) {
@@ -621,7 +619,7 @@ test('accountVoidDelta: compensación selectiva sin duplicar anulaciones', () =>
     transaction_data: { id: 't_old', date: '2026-05-10', amount: 60, type: 'expense', account_id: accId },
     voided_at: '2026-05-20T10:00:00.000Z'
   };
-  assert.strictEqual(accountVoidDelta(v1, accId, baseDate, '2026-05-25'), 60);
+  assert.strictEqual(accountVoidDelta(v1, accId, baseDate, '2026-05-25'), 0);
 
   var v2 = {
     id: 'tv2',
