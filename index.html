@@ -2523,7 +2523,7 @@ button:not(:disabled):active{transform:scale(.97);}
 </div>
 
 <script>
-var APP_VERSION='2026.10.01.2';
+var APP_VERSION='2026.10.01.3';
 var APP_PUBLISHED_AT='01/10/2026 09:30 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
@@ -8286,9 +8286,9 @@ async function exportPDF(range) {
   });
   var dateKeys = Object.keys(groups).sort().reverse();
   var daysOfWeek = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-  var dayHeaderH = 6.2;
+  var dayHeaderH = 4.4;
   var rowH = 8.6;
-  var dayGap = 3.2;
+  var dayGap = 0.8;
 
   dateKeys.forEach(function(dateStr) {
     var dayTxs = groups[dateStr];
@@ -8303,38 +8303,27 @@ async function exportPDF(range) {
     // Salto de página preventivo si no cabe la cabecera del día y al menos un movimiento
     if (y + dayHeaderH + rowH > 274) {
       doc.addPage();
-      y = 14;
+      y = 16.5;
     }
 
-    // Cabecera de día
-    doc.setFillColor(248, 250, 252);
-    doc.roundedRect(M, y - 4.0, UW, dayHeaderH, 1.2, 1.2, 'F');
-    doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.18);
-    doc.line(M, y - 4.0, PW - M, y - 4.0);
-    doc.line(M, y - 4.0 + dayHeaderH, PW - M, y - 4.0 + dayHeaderH);
-
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.6); doc.setTextColor(30, 41, 59);
-    doc.text(dayTitle, M + 3.2, y + 0.3);
+    // Cabecera de día tipográfica sobria y compacta en negrita (sin caja gris)
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.6); doc.setTextColor(15, 23, 42);
+    doc.text(dayTitle, M + 2.0, y);
 
     var countLabel = dayTxs.length + (dayTxs.length === 1 ? ' movimiento' : ' movimientos');
     doc.setFont('helvetica', 'normal'); doc.setFontSize(6.8); doc.setTextColor(100, 116, 139);
-    doc.text(countLabel, PW - M - 3.2, y + 0.3, { align: 'right' });
-    y += dayHeaderH + 1.2;
+    doc.text(countLabel, PW - M - 2.0, y, { align: 'right' });
+    y += dayHeaderH;
 
     dayTxs.forEach(function(t, txIdx) {
       if (y + rowH > 274) {
         doc.addPage();
-        y = 14;
-        doc.setFillColor(248, 250, 252);
-        doc.roundedRect(M, y - 4.0, UW, dayHeaderH, 1.2, 1.2, 'F');
-        doc.setDrawColor(226, 232, 240); doc.setLineWidth(0.18);
-        doc.line(M, y - 4.0, PW - M, y - 4.0);
-        doc.line(M, y - 4.0 + dayHeaderH, PW - M, y - 4.0 + dayHeaderH);
-        doc.setFont('helvetica', 'bold'); doc.setFontSize(7.6); doc.setTextColor(30, 41, 59);
-        doc.text(dayTitle + ' (cont.)', M + 3.2, y + 0.3);
+        y = 16.5;
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(7.6); doc.setTextColor(15, 23, 42);
+        doc.text(dayTitle + ' (cont.)', M + 2.0, y);
         doc.setFont('helvetica', 'normal'); doc.setFontSize(6.8); doc.setTextColor(100, 116, 139);
-        doc.text(countLabel, PW - M - 3.2, y + 0.3, { align: 'right' });
-        y += dayHeaderH + 1.2;
+        doc.text(countLabel, PW - M - 2.0, y, { align: 'right' });
+        y += dayHeaderH;
       }
 
       var rowTop = y - 3.8;
