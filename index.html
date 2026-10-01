@@ -2523,7 +2523,7 @@ button:not(:disabled):active{transform:scale(.97);}
 </div>
 
 <script>
-var APP_VERSION='2026.10.01.1';
+var APP_VERSION='2026.10.01.2';
 var APP_PUBLISHED_AT='01/10/2026 09:30 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
@@ -7389,7 +7389,12 @@ async function runExport(fmt){
     var yrSel=document.getElementById('exportYear');
     var yr=yrSel?parseInt(yrSel.value,10):(viewYear||new Date().getFullYear());
     closeExportModal();
-    await exportAnnualPDF(yr);
+    try {
+      await exportAnnualPDF(yr);
+    } catch(err) {
+      console.error('Error al exportar PDF anual:', err);
+      alert('Error al generar el PDF anual: ' + (err.message || err));
+    }
     return;
   }
   var range=exportRangeFromUI();if(!range)return;
@@ -7400,8 +7405,15 @@ async function runExport(fmt){
     }
     if(fmt==='xlsx'&&typeof ExcelJS==='undefined')await loadScript('./vendor/exceljs.min.js');
   }catch(e){alert('No se pudo cargar la librería necesaria. Comprueba tu conexión e inténtalo de nuevo.');return;}
-  if(fmt==='pdf')await exportPDF(range);else if(fmt==='xlsx')exportXLSX(range);else if(fmt==='csv')exportCSV(range);
-  closeExportModal();
+  try {
+    if(fmt==='pdf')await exportPDF(range);
+    else if(fmt==='xlsx')exportXLSX(range);
+    else if(fmt==='csv')exportCSV(range);
+    closeExportModal();
+  } catch(err) {
+    console.error('Error al exportar:', err);
+    alert('Error al generar la exportación: ' + (err.message || err));
+  }
 }
 // ── shared helpers for chart images & brand header in PDF/Excel exports ───
 function hexToRgb(h){h=(h||'#888').replace('#','');if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];return [parseInt(h.substr(0,2),16)||0,parseInt(h.substr(2,2),16)||0,parseInt(h.substr(4,2),16)||0];}
@@ -8346,6 +8358,7 @@ async function exportPDF(range) {
       var isAdj = !!t.is_balance_adjustment;
       var isExp = t.type === 'expense', isInc = t.type === 'income';
       var txEffMode = getEffectiveTxCalcMode(t);
+      var isNoCalc = (txEffMode === 2);
       var c = txDisplayCategory(t);
       var mainTitle = isTra ? (accNameById(t.account_id) + ' -> ' + accNameById(t.to_account_id)) : (isAdj ? 'Ajuste de saldo' : capitalize(c.name));
 
@@ -8522,7 +8535,8 @@ function exportCSV(range){
     var tipo=t.is_balance_adjustment?'Ajuste de saldo':(t.type==='expense'?'Gasto':(t.type==='income'?'Ingreso':'Transferencia'));
     var cat=t.is_balance_adjustment?'Actualización de saldo':(t.type==='transfer'?(accNameById(t.account_id)+' → '+accNameById(t.to_account_id)):catById(t.category).name);
     var amt=(t.type==='expense'?-t.amount:t.amount).toString().replace('.',',');
-    var computa=isTxExcludedFromCalc(t)?'No':'Sí';
+    var mEff=getEffectiveTxCalcMode(t);
+    var computa=mEff===0?'Sí':(mEff===1?'Solo balance':'No');
     function csvEsc(v){v=(v||'').replace(/"/g,'""').replace(/[\r\n]+/g,' ');if(/^[=+\-@\t]/.test(v))v="'"+v;return v;}
     rows.push([t.date,tipo,csvEsc(cat),csvEsc(t.subcategory),csvEsc(t.note||''),amt,computa]);
   });
