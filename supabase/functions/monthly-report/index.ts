@@ -4,7 +4,7 @@ import { PDFDocument, StandardFonts, rgb } from "https://esm.sh/pdf-lib@1.17.1";
 
 const euro = (n: number) => new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(n);
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://mgesm.github.io",
+  "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-backup-cron-token",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Content-Type": "application/json"
@@ -12,6 +12,18 @@ const corsHeaders = {
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: corsHeaders });
 const base64 = (bytes: Uint8Array) => { let out = ""; for (let i = 0; i < bytes.length; i += 0x8000) out += String.fromCharCode(...bytes.subarray(i, i + 0x8000)); return btoa(out); };
 const median = (values: number[]) => { const v = values.slice().sort((a,b)=>a-b), m = Math.floor(v.length / 2); return v.length ? (v.length % 2 ? v[m] : (v[m-1]+v[m])/2) : 0; };
+
+async function sha256(value: string) {
+  const bytes = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value)));
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function authenticatedUser(db: any, req: Request) {
+  const token = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
+  if (!token) return null;
+  const { data: { user }, error } = await db.auth.getUser(token);
+  return error ? null : user;
+}
 
 async function exportPdf(title: string, income: number, expense: number, balance: number, txs: any[], categories: Array<{name:string;spent:number;budget:number}>, unusual: Array<{note:string;amount:number}>, accounts: any[], patrimony: any[], cutoffDate: string) {
   const pdf = await PDFDocument.create();
@@ -144,7 +156,7 @@ async function sendMonthlyReportForUser(db: any, targetUserId: string, targetEma
     db.from("transaction_voids").select("transaction_id").eq("user_id", targetUserId),
     db.from("categories").select("id,name").eq("user_id", targetUserId),
     db.from("budgets").select("category_id,amount").eq("user_id", targetUserId).eq("month_year", key),
-    db.from("transactions").select("type,amount,tags,exclude_from_calc").eq("user_id", targetUserId).gte("date", previousFrom).lt("date", from),
+    db.from("transactions").select("type,amount,tags,exclude_from_calc,is_balance_adjustment").eq("user_id", targetUserId).gte("date", previousFrom).lt("date", from),
     db.from("accounts").select("*").eq("user_id", targetUserId),
     db.from("patrimony").select("*").eq("user_id", targetUserId),
     db.rpc("get_fintrack_resend_api_key")
@@ -161,6 +173,7 @@ async function sendMonthlyReportForUser(db: any, targetUserId: string, targetEma
   const expense = expensesTx.reduce((s: number, x: any) => s + Number(x.amount), 0);
   const balExpense = activeBal.filter((x: any) => x.type === "expense").reduce((s: number, x: any) => s + Number(x.amount), 0);
   const balance = income - balExpense;
+  const previousExpense = (previousTx ?? []).filter((x: any) => x.type === "expense" && !x.is_balance_adjustment).reduce((s: number, x: any) => s + Number(x.amount), 0);
   const names = new Map((cats ?? []).map((x: any) => [x.id, x.name]));
   const budgetByCategory = new Map((budgets ?? []).filter((x: any) => x.category_id).map((x: any) => [x.category_id, Number(x.amount)]));
   const totals = new Map<string, number>();
@@ -202,40 +215,82 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
   const db = createClient(Deno.env.get("SUPABASE_URL") ?? "", Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "", { auth: { persistSession: false, autoRefreshToken: false } });
   try {
-    const authHeader = req.headers.get("Authorization") || "";
-    const token = authHeader.replace(/^Bearer\s+/i, "");
-    const cronToken = req.headers.get("x-backup-cron-token") || "";
     let body: any = {};
     try { body = await req.json(); } catch (_) {}
-    let targetUser: any = null;
 
-    if (token) {
-      const { data: { user }, error } = await db.auth.getUser(token);
-      if (error || !user) return json({ error: "Unauthorized" }, 401);
-      targetUser = user;
-    } else if (cronToken) {
-      const expectedToken = Deno.env.get("BACKUP_CRON_TOKEN") || "";
-      if (!expectedToken || cronToken !== expectedToken) {
-        return json({ error: "Cron unauthorized" }, 401);
-      }
-    } else {
-      return json({ error: "Unauthorized" }, 401);
-    }
+    const user = await authenticatedUser(db, req);
+    const cronToken = req.headers.get("x-backup-cron-token") || "";
 
     const now = new Date();
-    const prevMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const key = prevMonthDate.getFullYear() + "-" + String(prevMonthDate.getMonth() + 1).padStart(2, "0");
-    const from = key + "-01";
-    const to = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0") + "-01";
-    const twoMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 2, 1);
-    const previousFrom = twoMonthsAgo.getFullYear() + "-" + String(twoMonthsAgo.getMonth() + 1).padStart(2, "0") + "-01";
+    const preview = body?.preview === true && typeof body?.month === "string" && /^\d{4}-\d{2}$/.test(body.month);
+    const requested = preview
+      ? new Date(Date.UTC(Number(body.month.slice(0, 4)), Number(body.month.slice(5, 7)) - 1, 1))
+      : (typeof body?.month === "string" && /^\d{4}-\d{2}$/.test(body.month))
+        ? new Date(Date.UTC(Number(body.month.slice(0, 4)), Number(body.month.slice(5, 7)) - 1, 1))
+        : new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1));
+    const start = requested;
+    const end = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth() + 1, 1));
+    const previous = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth() - 1, 1));
+    const key = start.toISOString().slice(0, 7);
+    const from = start.toISOString().slice(0, 10);
+    const to = end.toISOString().slice(0, 10);
+    const previousFrom = previous.toISOString().slice(0, 10);
 
-    if (targetUser) {
-      const res = await sendMonthlyReportForUser(db, targetUser.id, targetUser.email, key, prevMonthDate, from, to, previousFrom, body?.preview === true);
-      return json(res);
+    // 1. Modalidad Usuario Autenticado (vía Bearer JWT)
+    if (user) {
+      const res = await sendMonthlyReportForUser(db, user.id, user.email, key, start, from, to, previousFrom, preview);
+      return json({ ok: true, ...res });
     }
 
-    return json({ message: "Cron report processing completed" });
+    // 2. Modalidad Cron (vía cabecera x-backup-cron-token)
+    if (!cronToken) {
+      return json({ error: "Unauthorized" }, 401);
+    }
+    const { data: secret } = await db.from("backup_scheduler_secret").select("token_hash").eq("singleton", true).maybeSingle();
+    const expectedToken = Deno.env.get("BACKUP_CRON_TOKEN") || "";
+    const isCronValid = (secret && await sha256(cronToken) === secret.token_hash) || (expectedToken && cronToken === expectedToken);
+    if (!isCronValid) {
+      return json({ error: "Cron unauthorized" }, 401);
+    }
+
+    const madridHour = Number(new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Madrid", hour: "2-digit", hourCycle: "h23" }).format(new Date()));
+    if (body?.source === "supabase-cron" && madridHour !== 14) {
+      return json({ ok: true, status: "outside_madrid_delivery_window" });
+    }
+
+    // Procesar todos los usuarios registrados en Supabase
+    const results: Array<{ userId: string; status: string; detail?: string }> = [];
+    for (let page = 1; ; page += 1) {
+      const { data, error } = await db.auth.admin.listUsers({ page, perPage: 200 });
+      if (error) return json({ error: "Could not list users: " + error.message }, 500);
+      const users = data.users ?? [];
+      if (!users.length) break;
+      for (const account of users) {
+        if (!account.email) continue;
+        const { data: sent } = await db.from("monthly_report_runs").select("id").eq("user_id", account.id).eq("report_month", key).eq("status", "completed").maybeSingle();
+        if (sent) {
+          results.push({ userId: account.id, status: "already_sent" });
+          continue;
+        }
+        try {
+          const res = await sendMonthlyReportForUser(db, account.id, account.email, key, start, from, to, previousFrom, false);
+          results.push({ userId: account.id, status: res.status });
+        } catch (err) {
+          const detail = err instanceof Error ? err.message : "Unknown report error";
+          await db.from("monthly_report_runs").upsert({
+            user_id: account.id,
+            report_month: key,
+            path: account.id + "/failed-" + key + ".pdf",
+            status: "failed",
+            error_message: detail
+          }, { onConflict: "user_id,report_month" });
+          results.push({ userId: account.id, status: "failed", detail });
+        }
+      }
+      if (users.length < 200) break;
+    }
+
+    return json({ ok: true, results, month: key });
   } catch (err) {
     return json({ error: err instanceof Error ? err.message : "Internal error" }, 500);
   }

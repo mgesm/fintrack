@@ -2523,8 +2523,8 @@ button:not(:disabled):active{transform:scale(.97);}
 </div>
 
 <script>
-var APP_VERSION='2026.10.01.4';
-var APP_PUBLISHED_AT='01/10/2026 09:30 CEST';
+var APP_VERSION='2026.10.02.1';
+var APP_PUBLISHED_AT='02/10/2026 09:15 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
 var sb=window.supabase.createClient(SB_URL,SB_KEY);
@@ -6461,13 +6461,39 @@ function renderSettingsTab(el){
     +'<div class="settings-section"><div class="settings-title">Apariencia</div><div class="theme-switch-row">'
     +themeOpts.map(function(o){return '<button class="theme-switch-btn'+(curTheme===o.v?' active':'')+'" onclick="setTheme(\''+o.v+'\')">'+o.label+'</button>';}).join('')
     +'</div></div>'
-    +'<div class="settings-section"><div class="settings-title">Exportar datos</div><button class="settings-btn" onclick="openExportModal()" style="display:flex;align-items:center;justify-content:space-between;"><span style="display:inline-flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Exportar movimientos (PDF · Excel · CSV)</span><span class="btn-arrow"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span></button><button class="settings-btn" onclick="openExportModal(\''+'year'+'\')" style="display:flex;align-items:center;justify-content:space-between;"><span style="display:inline-flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Exportar informe anual (PDF)</span><span class="btn-arrow"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span></button><button class="settings-btn" onclick="exportJSON()" style="display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Exportar copia completa JSON</button></div>'
+    +'<div class="settings-section"><div class="settings-title">Exportar datos</div><button class="settings-btn" onclick="openExportModal()" style="display:flex;align-items:center;justify-content:space-between;"><span style="display:inline-flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Exportar movimientos (PDF · Excel · CSV)</span><span class="btn-arrow"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span></button><button class="settings-btn" onclick="openExportModal(\''+'year'+'\')" style="display:flex;align-items:center;justify-content:space-between;"><span style="display:inline-flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Exportar informe anual (PDF)</span><span class="btn-arrow"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span></button><button class="settings-btn" onclick="sendMonthlyReportEmail()" style="display:flex;align-items:center;justify-content:space-between;"><span style="display:inline-flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Enviar resumen mensual a mi correo</span><span class="btn-arrow"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span></button><button class="settings-btn" onclick="exportJSON()" style="display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Exportar copia completa JSON</button></div>'
     +'<div class="settings-section"><div class="settings-title">Copia de Seguridad</div><div class="settings-info">Las copias se crean automáticamente cada cinco días y se conservan las tres últimas.'+(lastBackup?'<br>Última copia local: '+new Date(lastBackup).toLocaleDateString('es-ES'):'')+'<div id="cloudBackupStatus" style="margin-top:6px;font-size:12px;color:var(--text3)">Copia en la nube: consultando…</div></div><button class="settings-btn" onclick="downloadBackupNow()" style="display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar copia ahora</button><input id="importJSONFile" type="file" accept=".json,.json.gz,application/json,application/gzip" style="display:none" onchange="importJSONFile(this)"><button class="settings-btn" onclick="document.getElementById(&quot;importJSONFile&quot;).click()" style="display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Importar JSON</button><div class="status-msg" id="importStatus"></div><button class="settings-btn" onclick="restoreLatestBackup()" style="display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>Restaurar última copia</button></div>'
     +'<div class="settings-section"><div class="settings-title">Cuenta</div><div class="settings-info">'+email+'</div><button class="settings-btn danger" onclick="signOut()" style="display:flex;align-items:center;justify-content:space-between;"><span>Cerrar sesión</span><span class="btn-arrow"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span></button></div>'
     +'<div class="settings-section"><div class="settings-title">Zona de peligro</div><button class="settings-btn danger" onclick="clearTxs()" style="display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Borrar todas las transacciones</button></div>'
     +'<div style="text-align:center;padding:16px 0;font-size:11px;font-family:var(--mono);color:var(--text3)">fintrack · '+email+'</div>'
     +'</div>';
   setTimeout(function(){loadLatestCommitTime();loadCloudBackupStatus();},0);
+}
+async function sendMonthlyReportEmail(monthStr){
+  if(!currentUser||!currentUser.email){
+    alert('Debes iniciar sesión para recibir el resumen por correo');
+    return;
+  }
+  var m=monthStr||(viewYear+'-'+pad(viewMonth+1));
+  setSync('syncing');
+  showSuccessToast('Enviando resumen de '+m+' a '+currentUser.email+'…');
+  try{
+    var res=await sb.functions.invoke('monthly-report',{
+      body:{month:m,preview:false}
+    });
+    if(res.error||!res.data||res.data.ok===false){
+      var errMsg=(res.data&&res.data.error)||(res.error&&res.error.message)||'Error al enviar el correo';
+      alert('No se pudo enviar el resumen mensual: '+errMsg);
+      setSync('err');
+      return;
+    }
+    setSync('ok');
+    showSuccessToast('Resumen mensual de '+m+' enviado a '+currentUser.email);
+  }catch(err){
+    console.error('Error al invocar monthly-report:',err);
+    alert('Error al enviar el resumen mensual: '+(err.message||err));
+    setSync('err');
+  }
 }
 async function loadCloudBackupStatus(){
   var el=document.getElementById('cloudBackupStatus');if(!el||!currentUser)return;
