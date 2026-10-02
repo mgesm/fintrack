@@ -382,7 +382,7 @@ async function sendMonthlyReportForUser(db: any, targetUserId: string, targetEma
   const monthTitle = new Intl.DateTimeFormat("es-ES", { month: "long", year: "numeric" }).format(start);
   const bytes = await exportPdf(monthTitle, income, expense, balance, namedTransactions, categories, unusual, accountRows ?? [], patrimonyRows ?? [], to);
   const path = targetUserId + "/" + (preview ? "vista-previa-" + key + "-" + Date.now() : "informe-" + key) + ".pdf";
-  const { error: uploadError } = await db.storage.from("fintrack-reports").upload(path, bytes, { contentType: "application/pdf", upsert: false });
+  const { error: uploadError } = await db.storage.from("fintrack-reports").upload(path, bytes, { contentType: "application/pdf", upsert: true });
   if (uploadError) throw new Error(uploadError.message);
   const emailHtml = buildEmailHtml(monthTitle, income, expense, balance, categories, targetEmail, preview, key);
   const email = await fetch("https://api.resend.com/emails", {
@@ -402,7 +402,7 @@ async function sendMonthlyReportForUser(db: any, targetUserId: string, targetEma
     throw new Error("Email service returned " + email.status + (errText ? ": " + errText : ""));
   }
   if (!preview) {
-    const { error: recordError } = await db.from("monthly_report_runs").insert({ user_id: targetUserId, report_month: key, path, status: "completed" });
+    const { error: recordError } = await db.from("monthly_report_runs").upsert({ user_id: targetUserId, report_month: key, path, status: "completed", error_message: null }, { onConflict: "user_id,report_month" });
     if (recordError) throw new Error(recordError.message);
   }
   return { status: preview ? "preview_sent" : "sent", month: key };
