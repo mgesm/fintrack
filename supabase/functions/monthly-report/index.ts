@@ -150,6 +150,191 @@ async function exportPdf(title: string, income: number, expense: number, balance
   return pdf.save();
 }
 
+function buildEmailHtml(monthTitle: string, income: number, expense: number, balance: number, categories: Array<{name:string;spent:number;budget:number}>, targetEmail: string, preview: boolean, key: string) {
+  const topCategories = categories
+    .filter(c => c.spent > 0)
+    .sort((a, b) => b.spent - a.spent)
+    .slice(0, 4);
+
+  const savingsRate = income > 0 ? Math.max(0, ((income - expense) / income) * 100).toFixed(1) : null;
+  const balanceSign = balance >= 0 ? "+" : "";
+  const balanceColor = balance >= 0 ? "#1e3a8a" : "#b91c1c";
+
+  const categoriesRows = topCategories.map(c => {
+    const pct = expense > 0 ? ((c.spent / expense) * 100).toFixed(0) : "0";
+    return `
+      <tr>
+        <td style="padding: 10px 0; font-size: 13px; color: #334155; border-bottom: 1px solid #f1f5f9;">
+          <strong>${c.name}</strong>
+        </td>
+        <td style="padding: 10px 0; font-size: 13px; color: #64748b; text-align: right; border-bottom: 1px solid #f1f5f9; font-variant-numeric: tabular-nums;">
+          ${pct} %
+        </td>
+        <td style="padding: 10px 0; font-size: 13px; font-weight: 600; color: #0f172a; text-align: right; border-bottom: 1px solid #f1f5f9; font-variant-numeric: tabular-nums;">
+          ${euro(c.spent)}
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  return `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>fintrack · Resumen de ${monthTitle}</title>
+</head>
+<body style="margin: 0; padding: 24px 12px; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #0f172a;">
+  <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="max-width: 580px; background-color: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);">
+          <!-- Header fintrack -->
+          <tr>
+            <td style="padding: 32px 32px 20px 32px;">
+              <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td>
+                    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 26px; font-weight: 800; letter-spacing: -0.6px; color: #0f172a; line-height: 1;">
+                      fin<span style="color: #16a34a;">track.</span>
+                    </div>
+                    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #64748b; margin-top: 6px;">
+                      ${preview ? "Vista previa · " : "Resumen mensual · "}${monthTitle}
+                    </div>
+                  </td>
+                  <td align="right" valign="top">
+                    <span style="display: inline-block; padding: 4px 10px; background-color: #f1f5f9; color: #475569; font-size: 11px; font-weight: 600; border-radius: 9999px; letter-spacing: 0.02em;">
+                      ${preview ? "VISTA PREVIA" : "CONSOLIDADO"}
+                    </span>
+                  </td>
+                </tr>
+              </table>
+              <div style="height: 1px; background-color: #f1f5f9; margin-top: 20px;"></div>
+            </td>
+          </tr>
+
+          <!-- Intro copy -->
+          <tr>
+            <td style="padding: 0 32px 20px 32px; font-size: 14px; line-height: 1.5; color: #475569;">
+              Aquí tienes el resumen financiero consolidado de <strong>${monthTitle}</strong>. El documento completo con el arqueo de cuentas, control presupuestario y libro mayor agrupado se encuentra adjunto en formato PDF.
+            </td>
+          </tr>
+
+          <!-- KPI Cards -->
+          <tr>
+            <td style="padding: 0 32px 24px 32px;">
+              <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                  <!-- Ingresos -->
+                  <td width="31%" valign="top" style="background-color: #f0fdf4; border: 1px solid #dcfce7; border-radius: 14px; padding: 12px 14px;">
+                    <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #166534;">
+                      Ingresos
+                    </div>
+                    <div style="font-size: 16px; font-weight: 700; color: #15803d; margin-top: 4px; font-variant-numeric: tabular-nums;">
+                      ${euro(income)}
+                    </div>
+                  </td>
+                  <td width="3.5%"></td>
+                  <!-- Gastos -->
+                  <td width="31%" valign="top" style="background-color: #fef2f2; border: 1px solid #fee2e2; border-radius: 14px; padding: 12px 14px;">
+                    <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #991b1b;">
+                      Gastos
+                    </div>
+                    <div style="font-size: 16px; font-weight: 700; color: #b91c1c; margin-top: 4px; font-variant-numeric: tabular-nums;">
+                      ${euro(expense)}
+                    </div>
+                  </td>
+                  <td width="3.5%"></td>
+                  <!-- Balance -->
+                  <td width="31%" valign="top" style="background-color: #eff6ff; border: 1px solid #dbeafe; border-radius: 14px; padding: 12px 14px;">
+                    <div style="font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #1e40af;">
+                      Balance
+                    </div>
+                    <div style="font-size: 16px; font-weight: 700; color: ${balanceColor}; margin-top: 4px; font-variant-numeric: tabular-nums;">
+                      ${balanceSign}${euro(balance)}
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          ${savingsRate !== null ? `
+          <!-- Tasa de ahorro -->
+          <tr>
+            <td style="padding: 0 32px 20px 32px;">
+              <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
+                <tr>
+                  <td style="padding: 10px 16px; font-size: 12px; font-weight: 600; color: #475569;">
+                    Tasa de ahorro del periodo
+                  </td>
+                  <td align="right" style="padding: 10px 16px; font-size: 13px; font-weight: 700; color: #0f172a; font-variant-numeric: tabular-nums;">
+                    ${savingsRate} %
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          ` : ""}
+
+          ${topCategories.length > 0 ? `
+          <!-- Categorías destacadas -->
+          <tr>
+            <td style="padding: 0 32px 24px 32px;">
+              <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #64748b; margin-bottom: 8px;">
+                Mayores gastos por categoría
+              </div>
+              <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0">
+                ${categoriesRows}
+              </table>
+            </td>
+          </tr>
+          ` : ""}
+
+          <!-- PDF callout -->
+          <tr>
+            <td style="padding: 0 32px 28px 32px;">
+              <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 12px;">
+                <tr>
+                  <td style="padding: 14px 16px; font-size: 12px; line-height: 1.55; color: #475569;">
+                    <strong style="color: #0f172a;">Informe editorial adjunto:</strong> Encuentras el documento <span style="font-family: monospace; font-size: 11px; color: #0f172a;">fintrack-${key}.pdf</span> adjunto a este correo con el informe completo en diseño White Edition, libro mayor agrupado por jornadas y balance de cuentas.
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- CTA Button -->
+          <tr>
+            <td align="center" style="padding: 0 32px 32px 32px;">
+              <a href="https://mgesm.github.io/fintrack/" style="display: inline-block; padding: 12px 28px; background-color: #0f172a; color: #ffffff; text-decoration: none; border-radius: 9999px; font-size: 13px; font-weight: 600; letter-spacing: -0.2px;">
+                Abrir fintrack
+              </a>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 20px 32px; background-color: #f8fafc; border-top: 1px solid #f1f5f9; text-align: center;">
+              <div style="font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">
+                fintrack · finanzas personales privadas
+              </div>
+              <div style="font-size: 10px; color: #94a3b8; line-height: 1.4;">
+                Este resumen se ha generado automáticamente con el cierre del periodo.<br>
+                Tus datos financieros son privados y están cifrados.
+              </div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `.trim();
+}
+
 async function sendMonthlyReportForUser(db: any, targetUserId: string, targetEmail: string, key: string, start: Date, from: string, to: string, previousFrom: string, preview: boolean) {
   const [{ data: tx, error: txError }, { data: voids }, { data: cats }, { data: budgets }, { data: previousTx }, { data: accountRows }, { data: patrimonyRows }, { data: resendKey }] = await Promise.all([
     db.from("transactions").select("*").eq("user_id", targetUserId).gte("date", from).lt("date", to),
@@ -191,14 +376,15 @@ async function sendMonthlyReportForUser(db: any, targetUserId: string, targetEma
   const path = targetUserId + "/" + (preview ? "vista-previa-" + key + "-" + Date.now() : "informe-" + key) + ".pdf";
   const { error: uploadError } = await db.storage.from("fintrack-reports").upload(path, bytes, { contentType: "application/pdf", upsert: false });
   if (uploadError) throw new Error(uploadError.message);
+  const emailHtml = buildEmailHtml(monthTitle, income, expense, balance, categories, targetEmail, preview, key);
   const email = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: "Bearer " + resendKey, "Content-Type": "application/json" },
     body: JSON.stringify({
-      from: "FinTrack <onboarding@resend.dev>",
+      from: "fintrack <onboarding@resend.dev>",
       to: [targetEmail],
-      subject: (preview ? "Vista previa · " : "FinTrack · Informe de ") + monthTitle,
-      html: "<p>" + (preview ? "Esta es una vista previa" : "Ya tienes listo tu informe mensual") + " de <strong>" + monthTitle + "</strong>.</p><p>Adjunto encontrarás el PDF con el cierre y los principales avisos.</p>",
+      subject: (preview ? "fintrack · Vista previa de " : "fintrack · Resumen de ") + monthTitle,
+      html: emailHtml,
       attachments: [{ filename: "fintrack-" + key + ".pdf", content: base64(bytes) }]
     })
   });
