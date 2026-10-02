@@ -5,7 +5,7 @@ import { PDFDocument, StandardFonts, rgb } from "https://esm.sh/pdf-lib@1.17.1";
 const euro = (n: number) => new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(n);
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-backup-cron-token",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-backup-cron-token, x-user-token",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Content-Type": "application/json"
 };
@@ -18,11 +18,18 @@ async function sha256(value: string) {
   return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
-async function authenticatedUser(db: any, req: Request) {
-  const token = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
-  if (!token) return null;
-  const { data: { user }, error } = await db.auth.getUser(token);
-  return error ? null : user;
+async function authenticatedUser(db: any, req: Request, body?: any) {
+  const headerAuth = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
+  const customHeader = req.headers.get("x-user-token") || "";
+  const bodyToken = typeof body?.access_token === "string" ? body.access_token : "";
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
+
+  const candidates = [headerAuth, customHeader, bodyToken].filter(t => t && t !== anonKey);
+  for (const token of candidates) {
+    const { data: { user }, error } = await db.auth.getUser(token);
+    if (!error && user) return user;
+  }
+  return null;
 }
 
 async function exportPdf(title: string, income: number, expense: number, balance: number, txs: any[], categories: Array<{name:string;spent:number;budget:number}>, unusual: Array<{note:string;amount:number}>, accounts: any[], patrimony: any[], cutoffDate: string) {
@@ -336,7 +343,7 @@ function buildEmailHtml(monthTitle: string, income: number, expense: number, bal
 }
 
 async function sendMonthlyReportForUser(db: any, targetUserId: string, targetEmail: string, key: string, start: Date, from: string, to: string, previousFrom: string, preview: boolean) {
-  const [{ data: tx, error: txError }, { data: voids }, { data: cats }, { data: budgets }, { data: previousTx }, { data: accountRows }, { data: patrimonyRows }, { data: resendKey }] = await Promise.all([
+  const [{ data: tx, error: txError }, { data: voids }, { data: cats }, { data: budgets }, { data: previousTx }, { data: accountRows }, { data: patrimonyRows }, { data: resendRpcKey }] = await Promise.all([
     db.from("transactions").select("*").eq("user_id", targetUserId).gte("date", from).lt("date", to),
     db.from("transaction_voids").select("transaction_id").eq("user_id", targetUserId),
     db.from("categories").select("id,name").eq("user_id", targetUserId),
@@ -346,11 +353,12 @@ async function sendMonthlyReportForUser(db: any, targetUserId: string, targetEma
     db.from("patrimony").select("*").eq("user_id", targetUserId),
     db.rpc("get_fintrack_resend_api_key")
   ]);
-  if (txError || !resendKey) throw new Error(txError?.message || "Email sender not configured");
+  const resendKey = resendRpcKey || Deno.env.get("RESEND_API_KEY") || "";
+  if (txError || !resendKey) throw new Error(txError?.message || "Email sender not configured (no Resend API key found)");
   const voided = new Set((voids ?? []).map((x: any) => x.transaction_id));
   const isExcludedFromExpense = (x: any) => (x.exclude_from_calc === true || x.exclude_from_calc === 1 || x.exclude_from_calc === 2 || x.exclude_from_calc === "1" || x.exclude_from_calc === "2") || (Array.isArray(x.tags) && (x.tags.includes("_no_calc") || x.tags.includes("_no_expense")));
   const isExcludedFromBalance = (x: any) => (x.exclude_from_calc === true || x.exclude_from_calc === 2 || x.exclude_from_calc === "2") || (Array.isArray(x.tags) && x.tags.includes("_no_calc"));
-  const nonVoided = (tx ?? []).filter((x: any) => !voided.has(x.id) && x.type !== "transfer" && !x.is_balance_adjustment);
+  const nonVoided = (tx ?? []).filter((x: any) => !voided.has(x.id) && x.type !== "transfer" && !x.is_balance_adjustment); // type!=="transfer"&&!x.is_balance_adjustment
   const activeExp = nonVoided.filter((x: any) => !isExcludedFromExpense(x));
   const activeBal = nonVoided.filter((x: any) => !isExcludedFromBalance(x));
   const expensesTx = activeExp.filter((x: any) => x.type === "expense");
@@ -358,7 +366,7 @@ async function sendMonthlyReportForUser(db: any, targetUserId: string, targetEma
   const expense = expensesTx.reduce((s: number, x: any) => s + Number(x.amount), 0);
   const balExpense = activeBal.filter((x: any) => x.type === "expense").reduce((s: number, x: any) => s + Number(x.amount), 0);
   const balance = income - balExpense;
-  const previousExpense = (previousTx ?? []).filter((x: any) => x.type === "expense" && !x.is_balance_adjustment).reduce((s: number, x: any) => s + Number(x.amount), 0);
+  const previousExpense = (previousTx ?? []).filter((x: any) => x.type === "expense" && !x.is_balance_adjustment).reduce((s: number, x: any) => s + Number(x.amount), 0); // previousExpense=(previousTx??[]).filter(x=>x.type==="expense"&&!x.is_balance_adjustment)
   const names = new Map((cats ?? []).map((x: any) => [x.id, x.name]));
   const budgetByCategory = new Map((budgets ?? []).filter((x: any) => x.category_id).map((x: any) => [x.category_id, Number(x.amount)]));
   const totals = new Map<string, number>();
@@ -385,10 +393,14 @@ async function sendMonthlyReportForUser(db: any, targetUserId: string, targetEma
       to: [targetEmail],
       subject: (preview ? "fintrack · Vista previa de " : "fintrack · Resumen de ") + monthTitle,
       html: emailHtml,
-      attachments: [{ filename: "fintrack-" + key + ".pdf", content: base64(bytes) }]
+      attachments: [{ filename: "fintrack-" + key + ".pdf", content: base64(bytes) }] // attachments:[{filename:"fintrack-"+key+".pdf",content:base64(bytes)}]
     })
   });
-  if (!email.ok) { await db.storage.from("fintrack-reports").remove([path]); throw new Error("Email service returned " + email.status); }
+  if (!email.ok) {
+    const errText = await email.text().catch(() => "");
+    await db.storage.from("fintrack-reports").remove([path]);
+    throw new Error("Email service returned " + email.status + (errText ? ": " + errText : ""));
+  }
   if (!preview) {
     const { error: recordError } = await db.from("monthly_report_runs").insert({ user_id: targetUserId, report_month: key, path, status: "completed" });
     if (recordError) throw new Error(recordError.message);
@@ -404,7 +416,7 @@ Deno.serve(async (req) => {
     let body: any = {};
     try { body = await req.json(); } catch (_) {}
 
-    const user = await authenticatedUser(db, req);
+    const user = await authenticatedUser(db, req, body); // authenticatedUser(db, req)
     const cronToken = req.headers.get("x-backup-cron-token") || "";
 
     const now = new Date();
