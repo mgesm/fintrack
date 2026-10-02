@@ -2523,8 +2523,8 @@ button:not(:disabled):active{transform:scale(.97);}
 </div>
 
 <script>
-var APP_VERSION='2026.10.02.3';
-var APP_PUBLISHED_AT='02/10/2026 10:25 CEST';
+var APP_VERSION='2026.10.02.4';
+var APP_PUBLISHED_AT='02/10/2026 10:35 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
 var sb=window.supabase.createClient(SB_URL,SB_KEY);
@@ -6486,7 +6486,7 @@ async function sendMonthlyReportEmail(monthStr){
     }
     var token=session?session.access_token:'';
     var res=await sb.functions.invoke('monthly-report',{
-      headers:token?{Authorization:'Bearer '+token,'x-user-token':token}:{},
+      headers:token?{Authorization:'Bearer '+token}:{},
       body:{month:m,preview:false,access_token:token}
     });
     if(res.error||!res.data||res.data.ok===false){
