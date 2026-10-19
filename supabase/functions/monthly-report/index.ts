@@ -342,19 +342,34 @@ function buildEmailHtml(monthTitle: string, income: number, expense: number, bal
   `.trim();
 }
 
+async function fetchAllRows(db: any, table: string, userId: string, extraFilter?: (q: any) => any) {
+  const rows: any[] = [];
+  const pageSize = 1000;
+  for (let from = 0; ; from += pageSize) {
+    let q = db.from(table).select("*").eq("user_id", userId);
+    if (extraFilter) q = extraFilter(q);
+    const { data, error } = await q.range(from, from + pageSize - 1);
+    if (error) throw new Error(table + ": " + error.message);
+    if (!data || !data.length) break;
+    rows.push(...data);
+    if (data.length < pageSize) break;
+  }
+  return rows;
+}
+
 async function sendMonthlyReportForUser(db: any, targetUserId: string, targetEmail: string, key: string, start: Date, from: string, to: string, previousFrom: string, preview: boolean) {
-  const [{ data: tx, error: txError }, { data: voids }, { data: cats }, { data: budgets }, { data: previousTx }, { data: accountRows }, { data: patrimonyRows }, { data: resendRpcKey }] = await Promise.all([
-    db.from("transactions").select("*").eq("user_id", targetUserId).gte("date", from).lt("date", to),
-    db.from("transaction_voids").select("transaction_id").eq("user_id", targetUserId),
+  const [tx, voids, { data: cats }, { data: budgets }, previousTx, { data: accountRows }, patrimonyRows, { data: resendRpcKey }] = await Promise.all([
+    fetchAllRows(db, "transactions", targetUserId, (q: any) => q.gte("date", from).lt("date", to)),
+    fetchAllRows(db, "transaction_voids", targetUserId),
     db.from("categories").select("id,name").eq("user_id", targetUserId),
     db.from("budgets").select("category_id,amount").eq("user_id", targetUserId).eq("month_year", key),
-    db.from("transactions").select("type,amount,tags,exclude_from_calc,is_balance_adjustment").eq("user_id", targetUserId).gte("date", previousFrom).lt("date", from),
+    fetchAllRows(db, "transactions", targetUserId, (q: any) => q.gte("date", previousFrom).lt("date", from)),
     db.from("accounts").select("*").eq("user_id", targetUserId),
-    db.from("patrimony").select("*").eq("user_id", targetUserId),
+    fetchAllRows(db, "patrimony", targetUserId),
     db.rpc("get_fintrack_resend_api_key")
   ]);
   const resendKey = resendRpcKey || Deno.env.get("RESEND_API_KEY") || "";
-  if (txError || !resendKey) throw new Error(txError?.message || "Email sender not configured (no Resend API key found)");
+  if (!resendKey) throw new Error("Email sender not configured (no Resend API key found)");
   const voided = new Set((voids ?? []).map((x: any) => x.transaction_id));
   const isExcludedFromExpense = (x: any) => (x.exclude_from_calc === true || x.exclude_from_calc === 1 || x.exclude_from_calc === 2 || x.exclude_from_calc === "1" || x.exclude_from_calc === "2") || (Array.isArray(x.tags) && (x.tags.includes("_no_calc") || x.tags.includes("_no_expense")));
   const isExcludedFromBalance = (x: any) => (x.exclude_from_calc === true || x.exclude_from_calc === 2 || x.exclude_from_calc === "2") || (Array.isArray(x.tags) && x.tags.includes("_no_calc"));
