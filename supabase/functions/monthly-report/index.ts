@@ -38,7 +38,14 @@ async function exportPdf(title: string, income: number, expense: number, balance
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
   const W = 595, H = 842, M = 45;
   let page = pdf.addPage([W, H]), y = H - 38;
-  const text = (s: string, x: number, size = 10, strong = false, color = rgb(0.12, 0.16, 0.22)) => page.drawText(s.slice(0, 100), { x, y, size, font: strong ? bold : normal, color });
+  const sanitizeWinAnsi = (str: string) => (str || "")
+    .replace(/→/g, "->")
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/[\u2013\u2014]/g, "-")
+    .replace(/[^\x20-\x7E\xA0-\xFF]/g, "");
+
+  const text = (s: string, x: number, size = 10, strong = false, color = rgb(0.12, 0.16, 0.22)) => page.drawText(sanitizeWinAnsi(s).slice(0, 100), { x, y, size, font: strong ? bold : normal, color });
   const newPage = () => { page = pdf.addPage([W, H]); y = H - 38; };
   const ensure = (height: number) => { if (y - height < 42) newPage(); };
   const section = (s: string) => { ensure(28); y -= 10; text(s, M, 12, true, rgb(0.12, 0.16, 0.22)); y -= 16; };
@@ -163,7 +170,7 @@ function buildEmailHtml(monthTitle: string, income: number, expense: number, bal
     .sort((a, b) => b.spent - a.spent)
     .slice(0, 4);
 
-  const savingsRate = income > 0 ? Math.max(0, ((income - expense) / income) * 100).toFixed(1) : null;
+  const savingsRate = income > 0 ? ((balance / income) * 100).toFixed(1) : null;
   const balanceSign = balance >= 0 ? "+" : "";
   const balanceColor = balance >= 0 ? "#1e3a8a" : "#b91c1c";
 
@@ -378,9 +385,10 @@ async function sendMonthlyReportForUser(db: any, targetUserId: string, targetEma
   const activeBal = nonVoided.filter((x: any) => !isExcludedFromBalance(x));
   const expensesTx = activeExp.filter((x: any) => x.type === "expense");
   const income = activeExp.filter((x: any) => x.type === "income").reduce((s: number, x: any) => s + Number(x.amount), 0);
+  const balIncome = activeBal.filter((x: any) => x.type === "income").reduce((s: number, x: any) => s + Number(x.amount), 0);
   const expense = expensesTx.reduce((s: number, x: any) => s + Number(x.amount), 0);
   const balExpense = activeBal.filter((x: any) => x.type === "expense").reduce((s: number, x: any) => s + Number(x.amount), 0);
-  const balance = income - balExpense;
+  const balance = balIncome - balExpense;
   const previousExpense = (previousTx ?? []).filter((x: any) => x.type === "expense" && !x.is_balance_adjustment).reduce((s: number, x: any) => s + Number(x.amount), 0); // previousExpense=(previousTx??[]).filter(x=>x.type==="expense"&&!x.is_balance_adjustment)
   const names = new Map((cats ?? []).map((x: any) => [x.id, x.name]));
   const budgetByCategory = new Map((budgets ?? []).filter((x: any) => x.category_id).map((x: any) => [x.category_id, Number(x.amount)]));

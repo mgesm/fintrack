@@ -1,6 +1,6 @@
-var CACHE_NAME='fintrack-cache-v198';
+var CACHE_NAME='fintrack-cache-v199';
 var CACHE_PREFIX='fintrack-cache-';
-var PRECACHE=['./','./index.html','./manifest.json','./supabase-js.min.js','./icon-192.png','./icon-512.png','./vendor/jspdf.umd.min.js','./vendor/exceljs.min.js','./fonts/inter-latin-wght-normal.woff2'];
+var PRECACHE=['./','./index.html','./manifest.json','./supabase-js.min.js','./icon-192.png','./icon-512.png','./fonts/inter-latin-wght-normal.woff2'];
 
 self.addEventListener('install',function(e){
   self.skipWaiting();
@@ -37,10 +37,12 @@ self.addEventListener('fetch',function(e){
           return networkRes;
         }),
         new Promise(function(_,reject){
-          setTimeout(function(){reject(new Error('Navigation network timeout'));},2500);
+          setTimeout(function(){reject(new Error('Navigation network timeout'));},4500);
         })
       ]).catch(function(){
-        return caches.match('./index.html');
+        return caches.match(e.request).then(function(cached){
+          return cached || caches.match('./index.html') || caches.match('./');
+        });
       })
     );
     return;
