@@ -2523,8 +2523,8 @@ button:not(:disabled):active{transform:scale(.97);}
 </div>
 
 <script>
-var APP_VERSION='2026.10.19.1';
-var APP_PUBLISHED_AT='19/10/2026 09:45 CEST';
+var APP_VERSION='2026.10.26.1';
+var APP_PUBLISHED_AT='26/10/2026 12:00 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
 var sb=window.supabase.createClient(SB_URL,SB_KEY);
@@ -4051,7 +4051,7 @@ function renderBalanceAdjustmentNote(txs,id){
 function renderUncomputedExpensesNote(txs,id){
   var el=document.getElementById(id);if(!el)return;
   var uncomputed=(txs||[]).reduce(function(s,t){
-    if(t&&t.type==='expense'&&!t.is_balance_adjustment&&isTxExcludedFromExpense(t)){
+    if(t&&t.type==='expense'&&!t.is_balance_adjustment&&getEffectiveTxCalcMode(t)===1){
       return s+(Number(t.amount)||0);
     }
     return s;
