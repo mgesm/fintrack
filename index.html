@@ -522,7 +522,7 @@ body{display:flex;flex-direction:column;width:100%;max-width:430px;margin:0 auto
 }
 .dt-flip-wrap {
   width: 100%;
-  max-width: 100%;
+  max-width: 430px;
   margin: 0 auto;
 }
 .dt-flip-wrap .flip-face {
@@ -1491,41 +1491,16 @@ select.field-input option{background:var(--bg2);}
   pointer-events:none;z-index:1;
 }
 /* Privacy mode obscuring */
-html.privacy-mode canvas,
+html.privacy-mode #lineChartCanvas,
+html.privacy-mode #barChartCanvas,
 html.privacy-mode .heatmap-grid,
-html.privacy-mode #lineChartCanvas {
+html.privacy-mode .dc-amount,
+html.privacy-mode .dt-dc-amount,
+html.privacy-mode .heatmap-tot,
+html.privacy-mode .heatmap-detail {
   filter: blur(6px);
   transition: filter 0.25s ease;
   pointer-events: none;
-}
-/* Desktop 2-column layout */
-.dt-two-col {
-  display: grid;
-  grid-template-columns: 1.55fr 1fr;
-  gap: 28px;
-  width: 100%;
-  max-width: 1440px;
-  align-items: start;
-}
-.dt-ledger-col {
-  min-width: 0;
-}
-.dt-analytics-col {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  position: sticky;
-  top: 0;
-}
-@media(max-width: 1100px) {
-  .dt-two-col {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-  .dt-analytics-col {
-    position: static;
-  }
 }
 /* Mobile ergonomic touch targets */
 .month-label { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
@@ -2564,7 +2539,7 @@ button:not(:disabled):active{transform:scale(.97);}
 </div>
 
 <script>
-var APP_VERSION='2026.10.26.2';
+var APP_VERSION='2026.10.26.3';
 var APP_PUBLISHED_AT='26/10/2026 13:30 CEST';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
@@ -4292,9 +4267,9 @@ function renderDonut(exps,total){
     if(activeCatId){var a=entries.filter(function(e){return e.id===activeCatId;})[0];
       if(a){
         var catName=catById(activeCatId).name;
-        setCenter((chartTotal?Math.round(a.value/chartTotal*100):0)+'%',fmt(a.value),capitalize(catName));
-      } else setCenter('gastos',total?fmt(total):'0 €','');}
-    else setCenter('gastos',total?fmt(total):'0 €','');
+        setCenter((chartTotal?Math.round(a.value/chartTotal*100):0)+'%',fmtPrivacy(a.value),capitalize(catName));
+      } else setCenter('gastos',total?fmtPrivacy(total):'0 €','');}
+    else setCenter('gastos',total?fmtPrivacy(total):'0 €','');
   }
   refresh();
   canvas.onclick=function(ev){
@@ -9354,61 +9329,69 @@ function dtRender(){
       +'<div style="height:5px;background:var(--bg4);border-radius:99px"><div style="height:5px;background:'+col+';border-radius:99px;width:'+pct+'%;transition:width 0.4s"></div></div>'
       +'</div>';
   }
+  // Only show top bar on tab 0 (Inicio)
+  var showTopBar=(activeTab===0);
+  // Render top bar + tab content into dt-main
   var tc=document.getElementById('dtTabContent');
   if(!tc)return;
 
-  if(activeTab===0){
-    var sideAnalyticsHtml='<div class="dt-analytics-col" id="dtAnalyticsCol">'
-      +'<div class="dt-summary-row">'
-      +'<div class="dt-scard" onclick="quickFilterKpi(\'income\')" title="Filtrar solo ingresos" style="cursor:pointer;"><span class="dt-scard-label">Ingresos</span><span class="dt-scard-value" id="dtInc" style="color:var(--green)">'+incStr+'</span></div>'
-      +'<div class="dt-scard" onclick="quickFilterKpi(\'expense\')" title="Filtrar solo gastos" style="cursor:pointer;"><span class="dt-scard-label">Gastos</span><span class="dt-scard-value" id="dtExp" style="color:var(--red)">'+expStr+'</span></div>'
-      +'<div class="dt-scard" onclick="togglePrivacyMode()" title="Alternar modo privado" style="cursor:pointer;"><span class="dt-scard-label">Balance</span><span class="dt-scard-value" id="dtBal" style="color:'+(bal>=0?'var(--green)':'var(--red)')+'">'+balStr+'</span></div>'
-      +'</div>'
-      +'<div class="dt-flip-wrap"><div class="flip-inner" id="dtFlipInner">'
-      +'<div class="dt-donut-section flip-face flip-front" onclick="dtOnFrontClick(event)">'
-      +'<div id="dtDonutWrap" style="position:relative;width:240px;height:240px;cursor:default;">'
-      +'<canvas id="dtDonutCanvas" width="240" height="240"></canvas>'
-      +'<div class="dt-donut-center">'
-      +'<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;" id="dtDcPct">GASTOS</div>'
-      +'<div class="dt-dc-amount" style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--text);letter-spacing:-0.5px;" id="dtDcAmt">'+fmtPrivacy(tExp)+'</div>'
-      +'<div style="font-size:11px;color:var(--text3);max-width:100px;text-align:center;line-height:1.3;" id="dtDcCat"></div>'
-      +'</div></div>'
-      +'<div class="dt-legend-row">'+legendHtml+'</div><div class="balance-adjustment-note" id="dtBalanceAdjustmentNote"></div><div class="uncomputed-expenses-note" id="dtUncomputedExpensesNote"></div>'
-      +'</div>'
-      +'<div class="dt-donut-section flip-face flip-back" onclick="dtOnBackClick(event)">'
-      +'<div class="heatmap-head"><span class="heatmap-title" id="dtHmTitle">Gasto diario</span><span class="heatmap-tot" id="dtHmTot"></span></div>'
-      +'<div class="heatmap-dow"><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span></div>'
-      +'<div class="heatmap-grid" id="dtHeatmapGrid"></div>'
-      +'<div class="heatmap-detail" id="dtHeatmapDetail"></div>'
-      +'</div>'
-      +'</div></div>'
-      +budgetHtml
-      +'</div>';
+  // Top bar HTML
+  var topBarHtml=showTopBar?'<div class="dt-top-bar">'
+    // Summary cards row
+    +'<div class="dt-summary-row">'
+    +'<div class="dt-scard" onclick="quickFilterKpi(\'income\')" title="Filtrar solo ingresos" style="cursor:pointer;"><span class="dt-scard-label">Ingresos</span><span class="dt-scard-value" id="dtInc" style="color:var(--green)">'+incStr+'</span></div>'
+    +'<div class="dt-scard" onclick="quickFilterKpi(\'expense\')" title="Filtrar solo gastos" style="cursor:pointer;"><span class="dt-scard-label">Gastos</span><span class="dt-scard-value" id="dtExp" style="color:var(--red)">'+expStr+'</span></div>'
+    +'<div class="dt-scard" onclick="togglePrivacyMode()" title="Alternar modo privado" style="cursor:pointer;"><span class="dt-scard-label">Balance</span><span class="dt-scard-value" id="dtBal" style="color:'+(bal>=0?'var(--green)':'var(--red)')+'">'+balStr+'</span></div>'
+    +'</div>'
+    // Donut (flips to heatmap) centered + legend below
+    +'<div class="dt-flip-wrap"><div class="flip-inner" id="dtFlipInner">'
+    +'<div class="dt-donut-section flip-face flip-front" onclick="dtOnFrontClick(event)">'
+    +'<div id="dtDonutWrap" style="position:relative;width:240px;height:240px;cursor:default;">'
+    +'<canvas id="dtDonutCanvas" width="240" height="240"></canvas>'
+    +'<div class="dt-donut-center">'
+    +'<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;" id="dtDcPct">GASTOS</div>'
+    +'<div class="dt-dc-amount" style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--text);letter-spacing:-0.5px;" id="dtDcAmt">'+fmtPrivacy(tExp)+'</div>'
+    +'<div style="font-size:11px;color:var(--text3);max-width:100px;text-align:center;line-height:1.3;" id="dtDcCat"></div>'
+    +'</div></div>'
+    +'<div class="dt-legend-row">'+legendHtml+'</div><div class="balance-adjustment-note" id="dtBalanceAdjustmentNote"></div><div class="uncomputed-expenses-note" id="dtUncomputedExpensesNote"></div>'
+    +'</div>'
+    +'<div class="dt-donut-section flip-face flip-back" onclick="dtOnBackClick(event)">'
+    +'<div class="heatmap-head"><span class="heatmap-title" id="dtHmTitle">Gasto diario</span><span class="heatmap-tot" id="dtHmTot"></span></div>'
+    +'<div class="heatmap-dow"><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span></div>'
+    +'<div class="heatmap-grid" id="dtHeatmapGrid"></div>'
+    +'<div class="heatmap-detail" id="dtHeatmapDetail"></div>'
+    +'</div>'
+    +'</div></div>'
+    +'</div>'+budgetHtml:'';
 
-    tc.innerHTML='<div class="dt-two-col"><div class="dt-ledger-col" id="dtLedgerCol"></div>'+sideAnalyticsHtml+'</div>';
-    var ledgerCol=document.getElementById('dtLedgerCol');
-    if(ledgerCol)renderTxTab(ledgerCol);
-
-    if(!isPrivacyMode()&&shouldAnimateNumbers()){
-      countUp(document.getElementById('dtInc'),tInc,fmt);
-      countUp(document.getElementById('dtExp'),tExp,fmt);
-      countUp(document.getElementById('dtBal'),Math.abs(bal),function(n){return (bal<0?'−':'')+fmt(n);});
-    }
+  // Tab content
+  // Set top bar first
+  tc.innerHTML=topBarHtml+'<div id="dtTabInner"></div>';
+  if(showTopBar&&!isPrivacyMode()&&shouldAnimateNumbers()){
+    countUp(document.getElementById('dtInc'),tInc,fmt);
+    countUp(document.getElementById('dtExp'),tExp,fmt);
+    countUp(document.getElementById('dtBal'),Math.abs(bal),function(n){return (bal<0?'−':'')+fmt(n);});
+  }else if(showTopBar){
+    var _di=document.getElementById('dtInc'),_de=document.getElementById('dtExp'),_db=document.getElementById('dtBal');
+    if(_di)_di.textContent=incStr;if(_de)_de.textContent=expStr;if(_db)_db.textContent=balStr;
+  }
+  // Render tab content into the DOM-attached element
+  var tabInner=document.getElementById('dtTabInner');
+  if(tabInner){
+    if(activeTab===0)renderTxTab(tabInner);
+    else if(activeTab===1)renderCatTab(tabInner,'dt');
+    else if(activeTab===2)renderPatTab(tabInner);
+    else if(activeTab===3)renderAnnualTab(tabInner);
+    else if(activeTab===4)renderInvestmentsTab(tabInner);
+    else renderSettingsTab(tabInner);
+  }
+  // Render donut after DOM update (canvas now in DOM)
+  if(showTopBar){
     var canvas=document.getElementById('dtDonutCanvas');
     if(canvas)dtRenderDonut(txs,tExp,240);
     renderBalanceAdjustmentNote(txs,'dtBalanceAdjustmentNote');
     renderUncomputedExpensesNote(txs,'dtUncomputedExpensesNote');
     renderHeatmap(exps,HM_DESKTOP);
-  } else {
-    tc.innerHTML='<div id="dtTabInner"></div>';
-    var tabInner=document.getElementById('dtTabInner');
-    if(tabInner){
-      if(activeTab===1)renderCatTab(tabInner,'dt');
-      else if(activeTab===2)renderPatTab(tabInner);
-      else if(activeTab===3)renderAnnualTab(tabInner);
-      else if(activeTab===4)renderInvestmentsTab(tabInner);
-      else renderSettingsTab(tabInner);
-    }
   }
 }
 
@@ -9422,9 +9405,9 @@ function dtRenderDonut(exps,total,size){
     if(dtActiveCat){var a=entries.filter(function(e){return e.id===dtActiveCat;})[0];
       if(a){
         var catName=dtActiveCat==='__balance_adjustment'?'Actualización de saldo':catById(dtActiveCat).name;
-        dtSetCenter((chartTotal?Math.round(a.value/chartTotal*100):0)+'%',fmt(a.value),capitalize(catName));
-      } else dtSetCenter('GASTOS',total?fmt(total):'0 €','');}
-    else dtSetCenter('GASTOS',total?fmt(total):'0 €','');
+        dtSetCenter((chartTotal?Math.round(a.value/chartTotal*100):0)+'%',fmtPrivacy(a.value),capitalize(catName));
+      } else dtSetCenter('GASTOS',total?fmtPrivacy(total):'0 €','');}
+    else dtSetCenter('GASTOS',total?fmtPrivacy(total):'0 €','');
   }
   refresh();
   canvas.onmousemove=function(ev){
@@ -9433,11 +9416,11 @@ function dtRenderDonut(exps,total,size){
     if(id){
       var a=entries.filter(function(e){return e.id===id;})[0];
       var catName=id==='__balance_adjustment'?'Actualización de saldo':catById(id).name;
-      dtSetCenter(Math.round(a.value/chartTotal*100)+'%',fmt(a.value),capitalize(catName));
-    } else dtSetCenter('GASTOS',total?fmt(total):'0 €','');
+      dtSetCenter(Math.round(a.value/chartTotal*100)+'%',fmtPrivacy(a.value),capitalize(catName));
+    } else dtSetCenter('GASTOS',total?fmtPrivacy(total):'0 €','');
     canvas.style.cursor=id?'pointer':'default';
   };
-  canvas.onmouseleave=function(){if(!dtActiveCat)dtSetCenter('GASTOS',total?fmt(total):'0 €','');};
+  canvas.onmouseleave=function(){if(!dtActiveCat)dtSetCenter('GASTOS',total?fmtPrivacy(total):'0 €','');};
   canvas.onclick=function(ev){ev.stopPropagation();var id=donutHit(canvas,ev,entries,chartTotal,size);dtActiveCat=(id&&dtActiveCat===id)?null:(id||null);refresh();};
 }
 function dtSetCenter(p,a,c){var dp=document.getElementById('dtDcPct');var da=document.getElementById('dtDcAmt');var dc=document.getElementById('dtDcCat');if(dp)dp.textContent=p;if(da){da.textContent=a;fitCenterText(da,168,22);}if(dc)dc.textContent=c;}
