@@ -256,7 +256,7 @@ document.addEventListener('click',function(e){
   else if(action==='show-adjustform'){var f=document.getElementById('adjustform_'+id);f.style.display=f.style.display==='none'?'flex':'none';}
   else if(action==='toggle-hist'){toggleAccCard(id);}
   else if(action==='apply-adjust')applyBalanceAdjustment(id);
-  else if(action==='remove-tag'){txTags.splice(parseInt(id,10),1);renderTagsInput();}
+  else if(action==='toggle-tx-calc')cycleTxCalcMode();
   else if(action==='tx-more'){appendTxPage();}
   else if(action==='bio-unlock'){if(typeof bioUnlock==='function')bioUnlock();}
   else if(action==='switch-auth-tab')switchAuthTab(mode);
@@ -283,7 +283,6 @@ document.addEventListener('click',function(e){
   else if(action==='cycle-tx-calc')cycleTxCalcMode();
   else if(action==='swap-transfer-accounts')swapTransferAccounts();
   else if(action==='toggle-recurring')toggleRecurring();
-  else if(action==='toggle-tx-tags')toggleTxTagsDrawer();
   else if(action==='save-tx')saveTx();
   else if(action==='confirm-recur-del')confirmRecurringDelete(mode);
   else if(action==='close-recur-del')closeRecurringDeleteDialog();
@@ -1086,7 +1085,7 @@ function renderPatTab(el){
       +'</div>';
   }).join('');
   var accListHtml=accounts.length?accRows:renderEmptyState('Sin cuentas', 'Añade tu primera cuenta para empezar a registrar movimientos y saldos.', '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/></svg>');
-  var totalPatHtml=hidePat?'••••••':((totalPat<0?'−':'')+fmtHtml(Math.abs(totalPat)));
+  var totalPatHtml=hidePat?'••••••':((totalPat<0?'−':'')+fmt(Math.abs(totalPat)));
   el.innerHTML='<div class="pat-wrap">'
     +'<div class="pat-total-card"><div class="pat-total-label">Patrimonio total — '+capitalize(MONTHS[viewMonth])+' '+viewYear+'</div><div class="pat-total-value"'+(totalPat<0&&!hidePat?' style="background:none;-webkit-background-clip:unset;background-clip:unset;color:var(--red);"' : '')+'>'+totalPatHtml+'</div></div>'
     +accListHtml
@@ -1935,10 +1934,8 @@ function openModal(){
   document.getElementById('recurringSwitch').classList.remove('on');
   document.getElementById('recurringOptions').style.display='none';
   document.getElementById('recurInterval').value='monthly';document.getElementById('recurEndDate').value='';
-  var tagsDrw=document.getElementById('txTagsDrawer');if(tagsDrw)tagsDrw.style.display='none';
-  var tagsBtn=document.getElementById('txTagsBtn');if(tagsBtn)tagsBtn.setAttribute('aria-expanded','false');
   var initType=(activeTab===2)?'transfer':'expense';
-  setType(initType);populateCats();populateSubcats();populateAccounts();populateTransferAccounts();renderTagsInput();updateQuickCatPillsActive();
+  setType(initType);populateCats();populateSubcats();populateAccounts();populateTransferAccounts();updateQuickCatPillsActive();
   document.getElementById('modalBg').classList.add('visible');
   document.getElementById('modalBg').setAttribute('aria-hidden','false');
   document.getElementById('fabBtn').classList.add('open');
@@ -1970,9 +1967,7 @@ function editTx(id){
   document.getElementById('recurringOptions').style.display=isRecurring?'block':'none';
   document.getElementById('recurInterval').value=tx.recur_interval||'monthly';
   document.getElementById('recurEndDate').value=tx.recur_end_date||'';
-  var tagsDrw=document.getElementById('txTagsDrawer');if(tagsDrw)tagsDrw.style.display='none';
-  var tagsBtn=document.getElementById('txTagsBtn');if(tagsBtn)tagsBtn.setAttribute('aria-expanded','false');
-  document.getElementById('modalStatus').textContent='';renderTagsInput();
+  document.getElementById('modalStatus').textContent='';
   document.getElementById('modalBg').classList.add('visible');
   document.getElementById('modalBg').setAttribute('aria-hidden','false');
   lockBodyScroll();

@@ -294,10 +294,6 @@
     <div id="txRecurWrap">
       <div class="tx-extra-row">
         <div class="recurring-toggle" data-action="toggle-recurring"><div class="toggle-switch" id="recurringSwitch"><div class="toggle-knob"></div></div><span style="font-size:13.5px;color:var(--text2);font-weight:500">Recurrente</span></div>
-        <button type="button" class="tx-tags-trigger" id="txTagsBtn" data-action="toggle-tx-tags" aria-expanded="false">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-          <span id="txTagsBtnLabel">Etiquetas</span>
-        </button>
       </div>
       <div id="recurringOptions" style="display:none;margin-top:6px;">
         <div class="tx-fields-grid">
@@ -317,9 +313,6 @@
             <input type="date" class="field-input" id="recurEndDate">
           </div>
         </div>
-      </div>
-      <div id="txTagsDrawer" style="display:none;margin-top:6px;">
-        <div class="tags-input-wrap" id="tagsWrap"><input type="text" class="tags-text-input" id="tagInput" placeholder="vacaciones, regalo..."></div>
       </div>
     </div>
     <div class="modal-btns"><button class="btn-cancel" data-action="close-modal">Cancelar</button><button class="btn-save" data-action="save-tx">Guardar</button></div>

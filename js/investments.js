@@ -110,8 +110,8 @@ function refreshAssetPeriodChange(sheet){
 }
 var assetHistoryCache={};
 function investmentPrefsKey(name){return 'ft_invest_'+name+'_'+(currentUser?currentUser.id:'guest');}
-function portfolioValueHidden(){return isPrivacyMode();}
-function togglePortfolioValue(){togglePrivacyMode();}
+function portfolioValueHidden(){try{return localStorage.getItem(investmentPrefsKey('privacy'))==='1';}catch(e){return false;}}
+function togglePortfolioValue(){try{localStorage.setItem(investmentPrefsKey('privacy'),portfolioValueHidden()?'0':'1');}catch(e){}refreshTab();}
 function portfolioValueText(value){return portfolioValueHidden()?'••••••':value;}
 function recentAssets(){try{var values=JSON.parse(localStorage.getItem(investmentPrefsKey('recent_assets'))||'[]');return Array.isArray(values)?values.slice(0,3):[];}catch(e){return [];}}
 function rememberRecentAsset(name,type,symbol){try{var row={name:name,type:type||'Producto',symbol:symbol};var values=recentAssets().filter(function(x){return x&&x.symbol!==symbol;});values.unshift(row);localStorage.setItem(investmentPrefsKey('recent_assets'),JSON.stringify(values.slice(0,3)));}catch(e){}}
