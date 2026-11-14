@@ -364,15 +364,127 @@ async function fetchAllRows(db: any, table: string, userId: string, extraFilter?
   return rows;
 }
 
+function normLabel(value: string): string {
+  return String(value || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+}
+
+function isAutoRecurBudgetCat(cat: any): boolean {
+  if (!cat || cat.kind === "income") return false;
+  const n = normLabel(cat.name);
+  return cat.id === "cat_subscriptions" || n === "suscripciones" || n === "subscripciones";
+}
+
+function addRecurInterval(d: Date, interval: string, anchorDay?: number): Date {
+  const n = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0);
+  if (interval === "weekly") { n.setDate(n.getDate() + 7); return n; }
+  if (interval === "biweekly") { n.setDate(n.getDate() + 14); return n; }
+  if (interval === "quarterly") {
+    const targetDay = anchorDay || d.getDate();
+    const targetMonth = n.getMonth() + 3;
+    const targetYear = n.getFullYear() + Math.floor(targetMonth / 12);
+    const normMonth = ((targetMonth % 12) + 12) % 12;
+    const maxDay = new Date(targetYear, normMonth + 1, 0).getDate();
+    return new Date(targetYear, normMonth, Math.min(targetDay, maxDay), 12, 0, 0);
+  }
+  if (interval === "yearly") {
+    const targetDay = anchorDay || d.getDate();
+    const maxDay = new Date(n.getFullYear() + 1, n.getMonth() + 1, 0).getDate();
+    return new Date(n.getFullYear() + 1, n.getMonth(), Math.min(targetDay, maxDay), 12, 0, 0);
+  }
+  const targetDay = anchorDay || d.getDate();
+  const targetMonth = n.getMonth() + 1;
+  const targetYear = n.getFullYear() + Math.floor(targetMonth / 12);
+  const normMonth = ((targetMonth % 12) + 12) % 12;
+  const maxDay = new Date(targetYear, normMonth + 1, 0).getDate();
+  return new Date(targetYear, normMonth, Math.min(targetDay, maxDay), 12, 0, 0);
+}
+
+function computeAutoRecurBudget(
+  catId: string,
+  year: number,
+  month: number,
+  recurringTx: any[],
+  voided: Set<string>,
+  exclusions: any[],
+  isExclExpense: (x: any) => boolean
+): number {
+  const pad2 = (n: number) => String(n).padStart(2, "0");
+  const monthStart = new Date(year, month, 1, 12, 0, 0);
+  const monthEnd = new Date(year, month + 1, 0, 12, 0, 0);
+  const monthEndStr = `${year}-${pad2(month + 1)}-${pad2(monthEnd.getDate())}`;
+  const exclSet = new Set(exclusions.map((e: any) => `${e.recur_series_id}|${e.skipped_date}`));
+  const seriesMap = new Map<string, any[]>();
+  const noCalcDatesBySeries = new Map<string, Set<string>>();
+
+  for (const t of recurringTx) {
+    if (voided.has(t.id) || t.type !== "expense" || t.category !== catId) continue;
+    const key = String(t.recur_series_id || `series_${t.id}`);
+    if (isExclExpense(t)) {
+      if (!noCalcDatesBySeries.has(key)) noCalcDatesBySeries.set(key, new Set<string>());
+      noCalcDatesBySeries.get(key)!.add(String(t.date));
+      continue;
+    }
+    if (!seriesMap.has(key)) seriesMap.set(key, []);
+    seriesMap.get(key)!.push(t);
+  }
+
+  let total = 0;
+  for (const [key, group] of seriesMap.entries()) {
+    let root = group[0];
+    for (const t of group) {
+      if (String(t.date) < String(root.date)) root = t;
+    }
+    const eligibleLatest = group.filter((t: any) => String(t.date) <= monthEndStr);
+    let latestCandidate = eligibleLatest.length ? eligibleLatest[0] : root;
+    for (const t of eligibleLatest) {
+      if (String(t.date) > String(latestCandidate.date)) latestCandidate = t;
+    }
+    const interval = latestCandidate.recur_interval || root.recur_interval || "monthly";
+    const anchorSource = String(latestCandidate.recur_anchor_date || latestCandidate.date || root.recur_anchor_date || root.date);
+    const anchorDay = parseInt(anchorSource.slice(8, 10), 10) || undefined;
+    const effectiveEndDate = latestCandidate.recur_end_date || root.recur_end_date;
+    const endDate = effectiveEndDate ? new Date(`${effectiveEndDate}T12:00:00`) : null;
+    const rootDate = new Date(`${root.date}T12:00:00`);
+    if (rootDate > monthEnd) continue;
+    if (endDate && endDate < monthStart) continue;
+
+    let occ = rootDate;
+    let guard = 0;
+    let count = 0;
+    const noCalcSet = noCalcDatesBySeries.get(key);
+    while (occ <= monthEnd && guard < 5000) {
+      const occDate = `${occ.getFullYear()}-${pad2(occ.getMonth() + 1)}-${pad2(occ.getDate())}`;
+      if (
+        occ >= monthStart &&
+        occ <= monthEnd &&
+        (!endDate || occ <= endDate) &&
+        !exclSet.has(`${key}|${occDate}`) &&
+        !(noCalcSet && noCalcSet.has(occDate))
+      ) {
+        count++;
+      }
+      occ = addRecurInterval(occ, interval, anchorDay);
+      guard++;
+    }
+    if (count > 0) {
+      const unitAmount = Number(latestCandidate.amount ?? root.amount ?? 0);
+      total += unitAmount * count;
+    }
+  }
+  return Math.round((total + Number.EPSILON) * 100) / 100;
+}
+
 async function sendMonthlyReportForUser(db: any, targetUserId: string, targetEmail: string, key: string, start: Date, from: string, to: string, previousFrom: string, preview: boolean) {
-  const [tx, voids, { data: cats }, { data: budgets }, previousTx, { data: accountRows }, patrimonyRows, { data: resendRpcKey }] = await Promise.all([
+  const [tx, voids, { data: cats }, { data: budgets }, previousTx, { data: accountRows }, patrimonyRows, exclusions, recurringTx, { data: resendRpcKey }] = await Promise.all([
     fetchAllRows(db, "transactions", targetUserId, (q: any) => q.gte("date", from).lt("date", to)),
     fetchAllRows(db, "transaction_voids", targetUserId),
-    db.from("categories").select("id,name").eq("user_id", targetUserId),
+    db.from("categories").select("id,name,kind").eq("user_id", targetUserId),
     db.from("budgets").select("category_id,amount").eq("user_id", targetUserId).eq("month_year", key),
     fetchAllRows(db, "transactions", targetUserId, (q: any) => q.gte("date", previousFrom).lt("date", from)),
     db.from("accounts").select("*").eq("user_id", targetUserId),
     fetchAllRows(db, "patrimony", targetUserId),
+    fetchAllRows(db, "recurrence_exclusions", targetUserId),
+    fetchAllRows(db, "transactions", targetUserId, (q: any) => q.eq("recurring", true).lt("date", to)),
     db.rpc("get_fintrack_resend_api_key")
   ]);
   const resendKey = resendRpcKey || Deno.env.get("RESEND_API_KEY") || "";
@@ -390,11 +502,25 @@ async function sendMonthlyReportForUser(db: any, targetUserId: string, targetEma
   const balExpense = activeBal.filter((x: any) => x.type === "expense").reduce((s: number, x: any) => s + Number(x.amount), 0);
   const balance = balIncome - balExpense;
   const previousExpense = (previousTx ?? []).filter((x: any) => x.type === "expense" && !x.is_balance_adjustment).reduce((s: number, x: any) => s + Number(x.amount), 0); // previousExpense=(previousTx??[]).filter(x=>x.type==="expense"&&!x.is_balance_adjustment)
+  const catMap = new Map((cats ?? []).map((x: any) => [x.id, x]));
   const names = new Map((cats ?? []).map((x: any) => [x.id, x.name]));
   const budgetByCategory = new Map((budgets ?? []).filter((x: any) => x.category_id).map((x: any) => [x.category_id, Number(x.amount)]));
   const totals = new Map<string, number>();
   expensesTx.forEach((x: any) => totals.set(x.category, (totals.get(x.category) ?? 0) + Number(x.amount)));
-  const categories = Array.from(new Set([...totals.keys(), ...budgetByCategory.keys()])).map(id => ({ name: names.get(id) ?? "Sin categoría", spent: totals.get(id) ?? 0, budget: budgetByCategory.get(id) ?? 0 }));
+  const reportYear = parseInt(key.slice(0, 4), 10);
+  const reportMonth = parseInt(key.slice(5, 7), 10) - 1;
+  const autoBudgetByCategory = new Map<string, number>();
+  (cats ?? []).forEach((c: any) => {
+    if (!budgetByCategory.has(c.id) && isAutoRecurBudgetCat(c)) {
+      const autoVal = computeAutoRecurBudget(c.id, reportYear, reportMonth, recurringTx ?? [], voided, exclusions ?? [], isExcludedFromExpense);
+      if (autoVal > 0 || totals.has(c.id)) autoBudgetByCategory.set(c.id, autoVal);
+    }
+  });
+  const categories = Array.from(new Set([...totals.keys(), ...budgetByCategory.keys(), ...autoBudgetByCategory.keys()])).map(id => {
+    const manualBudget = budgetByCategory.get(id);
+    const budget = manualBudget !== undefined ? manualBudget : (autoBudgetByCategory.get(id) ?? 0);
+    return { name: names.get(id) ?? catMap.get(id)?.name ?? "Sin categoría", spent: totals.get(id) ?? 0, budget };
+  });
   const med = median(expensesTx.map((x: any) => Number(x.amount)));
   const unusual = expensesTx.filter((x: any) => med > 0 && Number(x.amount) >= Math.max(med * 2.5, 100)).sort((a: any, b: any) => Number(b.amount) - Number(a.amount)).slice(0, 6).map((x: any) => ({ note: x.note, amount: Number(x.amount) }));
   const namedTransactions = nonVoided.map((x: any) => ({

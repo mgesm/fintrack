@@ -24,8 +24,8 @@ const localStorageMock = (function() {
 })();
 
 // Extraer funciones clave directamente desde index.html para asegurar exactitud
-const indexPath = path.join(__dirname, '..', 'index.html');
-const indexHtml = fs.readFileSync(indexPath, 'utf8');
+const { readAllAppSource } = require('./_load_app');
+const indexHtml = readAllAppSource();
 
 // Verificaciones estáticas preliminares en index.html
 console.log('--- FASE 0: VERIFICACIÓN ESTÁTICA DEL CÓDIGO FUENTE (INDEX.HTML) ---');

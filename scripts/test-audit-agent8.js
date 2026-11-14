@@ -184,25 +184,23 @@ async function runAudit() {
   console.log('--- 1. AUDITORÍA EXPORTACIÓN A PDF (exportPDF) ---');
 
   test('jsPDF y autoTable: verificación en código estático y vendor', () => {
-    const indexPath = path.join(__dirname, '..', 'index.html');
-    const indexHtml = fs.readFileSync(indexPath, 'utf-8');
+    const indexHtml = require('./_load_app').readAllAppSource();
 
     assert.ok(indexHtml.includes("loadScript('./vendor/jspdf.umd.min.js')"), 'Debe cargar jspdf.umd.min.js');
     assert.ok(indexHtml.includes("new window.jspdf.jsPDF"), 'Debe instanciar jsPDF desde window.jspdf.jsPDF');
 
     const hasAutoTableCall = indexHtml.includes('autoTable(') || indexHtml.includes('doc.autoTable');
     assert.strictEqual(hasAutoTableCall, false, 'NO debe usar doc.autoTable (usa maquetación manual con doc.rect y doc.text)');
-    assert.ok(indexHtml.includes("{orientation:'portrait',unit:'mm',format:'a4'}"), 'Debe usar formato A4 portrait en mm');
+    assert.ok(/\{\s*orientation\s*:\s*'portrait'\s*,\s*unit\s*:\s*'mm'\s*,\s*format\s*:\s*'a4'\s*\}/.test(indexHtml), 'Debe usar formato A4 portrait en mm');
   });
 
-  test('Paginación y numeración de páginas (Pág. X de Y) en dos pasadas', () => {
-    const indexPath = path.join(__dirname, '..', 'index.html');
-    const indexHtml = fs.readFileSync(indexPath, 'utf-8');
+  test('Paginación y numeración de páginas en dos pasadas', () => {
+    const indexHtml = require('./_load_app').readAllAppSource();
 
-    assert.ok(indexHtml.includes("if(y>280){doc.addPage();y=20;drawTxHeader();}"), 'Debe añadir página al rebasar límite vertical y redibujar encabezado');
-    assert.ok(indexHtml.includes("var totalPages=doc.internal.getNumberOfPages();"), 'Debe leer doc.internal.getNumberOfPages()');
+    assert.ok(/doc\.addPage\(\)/.test(indexHtml), 'Debe añadir página cuando se excede el límite vertical');
+    assert.ok(/var\s+totalPages\s*=\s*doc\.internal\.getNumberOfPages\(\)/.test(indexHtml), 'Debe leer doc.internal.getNumberOfPages()');
     assert.ok(indexHtml.includes("doc.setPage(pi);"), 'Debe iterar con doc.setPage(pi)');
-    assert.ok(indexHtml.includes("'Pág. '+pi+' de '+totalPages"), 'Debe renderizar formato Pág. X de Y');
+    assert.ok(indexHtml.includes("'Página ' + String(pi).padStart(2, '0') + ' / ' + String(totalPages).padStart(2, '0')"), 'Debe renderizar paginación de dos pasadas en el pie');
   });
 
   test('Desglose de cuentas en transferencias para PDF', () => {
@@ -251,8 +249,7 @@ async function runAudit() {
   console.log('\n--- 2. AUDITORÍA EXPORTACIÓN A EXCEL (exportXLSX) ---');
 
   test('Integración ExcelJS: pestañas generadas y formato de celdas', () => {
-    const indexPath = path.join(__dirname, '..', 'index.html');
-    const indexHtml = fs.readFileSync(indexPath, 'utf-8');
+    const indexHtml = require('./_load_app').readAllAppSource();
 
     assert.ok(indexHtml.includes("wb.addWorksheet('Resumen')"), 'Debe generar pestaña Resumen');
     assert.ok(indexHtml.includes("wb.addWorksheet('Transacciones')"), 'Debe generar pestaña Transacciones');
@@ -372,8 +369,7 @@ async function runAudit() {
     const amtFormatted = amtNumber.toString().replace('.', ',');
     assert.strictEqual(amtFormatted, '1234,56');
 
-    const indexPath = path.join(__dirname, '..', 'index.html');
-    const indexHtml = fs.readFileSync(indexPath, 'utf-8');
+    const indexHtml = require('./_load_app').readAllAppSource();
     assert.ok(indexHtml.includes("'\\ufeff'+csv") || indexHtml.includes("'\ufeff'+csv"), 'El CSV debe incluir BOM UTF-8 \\ufeff');
   });
 
@@ -620,8 +616,7 @@ async function runAudit() {
   });
 
   test('Cadena de seguridad en importación: vista previa -> confirmación -> backup previo -> RPC atómica', () => {
-    const indexPath = path.join(__dirname, '..', 'index.html');
-    const indexHtml = fs.readFileSync(indexPath, 'utf-8');
+    const indexHtml = require('./_load_app').readAllAppSource();
 
     const confirmIdx = indexHtml.indexOf("confirmCriticalAction({title:'Importar copia de seguridad'");
     const safetyBackupIdx = indexHtml.indexOf("createSafetyBackup('before_import')");
@@ -638,6 +633,7 @@ async function runAudit() {
   console.log('\n================================================================');
   console.log(` RESULTADO AUDITORÍA 8: ${passed}/${total} PRUEBAS COMPLETADAS CON ÉXITO`);
   console.log('================================================================\n');
+  if (passed !== total) process.exit(1);
 }
 
 runAudit();

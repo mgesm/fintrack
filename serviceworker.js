@@ -1,17 +1,27 @@
-var CACHE_NAME='fintrack-cache-v202';
+var CACHE_NAME='fintrack-cache-v203';
 var CACHE_PREFIX='fintrack-cache-';
-var PRECACHE=['./','./index.html','./manifest.json','./supabase-js.min.js','./icon-192.png','./icon-512.png','./fonts/inter-latin-wght-normal.woff2'];
+var CRITICAL_PRECACHE=['./','./index.html','./styles.css','./manifest.json','./supabase-js.min.js','./js/theme-init.js','./js/core.js','./js/accounting.js','./js/recurring.js','./js/sync.js','./js/investments.js','./js/charts.js','./js/export.js','./js/ui.js','./js/bootstrap.js'];
+var OPTIONAL_PRECACHE=['./icon-192.png','./icon-512.png','./fonts/inter-latin-wght-normal.woff2','./vendor/jspdf.umd.min.js','./vendor/exceljs.min.js'];
+var PRECACHE=CRITICAL_PRECACHE.concat(OPTIONAL_PRECACHE);
 
 self.addEventListener('install',function(e){
-  self.skipWaiting();
+  if(!self.registration||!self.registration.active){
+    self.skipWaiting();
+  }
   e.waitUntil(caches.open(CACHE_NAME).then(function(cache){
-    // index.html es crítico: si falla, que falle la instalación. El resto es best-effort.
-    return cache.add('./index.html').then(function(){
-      return Promise.all(PRECACHE.filter(function(u){return u!=='./index.html';}).map(function(u){
+    // El app shell completo es atómico para evitar desajuste entre index.html, CSS y módulos JS.
+    return cache.addAll(CRITICAL_PRECACHE).then(function(){
+      return Promise.all(OPTIONAL_PRECACHE.map(function(u){
         return cache.add(u).catch(function(){});
       }));
     });
   }));
+});
+
+self.addEventListener('message',function(e){
+  if(e.data&&e.data.type==='SKIP_WAITING'){
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('activate',function(e){
@@ -27,21 +37,26 @@ self.addEventListener('fetch',function(e){
     return;
   }
   if(e.request.mode==='navigate'){
+    var navFetch=fetch(e.request).then(function(networkRes){
+      if(networkRes&&networkRes.status===200){
+        var resClone=networkRes.clone();
+        caches.open(CACHE_NAME).then(function(cache){cache.put(e.request,resClone);});
+      }
+      return networkRes;
+    });
+    navFetch.catch(function(){});
     e.respondWith(
       Promise.race([
-        fetch(e.request).then(function(networkRes){
-          if(networkRes&&networkRes.status===200){
-            var resClone=networkRes.clone();
-            caches.open(CACHE_NAME).then(function(cache){cache.put(e.request,resClone);});
-          }
-          return networkRes;
-        }),
+        navFetch,
         new Promise(function(_,reject){
-          setTimeout(function(){reject(new Error('Navigation network timeout'));},4500);
+          setTimeout(function(){reject(new Error('Navigation network timeout'));},1200);
         })
       ]).catch(function(){
-        return caches.match(e.request).then(function(cached){
-          return cached || caches.match('./index.html') || caches.match('./');
+        return caches.match(e.request,{ignoreSearch:true}).then(function(cached){
+          if(cached)return cached;
+          return caches.match('./index.html').then(function(idx){
+            return idx||caches.match('./');
+          });
         });
       })
     );
@@ -52,7 +67,7 @@ self.addEventListener('fetch',function(e){
     if(networkRes&&networkRes.status===200)return caches.open(CACHE_NAME).then(function(cache){return cache.put(e.request,networkRes.clone());});
   }).catch(function(){}));
   e.respondWith(
-    caches.match(e.request).then(function(cached){
+    caches.match(e.request,{ignoreSearch:true}).then(function(cached){
       return cached||network.catch(function(){return cached;});
     })
   );

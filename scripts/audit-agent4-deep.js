@@ -2,7 +2,8 @@
 // Auditoría profunda de Auditor 4: Inversión, Cartera, Asset Allocation, Modo Privado y Logos
 const fs = require('fs');
 
-const html = fs.readFileSync('index.html', 'utf8');
+const { readAllAppSource } = require('./_load_app');
+const html = readAllAppSource();
 const context = fs.readFileSync('PROJECT_CONTEXT.md', 'utf8');
 const marketData = fs.readFileSync('supabase/functions/market-data/index.ts', 'utf8');
 const rpcInvest = fs.readFileSync('supabase/migrations/20260901113000_investment_operations.sql', 'utf8');

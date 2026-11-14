@@ -11,7 +11,8 @@ console.log('===================================================================
 console.log('INICIANDO SUITE DE AUDITORÍA DE INTEGRIDAD FUNCIONAL Y UX DE FINTRACK');
 console.log('======================================================================\n');
 
-const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+const { readAllAppSource } = require('./_load_app');
+const html = readAllAppSource();
 
 let passedTests = 0;
 let totalTests = 0;

@@ -1,6 +1,7 @@
 const fs = require('fs');
 
-const indexHtml = fs.readFileSync('index.html', 'utf8');
+const { readAllAppSource } = require('./_load_app');
+const indexHtml = readAllAppSource();
 
 console.log('--- REVISIÓN DE CONSULTAS EN loadData() ---');
 const loadDataStart = indexHtml.indexOf('async function loadData');

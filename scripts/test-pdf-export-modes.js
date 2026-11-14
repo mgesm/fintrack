@@ -4,7 +4,8 @@ const assert = require('assert');
 
 console.log('--- Testing PDF Export Calculation Modes and Variables ---');
 
-const indexHtml = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+const { readAllAppSource } = require('./_load_app');
+const indexHtml = readAllAppSource();
 
 // 1. Verify index.html defines isNoCalc inside exportPDF
 assert(indexHtml.includes('var isNoCalc = (txEffMode === 2);'), 'index.html must define isNoCalc in exportPDF');

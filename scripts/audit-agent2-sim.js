@@ -1,4 +1,4 @@
-﻿// scripts/audit-agent2-sim.js
+// scripts/audit-agent2-sim.js
 // Auditoría 2: Recurrencias, Exclusiones, Fechas y Anulaciones (Transaction Voids) en FinTrack.
 
 function pad(n) { return n < 10 ? '0' + n : '' + n; }
@@ -560,6 +560,8 @@ results.anomalies_detected.forEach(function(a, i) {
 });
 
 var fs = require('fs');
-var reportPath = __dirname + '/../scratch/audit-agent2-report.json';
+var path = require('path');
+var reportPath = path.join(__dirname, '..', 'scratch', 'audit-agent2-report.json');
+fs.mkdirSync(path.dirname(reportPath), { recursive: true });
 fs.writeFileSync(reportPath, JSON.stringify(results, null, 2));
 console.log('Reporte JSON guardado en:', reportPath);

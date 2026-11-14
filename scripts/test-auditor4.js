@@ -1,5 +1,6 @@
 ﻿const fs = require('fs');
-const html = fs.readFileSync('index.html', 'utf8');
+const { readAllAppSource } = require('./_load_app');
+const html = readAllAppSource();
 
 console.log('=== VERIFICACION EXHAUSTIVA DE AUDITOR 4 ===');
 
@@ -37,7 +38,7 @@ console.log('MutationObserver activo:', html.includes('var investmentLogoObserve
 console.log('\n--- 4. Encabezado Inversion ---');
 console.log('class="invest-head" en HTML:', html.includes('class="invest-head"'));
 const tabStart = html.indexOf('function renderInvestmentsTab');
-const tabEnd = html.indexOf('function renderSettingsTab');
+const tabEnd = html.indexOf('renderInvestmentsTab', tabStart) + 3000;
 const tabCode = html.slice(tabStart, tabEnd);
 console.log('invest-head en renderInvestmentsTab:', tabCode.includes('invest-head'));
 

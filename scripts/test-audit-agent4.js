@@ -8,7 +8,8 @@ console.log('AUDITORÍA TÉCNICA Y MATEMÁTICA: MÓDULO DE INVERSIÓN (FINTRACK)
 console.log('Especialista: Auditor 4 - Cartera, Asset Allocation y Logos');
 console.log('================================================================\n');
 
-const htmlSource = fs.readFileSync('index.html', 'utf8');
+const { readAllAppSource } = require('./_load_app');
+const htmlSource = readAllAppSource();
 const contextSource = fs.readFileSync('PROJECT_CONTEXT.md', 'utf8');
 const rpcSource = fs.readFileSync('supabase/migrations/20260901113000_investment_operations.sql', 'utf8');
 const marketDataSource = fs.readFileSync('supabase/functions/market-data/index.ts', 'utf8');

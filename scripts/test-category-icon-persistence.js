@@ -31,11 +31,14 @@ global.showSuccessToast = () => {};
 global.setSync = () => {};
 
 // Read and extract relevant functions from index.html
-const html = fs.readFileSync('index.html', 'utf8');
+const { readAllAppSource } = require('./_load_app');
+const html = readAllAppSource();
 
 // Extract script content
 eval(`
 var _catIconsCache = null;
+var _catStyleEditingId = null;
+function renderCatStyleModalContent() {}
 ${html.match(/function getCategoryCustomIcons\(\)[\s\S]*?function applyCategoryCustomIcons\(\)[\s\S]*?\n\}/)[0]}
 
 var categories = [

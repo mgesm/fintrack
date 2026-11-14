@@ -1,10 +1,12 @@
 const fs = require('fs');
 const path = require('path');
+const { ROOT_DIR, readHtml, readCss, readAllJs, readAllAppSource } = require('./_load_app');
 
-const rootDir = 'C:\\Users\\usuario587\\.gemini\\antigravity\\scratch\\fintrack';
+const rootDir = ROOT_DIR;
 const swContent = fs.readFileSync(path.join(rootDir, 'serviceworker.js'), 'utf8');
 const manifestContent = JSON.parse(fs.readFileSync(path.join(rootDir, 'manifest.json'), 'utf8'));
-const htmlContent = fs.readFileSync(path.join(rootDir, 'index.html'), 'utf8');
+const htmlOnly = readHtml();
+const htmlContent = readAllAppSource();
 
 console.log('====================================================');
 console.log('AUDITORIA INTEGRAL AGENTE 10 - FINTRACK');
@@ -19,11 +21,19 @@ const cachePrefixMatch = swContent.match(/var\s+CACHE_PREFIX\s*=\s*'([^']+)'/);
 console.log('Cache Name activo:', cacheNameMatch ? cacheNameMatch[1] : 'NO DETECTADO');
 console.log('Cache Prefix:', cachePrefixMatch ? cachePrefixMatch[1] : 'NO DETECTADO');
 
-const precacheMatch = swContent.match(/var\s+PRECACHE\s*=\s*(\[[^\]]+\])/);
 let precacheList = [];
-if (precacheMatch) {
-  precacheList = eval(precacheMatch[1]);
-}
+try {
+  const vm = require('vm');
+  const ctx = {};
+  const mVar = swContent.match(/(var\s+CRITICAL_PRECACHE[\s\S]*?var\s+PRECACHE\s*=[\s\S]*?;)/);
+  if (mVar) {
+    vm.runInNewContext(mVar[1], ctx);
+    precacheList = ctx.PRECACHE || [];
+  } else {
+    const pm = swContent.match(/var\s+PRECACHE\s*=\s*(\[[^\]]+\])/);
+    if (pm) precacheList = vm.runInNewContext(pm[1], {});
+  }
+} catch (e) {}
 console.log('\nArchivos en PRECACHE (' + precacheList.length + '):');
 let allFilesExist = true;
 precacheList.forEach(item => {
@@ -44,10 +54,10 @@ precacheList.forEach(item => {
 console.log('¿Todos los archivos precacheados existen físicamente?:', allFilesExist ? 'SÍ (100% verificado)' : 'NO');
 
 console.log('\nCiclo de vida SW:');
-console.log('  - skipWaiting() en install:', swContent.includes('self.skipWaiting()') ? '✓ Presente' : '✗ Falta');
+console.log('  - skipWaiting() controlado (primer install o mensaje SKIP_WAITING):', (swContent.includes('self.skipWaiting()') && swContent.includes("SKIP_WAITING")) ? '✓ Presente y coordinado (SW-06)' : '✗ Falta');
 console.log('  - clients.claim() en activate:', swContent.includes('self.clients.claim()') ? '✓ Presente' : '✗ Falta');
-console.log('  - Estrategia de red con fallback a caché en navigate:', swContent.includes("e.request.mode==='navigate'") && swContent.includes("caches.match('./index.html')") ? '✓ Network-First con fallback offline a index.html' : '✗ Incompleto');
-console.log('  - Estrategia para subrecursos (JS, CSS, PNG):', swContent.includes('caches.match(e.request)') ? '✓ Cache-First con actualización en segundo plano (SWR)' : '✗ Incompleto');
+console.log('  - Estrategia de red con fallback a caché en navigate:', swContent.includes("e.request.mode==='navigate'") && swContent.includes("caches.match('./index.html')") ? '✓ Network-First (1200ms) con fallback offline a index.html' : '✗ Incompleto');
+console.log('  - Estrategia para subrecursos (JS, CSS, PNG):', swContent.includes('caches.match(e.request,{ignoreSearch:true})') ? '✓ Cache-First con ignoreSearch y SWR (SW-01)' : '✗ Incompleto');
 console.log('  - Aislamiento de origen (evita interceptar APIs externas):', swContent.includes('url.origin!==location.origin') ? '✓ Correcto (ignora peticiones a Supabase/Google Fonts)' : '✗ Falta');
 
 console.log('\nManifest PWA:');
