@@ -1874,23 +1874,6 @@ function renderMonthPickerGrid(){
 }
 
 var lastModalTrigger=null;
-function updateTxTagsBtn(){
-  var btn=document.getElementById('txTagsBtn'),lbl=document.getElementById('txTagsBtnLabel');
-  var userCount=txTags.filter(function(g){return g&&g.charAt(0)!=='_';}).length;
-  if(lbl)lbl.textContent=userCount?('Etiquetas ('+userCount+')'):'Etiquetas';
-  var drawer=document.getElementById('txTagsDrawer');
-  var isOpen=!!(drawer&&drawer.style.display!=='none');
-  if(btn)btn.classList.toggle('active',userCount>0||isOpen);
-}
-function toggleTxTagsDrawer(){
-  var drawer=document.getElementById('txTagsDrawer'),btn=document.getElementById('txTagsBtn');
-  if(!drawer)return;
-  var open=drawer.style.display==='none';
-  drawer.style.display=open?'block':'none';
-  if(btn)btn.setAttribute('aria-expanded',open?'true':'false');
-  updateTxTagsBtn();
-  if(open){var inp=document.getElementById('tagInput');if(inp)inp.focus();}
-}
 function renderQuickCatPills(){
   var wrap=document.getElementById('txQuickCatsWrap'),scroll=document.getElementById('txQuickCats');
   if(!wrap||!scroll)return;
@@ -2066,21 +2049,6 @@ function populateAccounts(){
   }
 }
 function toggleRecurring(){isRecurring=!isRecurring;document.getElementById('recurringSwitch').classList.toggle('on',isRecurring);document.getElementById('recurringOptions').style.display=isRecurring?'block':'none';}
-function renderTagsInput(){
-  var wrap=document.getElementById('tagsWrap');if(!wrap)return;
-  var visibleCount=0;
-  var chips=txTags.map(function(g,i){
-    if(!g||g.charAt(0)==='_')return '';
-    visibleCount++;
-    return '<div class="tag-chip">'+htmlEscape(g)+'<button data-action="remove-tag" data-id="'+i+'" aria-label="Eliminar etiqueta" style="display:inline-flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>';
-  }).join('');
-  wrap.innerHTML=chips+'<input type="text" class="tags-text-input" id="tagInput" placeholder="'+(visibleCount?'':'vacaciones, regalo...')+'">';
-  updateTxTagsBtn();
-  document.getElementById('tagInput').addEventListener('keydown',function(e){
-    if(e.key==='Enter'||e.key===','){e.preventDefault();var v=this.value.trim().toLowerCase();if(v&&v.charAt(0)!=='_'&&!txTags.includes(v)){txTags.push(v);renderTagsInput();}}
-    else if(e.key==='Backspace'&&!this.value){for(var bi=txTags.length-1;bi>=0;bi--){if(txTags[bi]&&txTags[bi].charAt(0)!=='_'){txTags.splice(bi,1);renderTagsInput();break;}}}
-  });
-}
 function showRecurEditDialog(){
   return new Promise(function(resolve){
     var overlay=document.createElement('div');
@@ -2154,8 +2122,6 @@ async function saveTx(){
         if(curEditTx&&curEditTx.category===category&&curEditTx.subcategory===rawSub)subcategory=rawSub;
       }
     }
-    var tagVal=document.getElementById('tagInput').value.trim().toLowerCase();
-    if(tagVal&&!txTags.includes(tagVal))txTags.push(tagVal);
     var recurInterval=isRecurring?document.getElementById('recurInterval').value:null;
     var recurEndDate=isRecurring?(document.getElementById('recurEndDate').value||null):null;
     if(recurEndDate&&recurEndDate<date){status.textContent='la fecha de fin no puede ser anterior al movimiento';status.className='modal-status status-err';isSaving=false;return;}
@@ -3098,7 +3064,6 @@ document.addEventListener('keydown', function(e){
 });
 document.getElementById('authEmail').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('authPass').focus();});
 document.getElementById('authPass').addEventListener('keydown',function(e){if(e.key==='Enter')submitAuth();});
-document.getElementById('tagsWrap').addEventListener('click',function(){document.getElementById('tagInput').focus();});
 document.getElementById('dtPrevMonth').onclick=function(){if(homeAnnualMode){viewYear--;}else if(viewMonth===0){viewMonth=11;viewYear--;}else viewMonth--;dtActiveCat=null;hmSelDay=null;filterDateFrom='';filterDateTo='';saveUiState();dtRender();};
 document.getElementById('dtNextMonth').onclick=function(){if(homeAnnualMode){viewYear++;}else if(viewMonth===11){viewMonth=0;viewYear++;}else viewMonth++;dtActiveCat=null;hmSelDay=null;filterDateFrom='';filterDateTo='';saveUiState();dtRender();};
 var _lastAppWidth=window.innerWidth;

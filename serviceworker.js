@@ -1,4 +1,4 @@
-var CACHE_NAME='fintrack-cache-v205';
+var CACHE_NAME='fintrack-cache-v206';
 var CACHE_PREFIX='fintrack-cache-';
 var CRITICAL_PRECACHE=['./','./index.html','./styles.css','./manifest.json','./supabase-js.min.js','./js/theme-init.js','./js/core.js','./js/accounting.js','./js/recurring.js','./js/sync.js','./js/investments.js','./js/charts.js','./js/export.js','./js/ui.js','./js/bootstrap.js'];
 var OPTIONAL_PRECACHE=['./icon-192.png','./icon-512.png','./fonts/inter-latin-wght-normal.woff2','./vendor/jspdf.umd.min.js','./vendor/exceljs.min.js'];
