@@ -1,4 +1,4 @@
-var CACHE_NAME='fintrack-cache-v206';
+var CACHE_NAME='fintrack-cache-v207';
 var CACHE_PREFIX='fintrack-cache-';
 var CRITICAL_PRECACHE=['./','./index.html','./styles.css','./manifest.json','./supabase-js.min.js','./js/theme-init.js','./js/core.js','./js/accounting.js','./js/recurring.js','./js/sync.js','./js/investments.js','./js/charts.js','./js/export.js','./js/ui.js','./js/bootstrap.js'];
 var OPTIONAL_PRECACHE=['./icon-192.png','./icon-512.png','./fonts/inter-latin-wght-normal.woff2','./vendor/jspdf.umd.min.js','./vendor/exceljs.min.js'];
@@ -7,8 +7,13 @@ var PRECACHE=CRITICAL_PRECACHE.concat(OPTIONAL_PRECACHE);
 self.addEventListener('install',function(e){
   self.skipWaiting();
   e.waitUntil(caches.open(CACHE_NAME).then(function(cache){
-    // El app shell completo es atómico para evitar desajuste entre index.html, CSS y módulos JS.
-    return cache.addAll(CRITICAL_PRECACHE).then(function(){
+    // El app shell completo se descarga con cache:'reload' para evitar arrastrar archivos antiguos de la caché HTTP.
+    return Promise.all(CRITICAL_PRECACHE.map(function(u){
+      return fetch(new Request(u,{cache:'reload'})).then(function(res){
+        if(!res||!res.ok)throw new Error('Precache failed: '+u);
+        return cache.put(u,res);
+      });
+    })).then(function(){
       return Promise.all(OPTIONAL_PRECACHE.map(function(u){
         return cache.add(u).catch(function(){});
       }));
@@ -60,10 +65,14 @@ self.addEventListener('fetch',function(e){
     );
     return;
   }
-  var network=fetch(e.request);
-  e.waitUntil(network.then(function(networkRes){
-    if(networkRes&&networkRes.status===200)return caches.open(CACHE_NAME).then(function(cache){return cache.put(e.request,networkRes.clone());});
-  }).catch(function(){}));
+  var network=fetch(e.request).then(function(networkRes){
+    if(networkRes&&networkRes.status===200){
+      var resClone=networkRes.clone();
+      caches.open(CACHE_NAME).then(function(cache){cache.put(e.request,resClone);});
+    }
+    return networkRes;
+  });
+  network.catch(function(){});
   e.respondWith(
     caches.match(e.request,{ignoreSearch:true}).then(function(cached){
       return cached||network.catch(function(){return cached;});

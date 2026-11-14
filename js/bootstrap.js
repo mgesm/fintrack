@@ -11,8 +11,10 @@ if('serviceWorker' in navigator){
   var _swRefreshing=false;
   navigator.serviceWorker.addEventListener('controllerchange',function(){
     if(_swRefreshing)return;
-    // SW-06: Solo recargar cuando el usuario confirma explícitamente la actualización; nunca interrumpir edición en curso.
-    if(window.__ftUserRequestedSwUpdate){
+    var ov=document.getElementById('loadingOverlay');
+    var stuckLoading=ov&&!ov.classList.contains('hidden');
+    // SW-06: Recargar cuando el usuario confirma la actualización o si seguía en la pantalla de carga inicial.
+    if(window.__ftUserRequestedSwUpdate||stuckLoading){
       _swRefreshing=true;
       window.location.reload();
     }
