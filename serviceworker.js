@@ -1,13 +1,11 @@
-var CACHE_NAME='fintrack-cache-v204';
+var CACHE_NAME='fintrack-cache-v205';
 var CACHE_PREFIX='fintrack-cache-';
 var CRITICAL_PRECACHE=['./','./index.html','./styles.css','./manifest.json','./supabase-js.min.js','./js/theme-init.js','./js/core.js','./js/accounting.js','./js/recurring.js','./js/sync.js','./js/investments.js','./js/charts.js','./js/export.js','./js/ui.js','./js/bootstrap.js'];
 var OPTIONAL_PRECACHE=['./icon-192.png','./icon-512.png','./fonts/inter-latin-wght-normal.woff2','./vendor/jspdf.umd.min.js','./vendor/exceljs.min.js'];
 var PRECACHE=CRITICAL_PRECACHE.concat(OPTIONAL_PRECACHE);
 
 self.addEventListener('install',function(e){
-  if(!self.registration||!self.registration.active){
-    self.skipWaiting();
-  }
+  self.skipWaiting();
   e.waitUntil(caches.open(CACHE_NAME).then(function(cache){
     // El app shell completo es atómico para evitar desajuste entre index.html, CSS y módulos JS.
     return cache.addAll(CRITICAL_PRECACHE).then(function(){
