@@ -996,7 +996,7 @@ function animateTabEntrance(el,selector){
 function buildAccHistHtml(accId){
   var a=accounts.find(function(x){return x.id===accId;});if(!a)return '';
   var hist=accountHistory(accId);if(!hist.length)return '';
-  var hideAcc=isPrivacyMode()||(!!a.is_investment&&portfolioValueHidden());
+  var hideAcc=isPrivacyMode()||((a.is_investment||isAccountInvestment(a.id))&&portfolioValueHidden());
   return '<div class="pat-hist-table">'
     +hist.slice().reverse().map(function(p){
       var th=isLockedAdjust(p)?null:snapshotTheoreticalAmount(p,a.id);
@@ -1044,10 +1044,15 @@ function renderPatTab(el){
   var yr=viewYear,mo=viewMonth+1;
   var defAccId=getDefaultAccountId();
   var hidePat=isPrivacyMode();
-  var totalPat=accounts.reduce(function(sum,a){return sum+((hidePat&&a.is_investment)?0:accountCalcBalance(a.id,yr,mo));},0);
+  var hideInv=portfolioValueHidden();
+  var totalPat=accounts.reduce(function(sum,a){
+    var isInv=!!(a.is_investment||isAccountInvestment(a.id));
+    return sum+((hideInv&&isInv)?0:accountCalcBalance(a.id,yr,mo));
+  },0);
   var accRows=accounts.map(function(a){
     var calc=accountCalcBalance(a.id,yr,mo);
-    var hideAcc=hidePat||(!!a.is_investment&&portfolioValueHidden());
+    var isInv=!!(a.is_investment||isAccountInvestment(a.id));
+    var hideAcc=hidePat||(isInv&&hideInv);
     var calcText=hideAcc?'••••••':fmtHtml(calc);
     var reset=accountLatestReset(a.id,yr,mo);
     var resetHtml=reset?'Última actualización: '+new Date((reset.reset_date||(reset.year+'-'+pad(reset.month)+'-01'))+'T12:00:00').toLocaleDateString('es-ES')+' <span style="display:inline-flex;align-items:center;vertical-align:-1px;margin:0 3px;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span> '+(hideAcc?'••••••':fmt(reset.amount)):'Sin ajustes registrados, calculado desde el inicio';
