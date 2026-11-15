@@ -32,17 +32,19 @@ This skill provides immediate, comprehensive context on the **fintrack** ecosyst
 
 ## 2. Architecture & File Structure
 
-fintrack deliberately uses **zero build tools, zero bundlers, and zero client-side frameworks** (no React, Vue, Vite, or Webpack). It is a monolithic, lightning-fast static Single Page Application (SPA).
+fintrack deliberately uses **zero build tools, zero bundlers, and zero client-side frameworks** (no React, Vue, Vite, or Webpack). It is a modular static Single Page Application (SPA) with external CSS (`styles.css`), strict-mode deferred JS modules (`js/*.js`), and Content Security Policy (`script-src 'self'`).
 
 | File / Directory | Role & Responsibilities |
 |---|---|
-| [`index.html`](file:///C:/Users/migue/.gemini/antigravity/scratch/fintrack/index.html) | Monolithic core: HTML layout, CSS variables/styles, and all client-side JavaScript logic (state, DOM rendering, Supabase calls, charts, modals). |
-| [`PROJECT_CONTEXT.md`](file:///C:/Users/migue/.gemini/antigravity/scratch/fintrack/PROJECT_CONTEXT.md) | **Living technical and operational document.** Contains architectural logs, current version history, and detailed functional specs. |
+| [`index.html`](file:///C:/Users/migue/.gemini/antigravity/scratch/fintrack/index.html) | Semantic HTML shell, CSP meta tag, external stylesheet link, and ordered `<script defer>` tags (`0` inline `on*=` handlers). |
+| [`styles.css`](file:///C:/Users/migue/.gemini/antigravity/scratch/fintrack/styles.css) | Complete *White Edition & Liquid Glass* stylesheet, responsive layout, and full-screen mobile transaction modal (`100dvh`). |
+| [`js/`](file:///C:/Users/migue/.gemini/antigravity/scratch/fintrack/js) | Domain modules in `'use strict'`: `theme-init.js`, `core.js` (`APP_VERSION`, `APP_PUBLISHED_AT`), `accounting.js`, `recurring.js`, `sync.js`, `investments.js`, `charts.js`, `export.js`, `ui.js`, and `bootstrap.js`. |
+| [`PROJECT_CONTEXT.md`](file:///C:/Users/migue/.gemini/antigravity/scratch/fintrack/PROJECT_CONTEXT.md) | **Living technical and operational document.** Contains architectural logs, current version history, discarded decisions (§12), and detailed functional specs. |
 | [`DESIGN_SYSTEM.md`](file:///C:/Users/migue/.gemini/antigravity/scratch/fintrack/DESIGN_SYSTEM.md) | Canonical visual standard: *White Edition & Liquid Glass*, zero emojis, squircle tokens, typography, and responsive ergonomics. |
-| [`serviceworker.js`](file:///C:/Users/migue/.gemini/antigravity/scratch/fintrack/serviceworker.js) | Offline caching strategy (`CACHE_NAME`). Network-first with cache fallback. |
+| [`serviceworker.js`](file:///C:/Users/migue/.gemini/antigravity/scratch/fintrack/serviceworker.js) | Offline caching strategy (`CACHE_NAME`). Network-first navigation with `cache: 'reload'` precaching. |
 | [`manifest.json`](file:///C:/Users/migue/.gemini/antigravity/scratch/fintrack/manifest.json) | PWA installation parameters, theme color, icons. |
 | [`supabase-js.min.js`](file:///C:/Users/migue/.gemini/antigravity/scratch/fintrack/supabase-js.min.js) | Local vendor bundle for Supabase JavaScript client. |
-| [`scripts/`](file:///C:/Users/migue/.gemini/antigravity/scratch/fintrack/scripts/) | Validation suites (`validate-syntax.js`), mathematical audits (`audit-finance-core.js`), backend tests. |
+| [`scripts/`](file:///C:/Users/migue/.gemini/antigravity/scratch/fintrack/scripts/) | Validation suites (`validate-syntax.js`, `_load_app.js`), mathematical audits (`audit-finance-core.js`), backend tests. |
 | [`supabase/`](file:///C:/Users/migue/.gemini/antigravity/scratch/fintrack/supabase/) | SQL migrations, PostgreSQL schema, RLS policies, and Edge Functions. |
 
 ---
@@ -52,13 +54,14 @@ fintrack deliberately uses **zero build tools, zero bundlers, and zero client-si
 Whenever working on fintrack, you must follow this sequence:
 
 1. **Read & Cross-Reference Context:**
-   - Inspect [`PROJECT_CONTEXT.md`](file:///C:/Users/migue/.gemini/antigravity/scratch/fintrack/PROJECT_CONTEXT.md) to verify current versioning, known issues, and recent changes.
+   - Inspect [`PROJECT_CONTEXT.md`](file:///C:/Users/migue/.gemini/antigravity/scratch/fintrack/PROJECT_CONTEXT.md) to verify current versioning, known issues, discarded decisions (§12), and recent changes.
    - Inspect [`DESIGN_SYSTEM.md`](file:///C:/Users/migue/.gemini/antigravity/scratch/fintrack/DESIGN_SYSTEM.md) before altering any visual element.
-2. **Never Break Monolithic Integrity:**
-   - Because `index.html` contains all logic, syntax errors will crash the entire app. Always validate JavaScript syntax with `node scripts/validate-syntax.js`.
+2. **Never Break Modular Integrity:**
+   - All modules in `js/` run in `'use strict'` and share top-level scope in load order. Always validate syntax and static bindings with `node scripts/validate-syntax.js`.
 3. **Respect Hard Rules:**
    - **CERO EMOJIS:** Absolute ban on emojis across the entire app. Use monochromatic inline SVGs (`stroke="currentColor"`).
    - **Brand casing:** Always write `fintrack` in all-lowercase (never `FinTrack`).
-   - **Privacy mode:** Blur numeric amounts, but keep charts and outer rings readable.
+   - **Privacy modes:** Balance (`isPrivacyMode()`) and Inversión (`portfolioValueHidden()`) have separate states; when Inversión is hidden, investment accounts are excluded from `Patrimonio total` in Cuentas.
+   - **No user tags UI:** User-facing transaction tags are removed; only internal system tags (`_no_calc`, `_no_expense`, `invest_*`) exist.
 4. **Post-Change Release Protocol:**
-   - Any modification requires bumping `APP_VERSION` and `APP_PUBLISHED_AT` in `index.html`, bumping `CACHE_NAME` in `serviceworker.js`, running tests, and updating `PROJECT_CONTEXT.md`.
+   - Any modification requires bumping `APP_VERSION` and `APP_PUBLISHED_AT` in `js/core.js`, bumping `CACHE_NAME` in `serviceworker.js`, running tests, and updating `PROJECT_CONTEXT.md`.

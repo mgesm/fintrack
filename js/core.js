@@ -1,6 +1,6 @@
 'use strict';
-var APP_VERSION='2026.11.14.1';
-var APP_PUBLISHED_AT='14/11/2026 14:00 CET';
+var APP_VERSION='2026.11.15.1';
+var APP_PUBLISHED_AT='15/11/2026 08:48 CET';
 var SB_URL='https://sswktibdpxqrumsqsegi.supabase.co';
 var SB_KEY='sb_publishable_A4Lahtw5TjoD3hajMJITfw_o-p2zgH_';
 var sb=window.supabase.createClient(SB_URL,SB_KEY);
