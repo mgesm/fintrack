@@ -518,7 +518,7 @@ body{display:flex;flex-direction:column;width:100%;max-width:430px;margin:0 auto
 .dt-flip-wrap {
   width: 100%;
   max-width: 430px;
-  margin: 0 auto;
+  margin: 0 auto 16px;
 }
 .dt-flip-wrap .flip-face {
   cursor: pointer;
@@ -539,6 +539,17 @@ body{display:flex;flex-direction:column;width:100%;max-width:430px;margin:0 auto
   transform: rotateY(180deg) translateZ(1px);
   justify-content: flex-start;
 }
+#homeFlip .flip-inner.flipped > .flip-front,
+.dt-flip-wrap .flip-inner.flipped > .flip-front {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+#homeFlip .flip-inner.flipped > .flip-back,
+.dt-flip-wrap .flip-inner.flipped > .flip-back {
+  position: relative;
+}
 
 .cat-flip-card {
   margin: 0 0 10px 0;
@@ -555,8 +566,8 @@ body{display:flex;flex-direction:column;width:100%;max-width:430px;margin:0 auto
   -webkit-transform-origin: center center;
   transform-style: preserve-3d;
   -webkit-transform-style: preserve-3d;
-  transition: transform 0.62s cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: transform;
+  transition: transform 0.62s cubic-bezier(0.22, 1, 0.36, 1), height 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, height;
 }
 
 .flip-inner.flipped {

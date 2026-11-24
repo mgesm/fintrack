@@ -3086,7 +3086,7 @@ window.addEventListener('resize',function(){
       applyLayout();
     }
     clearTimeout(window._resizeChartTimer);
-    window._resizeChartTimer=setTimeout(function(){refreshTab();setFlipHeight('homeFlipInner');},200);
+    window._resizeChartTimer=setTimeout(function(){refreshTab();setFlipHeight('homeFlipInner');setFlipHeight('dtFlipInner');},200);
   } else {
     IS_DESKTOP=nowDesktop;
   }

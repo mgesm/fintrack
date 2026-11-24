@@ -176,13 +176,13 @@ function setFlipHeight(innerId){
   innerId=innerId||'homeFlipInner';
   var inner=document.getElementById(innerId);if(!inner)return;
   var flipped=inner.classList.contains('flipped');
+  if(!flipped&&(innerId==='homeFlipInner'||innerId==='dtFlipInner')){
+    inner.style.height='';
+    return;
+  }
   var face=inner.querySelector(flipped?'.flip-back':'.flip-front');
   if(face&&face.offsetHeight>0){
-    if(innerId==='homeFlipInner'||innerId==='dtFlipInner'){
-      inner.style.height='';
-    } else {
-      inner.style.height=face.offsetHeight+'px';
-    }
+    inner.style.height=face.offsetHeight+'px';
   }
 }
 function toggleFlip(innerId){
@@ -190,17 +190,24 @@ function toggleFlip(innerId){
   var willBeFlipped=!inner.classList.contains('flipped');
   var curFace=inner.querySelector(willBeFlipped?'.flip-front':'.flip-back');
   var nextFace=inner.querySelector(willBeFlipped?'.flip-back':'.flip-front');
-  if(innerId!=='homeFlipInner'&&innerId!=='dtFlipInner'&&curFace&&nextFace){
+  if(curFace&&nextFace){
     var startH=curFace.offsetHeight;
     var targetH=nextFace.offsetHeight;
-    if(startH>0&&targetH>0&&Math.abs(startH-targetH)>4){
+    if(startH>0&&targetH>0&&Math.abs(startH-targetH)>2){
       inner.style.height=startH+'px';
       requestAnimationFrame(function(){
         inner.style.height=targetH+'px';
       });
+    } else if(targetH>0){
+      inner.style.height=targetH+'px';
     }
   }
   inner.classList.toggle('flipped');
+  if(!willBeFlipped&&(innerId==='homeFlipInner'||innerId==='dtFlipInner')){
+    setTimeout(function(){
+      if(!inner.classList.contains('flipped'))inner.style.height='';
+    },380);
+  }
 }
 function toggleSubcats(e,id,innerId){
   if(e&&e.stopPropagation)e.stopPropagation();
